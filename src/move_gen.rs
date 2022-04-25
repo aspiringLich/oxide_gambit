@@ -10,7 +10,7 @@ pub struct chess_move {
 
 impl State {
     pub fn move_gen(&self, team: bool) -> Vec<chess_move> {
-        let moves: Vec<chess_move> = Vec![];
+        let moves: Vec<chess_move> = vec![];
 
         unimplemented!()
     }
