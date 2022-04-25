@@ -1,8 +1,8 @@
-use bevy::{prelude::*};
+use bevy::prelude::*;
 
 // constants
-const SQ_SIZE: f32 = 64.0;      // size of the chess squares
-const IMG_SIZE: f32 = 140.0;    // size of the images were loading
+const SQ_SIZE: f32 = 64.0; // size of the chess squares
+const IMG_SIZE: f32 = 140.0; // size of the images were loading
 const SPRITE_SIZE: f32 = SQ_SIZE / IMG_SIZE; // size of the chesspiece sprite
 
 // Z-AXIS:
@@ -20,19 +20,11 @@ fn vec_from_coord(rank: i8, file: i8) -> Vec3 {
 }
 
 // piece characters from index
-const PIECE_CHAR: [char; 6] = [
-    'p',
-    'r',
-    'n',
-    'b',
-    'k',
-    'q',
-];
-
+const PIECE_CHAR: [char; 6] = ['p', 'r', 'n', 'b', 'k', 'q'];
 
 // draw the chess pieces based on the state
 fn draw_chess_pieces(
-    commands: &mut Commands, 
+    commands: &mut Commands,
     asset_server: Res<AssetServer>,
     state: Res<crate::State>,
 ) {
@@ -40,8 +32,8 @@ fn draw_chess_pieces(
     let mut i = 0;
     for square in state.board {
         // match the piece type
-        match square & 0x7F { 
-            0 => {},
+        match square.0 & 0x7F {
+            0 => {}
             1..=6 => {
                 commands.spawn_bundle(SpriteBundle {
                     transform: Transform {
@@ -49,14 +41,17 @@ fn draw_chess_pieces(
                         scale: Vec3::new(SPRITE_SIZE, SPRITE_SIZE, 0.0),
                         ..Default::default()
                     },
-                    texture: asset_server.load(&format!("{}{}.png",
-                    if square >> 7 == 1 { 'b' } else { 'w' },
-                    PIECE_CHAR[(square & 0x7F) as usize - 1],
-                )),
+                    texture: asset_server.load(&format!(
+                        "{}{}.png",
+                        if square.0 >> 7 == 1 { 'b' } else { 'w' },
+                        PIECE_CHAR[(square.0 & 0x7F) as usize - 1],
+                    )),
                     ..Default::default()
                 });
-            },
-            _ => { unreachable!() },    // if it gets here something is wrong with your chess board
+            }
+            _ => {
+                panic!("Invalid chess board! Or something idek /shrug")
+            } // if it gets here something is wrong with your chess board
         }
         i += 1;
     }
@@ -65,8 +60,8 @@ fn draw_chess_pieces(
 /// setup the chessboard!
 pub fn setup(
     mut commands: Commands, 
-    asset_server: Res<AssetServer>,
-    state: Res<crate::State>,
+    asset_server: Res<AssetServer>, 
+    state: Res<crate::State>
 ) {
     // spawn a camera
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
@@ -86,9 +81,13 @@ fn draw_chessboard(commands: &mut Commands) {
         for rank in 0..8 {
             // check if color should be light or dark
             let mut color: bool = false;
-            if file % 2 == 1 { color = !color }
-            if rank % 2 == 1 { color = !color }
-            
+            if file % 2 == 1 {
+                color = !color
+            }
+            if rank % 2 == 1 {
+                color = !color
+            }
+
             // spawn the square
             commands.spawn_bundle(SpriteBundle {
                 transform: Transform {
@@ -97,9 +96,7 @@ fn draw_chessboard(commands: &mut Commands) {
                     ..Default::default()
                 },
                 sprite: Sprite {
-                    color: 
-                        if color { SQ_LIGHT }
-                        else { SQ_DARK },
+                    color: if color { SQ_LIGHT } else { SQ_DARK },
                     ..Default::default()
                 },
                 ..Default::default()

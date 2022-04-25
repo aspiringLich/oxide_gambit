@@ -1,7 +1,4 @@
-
-
-/// enum for holding a Piece
-
+use crate::piece::*;
 
 /// return the id of a piece from a character in a FEN string
 fn id_from_char(ch: char) -> u8 {
@@ -14,7 +11,7 @@ fn id_from_char(ch: char) -> u8 {
         'q' | 'Q' => 6,
         _ => 0,
     };
-    let team = if ch as u8 > 'a' as u8 { 0x80 } else { 0x00 };
+    let team = if ch as u8 > 'a' as u8 { 0x00 } else { 0x80 };
 
     return piece | team;
 }
@@ -22,22 +19,25 @@ fn id_from_char(ch: char) -> u8 {
 /// stores the state of the chessboard
 #[derive(Debug)]
 pub struct State {
-    pub board: [u8; 64], // board representation: square wise
-    pub pieces: Vec<u8>,
-    turn: bool,      // true for white's move, false for black
+    pub board: [PieceType; 64], // board representation: square wise
+    pub white_pieces: Vec<Piece>,
+    pub black_pieces: Vec<Piece>,
+    turn: bool, // true for white's move, false for black
 }
 
 impl State {
     pub fn new() -> Self {
         State {
-            board: [0; 64],
-            pieces: vec![],
+            board: [PieceType(0); 64],
+            // storing the team may be redundant but hey
+            white_pieces: vec![],
+            black_pieces: vec![],
             turn: true,
         }
     }
 
     /// loads a FEN string into the board state
-    pub fn from_FEN(str: &String) -> Self {
+    pub fn from_FEN(str: &str) -> Self {
         let mut state: State = Self::new();
         let mut section = 0; // which section of the FEN string are we on?
 
@@ -48,28 +48,41 @@ impl State {
         // 4    => halfmove clock       "0"
         // 5    => move counter         "1"
 
-        let mut i = 0; // square number you are on
+        let mut square = 0; // square number you are on
         for ch in str.chars() {
             if ch == ' ' {
                 section += 1;
                 continue;
             }
 
-            //print!("{} ", i);
             match section {
+                // write down the pieces
                 0 => {
-                    state.board[i - 1] = match ch {
-                        '1'..='9' => {
-                            i += ch as usize - '0' as usize;
-                            0
+                    match ch {
+                        // skip <x> squares
+                        '1'..='8' => {
+                            square += ch as usize - '0' as usize;
                         }
+                        // end of a rank
                         '/' => continue,
+                        // found something else whee
                         _ => {
-                            i += 1;
-                            id_from_char(ch)
+                            square += 1;
+
+                            let id = PieceType::from_char(ch);
+                            state.board[square - 1] = id.clone();
+                            if id.team() {
+                                // white
+                                state.white_pieces.push(Piece::new(square as u8 - 1, id));
+                            }
+                            else {
+                                //black
+                                state.black_pieces.push(Piece::new(square as u8 - 1, id));
+                            }
                         }
-                    };
+                    }
                 }
+                // who's g dang turn is it??
                 1 => {
                     if ch == 'b' {
                         state.turn = false;
@@ -79,41 +92,11 @@ impl State {
                 3 => {}
                 4 => {}
                 5 => {}
-                _ => unreachable!(), // if it gets here, uh, invalid FEN string i guess
+                _ => panic!(
+                    "invalid FEN string? either double check your string is valid or i did a dumb"
+                ),
             }
         }
         return state;
     }
 }
-
-// enum Piece {
-//     Pawn,
-//     Rook,
-//     Knight,
-//     Bishop,
-//     King,
-//     Queen,
-//     None,
-// }
-
-// enum Team {
-//     White,
-//     Black,
-// }
-
-// impl Piece {
-//     pub fn id(&self, team: &Team) -> u8 {
-//         return match self {
-//             Piece::Pawn => 1,
-//             Piece::Rook => 2,
-//             Piece::Knight => 3,
-//             Piece::Bishop => 4,
-//             Piece::King => 5,
-//             Piece::Queen => 6,
-//             Piece::None => return 0,
-//         } | match team {
-//             Team::White => 0x00,
-//             Team::Black => 0x80
-//         };
-//     }
-// }
