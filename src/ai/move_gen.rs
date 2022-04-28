@@ -1,5 +1,4 @@
-use crate::piece::*;
-use crate::State;
+use super::{Piece, Position, State};
 
 /// struct for holding a chess move
 ///     start - starting position
@@ -37,8 +36,8 @@ impl State {
     pub fn move_gen(&mut self, team: bool) {
         for piece in self.pieces[team as usize].clone() {
             match piece.id.piece_id() {
-                1 => self.pawn_moves(piece),
-                2 => self.sliding_straight(piece),
+                1 => self.gen_pawn_moves(piece),
+                2 => self.gen_sliding_straight(piece),
                 _ => {} // maybe add a panic here after testing
             }
         }
@@ -46,40 +45,55 @@ impl State {
 
     /// generate moves a horizontally / vertically moving piece
     #[inline]
-    pub fn sliding_straight(&mut self, piece: Piece) {
-        //use Position::*;
+    pub fn gen_sliding_straight(&mut self, piece: Piece) {
+        use Position::*;
         let mut i: i8 = 0;
 
+        let positions: [Position; 4] = [Up(1), Down(1), Left(1), Right(1)];
+
         for n in 0..4 {
-            i = 0;
-            let mut pos = piece.pos;
-            // while we havent hit the edge
-            loop {
-                i += 1;
-                pos = piece.pos(hacky_workaround_there_is_a_better_way_of_doing_this(n, i));
-                // if we are at the edge, break
-                if matches!(if n >= 2 { pos % 8 } else { pos / 8 }, 0 | 7) {
-                    dbg!(pos, i);
-                    break;
-                }
-                // oh no this square isnt empty
-                if self.occupied(pos) {
-                    // check for capture
-                    if self.team(pos) != piece.team() {
-                        self.push_move(piece, pos);
-                    }
-                    dbg!(pos, i);
-                    break;
-                }
-                self.push_move(piece, pos);
+            self.gen_sliding_dir(piece, positions[n])
+        }
+    }
+
+    /// generate all pieces in a direction
+    #[inline]
+    pub fn gen_sliding_dir(&mut self, piece: Piece, position: Position) {
+        let mut i = 0;
+        let mut pos;
+
+        // if were at the edge already break
+        if check_edge(position, piece) {
+            dbg!(piece.pos, i);
+            return;
+        }
+
+        // while we havent hit the edge
+        loop {
+            i += 1;
+            pos = piece.mutate(position).pos;
+            // if we are at the edge, break
+            if check_edge(position, piece) {
+                dbg!(piece.pos, i);
+                break;
             }
+            // oh no this square isnt empty
+            if self.occupied(pos) {
+                // check for capture
+                if self.team(pos) != piece.team() {
+                    self.push_move(piece, pos);
+                }
+                dbg!(pos, i);
+                break;
+            }
+            self.push_move(piece, pos);
         }
     }
 
     /// generate moves a pawn could take
     #[inline]
-    pub fn pawn_moves(&mut self, piece: Piece) {
-        use Position::*;
+    pub fn gen_pawn_moves(&mut self, piece: Piece) {
+        use super::Position::*;
         // TODO: add en passant later lol
         // white
 
@@ -107,5 +121,21 @@ impl State {
         if self.occupied(piece.pos(DiagTR(dir))) && !self.team(piece.pos(DiagTR(dir))) {
             self.push_move(piece, piece.pos(DiagTR(dir)));
         }
+    }
+}
+
+fn check_edge(position: Position, piece: Piece) -> bool {
+    use Position::*;
+
+    match position {
+        Up(_) => piece.pos(Rank) == 0,
+        Down(_) => piece.pos(Rank) == 7,
+        Left(_) => piece.pos(File) == 0,
+        Right(_) => piece.pos(File) == 7,
+        DiagTL(_) => piece.pos(Rank) == 0 || piece.pos(File) == 0,
+        DiagTR(_) => piece.pos(Rank) == 0 || piece.pos(File) == 7,
+        DiagBL(_) => piece.pos(Rank) == 7 || piece.pos(File) == 0,
+        DiagBR(_) => piece.pos(Rank) == 7 || piece.pos(File) == 7,
+        _ => unimplemented!(),
     }
 }

@@ -47,6 +47,26 @@ pub enum Position {
     File,
 }
 
+impl Position {
+    pub fn pos(&self, n: u8) -> u8 {
+        use Position::*;
+        (match self {
+            // position n squares <direction> relative to current position
+            Up(i) => n as i8 - 8 * i,
+            Down(i) => n as i8 + 8 * i,
+            Left(i) => n as i8 - i,
+            Right(i) => n as i8 + i,
+            DiagTL(i) => n as i8 - 9 * i,
+            DiagTR(i) => n as i8 - 7 * i,
+            DiagBL(i) => n as i8 + 7 * i,
+            DiagBR(i) => n as i8 + 9 * i,
+            // returns rank or file
+            File => return n % 8,
+            Rank => return n / 8,
+        }) as u8
+    }
+}
+
 pub fn hacky_workaround_there_is_a_better_way_of_doing_this(n: u8, val: i8) -> Position {
     use Position::*;
     match n {
@@ -79,21 +99,14 @@ impl Piece {
     }
 
     /// functions for positioning related stuffs, returns a position or value
-    pub const fn pos(&self, position: Position) -> u8 {
-        use Position::*;
-        (match position {
-            // position n squares <direction> relative to current position
-            Up(n) => self.pos as i8 - 8 * n,
-            Down(n) => self.pos as i8 + 8 * n,
-            Left(n) => self.pos as i8 - n,
-            Right(n) => self.pos as i8 + n,
-            DiagTL(n) => self.pos as i8 - 9 * n,
-            DiagTR(n) => self.pos as i8 - 7 * n,
-            DiagBL(n) => self.pos as i8 + 7 * n,
-            DiagBR(n) => self.pos as i8 + 9 * n,
-            // returns rank or file
-            File => return self.pos % 8,
-            Rank => return self.pos / 8,
-        }) as u8
+    pub fn pos(&self, position: Position) -> u8 {
+        position.pos(self.pos)
+    }
+
+    pub fn mutate(&self, position: Position) -> Self {
+        Piece {
+            pos: self.pos(position),
+            id: self.id,
+        }
     }
 }

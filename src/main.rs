@@ -1,11 +1,9 @@
-pub use bevy::prelude::*;
-mod event;
-mod move_gen;
-mod piece;
-mod setup;
-mod state;
-mod theme;
-use crate::state::State;
+mod ai;
+mod render;
+use bevy::prelude::*;
+
+use ai::State;
+use render::setup;
 
 fn main() {
     let starting_pos: String =

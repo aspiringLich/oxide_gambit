@@ -1,3 +1,4 @@
+use crate::render::theme::*;
 use bevy::prelude::*;
 
 // constants
@@ -71,8 +72,6 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>, state: Res<
 
 /// draw the squares of the chessboard
 fn draw_chessboard(commands: &mut Commands) {
-    use crate::theme::*;
-
     for file in 0..8 {
         for rank in 0..8 {
             // check if color should be light or dark

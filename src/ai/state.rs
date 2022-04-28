@@ -1,4 +1,4 @@
-use crate::{move_gen::chess_move, piece::*};
+use super::{chess_move, Piece, PieceType};
 
 /// stores the state of the chessboard
 #[derive(Debug)]
