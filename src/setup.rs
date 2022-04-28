@@ -14,7 +14,7 @@ const SPRITE_SIZE: f32 = SQ_SIZE / IMG_SIZE; // size of the chesspiece sprite
 fn vec_from_coord(rank: i8, file: i8) -> Vec3 {
     Vec3::new(
         SQ_SIZE * (rank - 4) as f32,
-        SQ_SIZE * (file - 4) as f32,
+        SQ_SIZE * -(file - 4) as f32,
         0.0,
     )
 }
@@ -26,7 +26,7 @@ const PIECE_CHAR: [char; 6] = ['p', 'r', 'n', 'b', 'k', 'q'];
 fn draw_chess_pieces(
     commands: &mut Commands,
     asset_server: Res<AssetServer>,
-    state: Res<crate::State>,
+    state: &Res<crate::State>,
 ) {
     // .enumerate() doesnt work for some reason? "Trait bounds not satisfied"
     let mut i = 0;
@@ -43,14 +43,14 @@ fn draw_chess_pieces(
                     },
                     texture: asset_server.load(&format!(
                         "{}{}.png",
-                        if square.0 >> 7 == 1 { 'b' } else { 'w' },
+                        if square.team() { 'w' } else { 'b' },
                         PIECE_CHAR[(square.0 & 0x7F) as usize - 1],
                     )),
                     ..Default::default()
                 });
             }
             _ => {
-                panic!("Invalid chess board! Or something idek /shrug")
+                panic!("Invalid chess board! Or something idek")
             } // if it gets here something is wrong with your chess board
         }
         i += 1;
@@ -58,11 +58,7 @@ fn draw_chess_pieces(
 }
 
 /// setup the chessboard!
-pub fn setup(
-    mut commands: Commands, 
-    asset_server: Res<AssetServer>, 
-    state: Res<crate::State>
-) {
+pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>, state: Res<crate::State>) {
     // spawn a camera
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 
@@ -70,7 +66,7 @@ pub fn setup(
     draw_chessboard(&mut commands);
 
     // draw the pieces
-    draw_chess_pieces(&mut commands, asset_server, state);
+    draw_chess_pieces(&mut commands, asset_server, &state);
 }
 
 /// draw the squares of the chessboard
