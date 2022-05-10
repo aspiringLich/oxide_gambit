@@ -1,3 +1,2 @@
-mod event;
 pub mod setup;
-mod theme;
+pub mod theme;

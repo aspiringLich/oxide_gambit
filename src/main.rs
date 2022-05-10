@@ -1,9 +1,13 @@
 mod ai;
+mod chess_logic;
+mod interactive;
 mod render;
 use bevy::prelude::*;
 
-use ai::State;
-use render::setup;
+use ai::*;
+use chess_logic::ChessState;
+use interactive::*;
+use render::*;
 
 fn main() {
     let starting_pos: String =
@@ -20,6 +24,11 @@ fn main() {
         })
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup::setup)
-        .insert_resource(State::from_FEN(&rook_test))
+        .add_event::<MouseEvent>()
+        .insert_resource(ChessState::from_FEN(&rook_test))
+        .insert_resource(WindowInfo::empty())
+        .add_system(send_mouse_events.before(drag_and_drop))
+        .add_system(update_window_info.before(drag_and_drop))
+        .add_system(drag_and_drop)
         .run();
 }

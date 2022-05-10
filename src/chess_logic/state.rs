@@ -1,18 +1,18 @@
-use super::{chess_move, Piece, PieceType};
+use super::{ChessMove, Piece, PieceType, Pos};
 
 /// stores the state of the chessboard
 #[derive(Debug)]
-pub struct State {
+pub struct ChessState {
     pub board: [PieceType; 64],  // board representation: square wise
     pub pieces: [Vec<Piece>; 2], // piece wise representation
     pub turn: bool,              // true for white's move, false for black
-    pub moves: Vec<chess_move>,
+    pub moves: Vec<ChessMove>,
     // private values that shouldnt be
 }
 
-impl State {
+impl ChessState {
     pub const fn new() -> Self {
-        State {
+        ChessState {
             board: [PieceType::new(0); 64],
             // storing the team may be redundant but hey
             pieces: [vec![], vec![]],
@@ -23,13 +23,13 @@ impl State {
 
     pub fn add_piece(&mut self, ch: char, square: u8) {
         let id = PieceType::from_char(ch);
-        self.board[square as usize - 1] = id.clone();
-        self.pieces[id.team() as usize].push(Piece::new(square, id));
+        self.board[square as usize] = id.clone();
+        self.pieces[id.team() as usize].push(Piece::new(Pos(square), id));
     }
 
     /// loads a FEN string into the board state
     pub fn from_FEN(str: &str) -> Self {
-        let mut state: State = Self::new();
+        let mut state: ChessState = Self::new();
         let mut section = 0; // which section of the FEN string are we on?
 
         // 0    => pieces on the board  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
@@ -51,17 +51,13 @@ impl State {
                 0 => {
                     match ch {
                         // skip <x> squares
-                        '1'..='8' => {
-                            square += ch as u8 - '0' as u8;
-                        }
-
-                        // end of a rank
+                        '1'..='8' => square += ch as u8 - '0' as u8,
+                        // next rank
                         '/' => continue,
-
-                        // found something else whee
+                        // wow something else
                         _ => {
+                            state.add_piece(ch, (square % 8) + (7 - (square / 8)) * 8);
                             square += 1;
-                            state.add_piece(ch, square);
                         }
                     }
                 }
@@ -80,6 +76,8 @@ impl State {
                 ),
             }
         }
+        state.move_gen();
+        dbg!(&state.moves);
         return state;
     }
 }
