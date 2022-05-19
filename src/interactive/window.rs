@@ -9,10 +9,7 @@ pub struct WindowInfo {
 
 impl WindowInfo {
     pub fn empty() -> Self {
-        WindowInfo {
-            size: Vec2::new(0.0, 0.0),
-            cursor_pos: Vec2::new(0.0, 0.0),
-        }
+        WindowInfo { size: Vec2::new(0.0, 0.0), cursor_pos: Vec2::new(0.0, 0.0) }
     }
 }
 

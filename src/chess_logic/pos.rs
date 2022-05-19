@@ -66,3 +66,9 @@ pub enum Direction {
     BL,
     BR,
 }
+
+impl PartialEq for Pos {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}

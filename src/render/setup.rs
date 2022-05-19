@@ -1,9 +1,9 @@
 use crate::{
     chess_logic::{ChessState, Piece, PieceType, Pos},
-    interactive,
+    interactive::init_interactive,
     render::theme::*,
 };
-use bevy::prelude::*;
+use bevy::{prelude::*, utils::Instant};
 
 // constants
 pub const SQ_SIZE: f32 = 64.0; // size of the chess squares
@@ -19,11 +19,7 @@ const SPRITE_SIZE: f32 = SQ_SIZE / IMG_SIZE; // size of the chesspiece sprite
 
 /// returns a vector from a chessboard rank / file
 fn vec_from_coord(rank: i8, file: i8) -> Vec3 {
-    Vec3::new(
-        SQ_SIZE * -3.5 + SQ_SIZE * rank as f32,
-        SQ_SIZE * -3.5 + SQ_SIZE * file as f32,
-        0.0,
-    )
+    Vec3::new(SQ_SIZE * -3.5 + SQ_SIZE * rank as f32, SQ_SIZE * -3.5 + SQ_SIZE * file as f32, 0.0)
 }
 
 /// returns a vector from posz
@@ -85,20 +81,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>, state: Res<
     draw_chess_pieces(&mut commands, asset_server, &state);
 
     // draw the drag and drop piece
-    commands
-        .spawn_bundle(SpriteBundle {
-            transform: Transform {
-                translation: vec_from_posz(Pos(0), -1.0),
-                scale: Vec3::new(SQ_SIZE, SQ_SIZE, 0.0),
-                ..Default::default()
-            },
-            sprite: Sprite {
-                color: Color::rgb(1.0, 0.0, 0.0),
-                ..Default::default()
-            },
-            ..Default::default()
-        })
-        .insert(interactive::HeldPiece(Piece::new(Pos(0), PieceType(0))));
+    init_interactive(commands);
 }
 
 /// draw the squares of the chessboard

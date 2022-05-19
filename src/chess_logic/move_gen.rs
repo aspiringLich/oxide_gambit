@@ -23,11 +23,7 @@ pub struct ChessMove {
 
 impl ChessMove {
     pub const fn new(from: Pos, to: Pos, attr: MoveAttribute) -> Self {
-        ChessMove {
-            origin: from,
-            target: to,
-            attribute: attr,
-        }
+        ChessMove { origin: from, target: to, attribute: attr }
     }
 }
 
@@ -48,15 +44,14 @@ impl ChessState {
         use Direction::*;
 
         for piece in self.pieces[self.turn as usize].clone() {
-            let target = {
+            let mut target = {
                 match piece.piece_id() {
                     1 => self.gen_pawn_moves(piece),
                     2 => self.gen_sliding(piece, vec![U, D, L, R]),
                     _ => panic!(),
                 }
             };
-
-            dbg!(target);
+            self.moves.append(&mut target);
         }
     }
 
