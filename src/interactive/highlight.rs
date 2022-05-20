@@ -2,7 +2,8 @@ use bevy::{
     hierarchy::{BuildChildren, DespawnRecursiveExt},
     math::Vec3,
     prelude::{
-        Color, Commands, Component, Entity, EventReader, Query, Res, ResMut, Transform, With,
+        Color, Commands, Component, Entity, EventReader, Query, Res, ResMut, Transform, Visibility,
+        With,
     },
     sprite::{Sprite, SpriteBundle},
     utils::Instant,
@@ -25,29 +26,28 @@ pub fn init_interactive(mut commands: Commands) {
     commands
         .spawn_bundle(SpriteBundle {
             transform: Transform {
-                translation: vec_from_posz(Pos(0), -1.0),
+                translation: vec_from_posz(Pos(0), 2.0),
                 scale: Vec3::new(SQ_SIZE, SQ_SIZE, 0.0),
                 ..Default::default()
             },
             sprite: Sprite { color: Color::rgb_u8(245, 199, 26), ..Default::default() },
+            visibility: Visibility { is_visible: false },
             ..Default::default()
         })
-        .insert(SelectedSquare(Piece::new(Pos(0), PieceType(0))));
+        .insert(SelectedSquare());
 }
 
 pub fn toggle_target_squares(
     state: Res<ChessState>,
     mut commands: Commands,
-    select_query: Query<&mut SelectedSquare>,
+    piece: Res<Piece>,
     target_query: Query<Entity, With<TargetSquare>>,
-    mut mouse_ev: EventReader<MouseEvent>,
 ) {
-    let select_piece = select_query.single();
-    if select_piece.0.piece_id() != 0 {
+    if piece.piece_id() != 0 {
         // get all chess moves that start with the selected piece
         let mut to: Vec<Pos> = vec![];
         for chessmove in &state.moves {
-            if chessmove.origin == select_piece.0.pos {
+            if chessmove.origin == piece.pos {
                 to.push(chessmove.target);
             }
         }

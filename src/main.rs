@@ -3,11 +3,14 @@ mod chess_logic;
 mod interactive;
 mod render;
 use bevy::prelude::*;
+use iyes_loopless::prelude::*;
 
 use ai::*;
 use chess_logic::ChessState;
 use interactive::*;
 use render::*;
+
+use crate::chess_logic::{Piece, PieceType, Pos};
 
 enum PluginGroup {
     Interactive, // interactive elements, drag and drop and whatnot
@@ -21,9 +24,10 @@ impl Plugin for Holder {
                 .add_event::<MouseEvent>()
                 .insert_resource(WindowInfo::empty())
                 .add_startup_system(init_interactive)
-                .add_system(send_mouse_events.before(drag_and_drop))
-                .add_system(update_window_info.before(drag_and_drop))
-                .add_system(drag_and_drop),
+                .add_system(send_mouse_events.before(toggle_select_square))
+                .add_system(update_window_info.before(toggle_select_square))
+                .add_system(toggle_select_square)
+                .add_system(update_select_square.after(toggle_select_square)),
         };
     }
 }
@@ -46,5 +50,6 @@ fn main() {
         .add_startup_system(setup::setup)
         .add_plugin(Holder(Interactive))
         .insert_resource(ChessState::from_FEN(&rook_test))
+        .insert_resource(Piece::new(Pos(0), PieceType(0)))
         .run();
 }
