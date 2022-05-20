@@ -79,9 +79,6 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>, state: Res<
 
     // draw the pieces
     draw_chess_pieces(&mut commands, asset_server, &state);
-
-    // draw the drag and drop piece
-    init_interactive(commands);
 }
 
 /// draw the squares of the chessboard

@@ -7,3 +7,9 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.7.0"
+
+
+[workspace.metadata.dylint]
+libraries = [
+    { git = "https://github.com/MinerSebas/bevy_lint", branch = "main" },
+]
