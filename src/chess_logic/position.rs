@@ -1,5 +1,5 @@
 /// acts as a wrapper for a u8, representing a position on a chessboard
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Pos(pub u8);
 
 impl Pos {
@@ -65,10 +65,4 @@ pub enum Direction {
     TR,
     BL,
     BR,
-}
-
-impl PartialEq for Pos {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
-    }
 }

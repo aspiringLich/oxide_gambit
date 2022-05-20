@@ -24,10 +24,16 @@ impl Plugin for Holder {
                 .add_event::<MouseEvent>()
                 .insert_resource(WindowInfo::empty())
                 .add_startup_system(init_interactive)
-                .add_system(send_mouse_events.before(toggle_select_square))
-                .add_system(update_window_info.before(toggle_select_square))
-                .add_system(toggle_select_square)
-                .add_system(update_select_square.after(toggle_select_square)),
+                .add_system(send_mouse_events.before(update_window_info))
+                .add_system(update_window_info)
+                .add_system(
+                    toggle_select_square.run_on_event::<MouseEvent>().after(update_window_info),
+                )
+                .add_system(
+                    update_select_square
+                        .run_unless_resource_equals(Piece::new(Pos(0), PieceType(0)))
+                        .after(toggle_select_square),
+                ),
         };
     }
 }

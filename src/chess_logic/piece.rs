@@ -1,7 +1,7 @@
 use super::Pos;
 
 /// cool structure for storing a pieces type
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct PieceType(pub u8);
 
 impl PieceType {
@@ -56,7 +56,7 @@ impl PieceType {
 // }
 
 /// cool structure for storing pieces
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Piece {
     pub pos: Pos,
     pub id: PieceType,
