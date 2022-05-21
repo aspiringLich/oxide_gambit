@@ -7,7 +7,7 @@ It probably will not be very good.
 
 ## Features:
 
-* not using Bevy for anything other than renderring (sorry bevy)
+* Bevy
 * italian cuisine interlaced into my software
 
 ## To-Do:
