@@ -3,7 +3,7 @@ use crate::{
     interactive::init_interactive,
     render::theme::*,
 };
-use bevy::{prelude::*, utils::Instant};
+use bevy::prelude::*;
 
 // constants
 pub const SQ_SIZE: f32 = 64.0; // size of the chess squares
