@@ -45,9 +45,9 @@ impl ChessState {
 
         for piece in self.pieces[self.turn as usize].clone() {
             let mut target = {
-                match piece.piece_id() {
-                    1 => self.gen_pawn_moves(piece),
-                    2 => self.gen_sliding(piece, vec![U, D, L, R]),
+                match piece.variant() {
+                    Pawn => self.gen_pawn_moves(piece),
+                    Rook => self.gen_sliding(piece, vec![U, D, L, R]),
                     _ => panic!(),
                 }
             };
@@ -56,21 +56,17 @@ impl ChessState {
     }
 
     /// generate moves on a list of directions
-    #[inline]
-    pub fn gen_sliding(&self, piece: Piece, directions: Vec<Direction>) -> Vec<ChessMove> {
+    pub fn gen_sliding(&self, piece: Piece, movements: Vec<(i8, i8)>) -> Vec<ChessMove> {
         let mut out: Vec<ChessMove> = vec![];
 
-        for direction in directions {
-            //println!("gaming {}", n);
-            let mut ret = self.gen_sliding_dir(piece, direction);
-            out.append(&mut ret);
+        for movement in movements {
+            out.append(&mut self.gen_sliding_dir(piece, movement));
         }
         return out;
     }
 
     /// generate all pieces in a direction
-    #[inline]
-    pub fn gen_sliding_dir(&self, piece: Piece, direction: Direction) -> Vec<ChessMove> {
+    pub fn gen_sliding_dir(&self, piece: Piece, direction: (i8, i8)) -> Vec<ChessMove> {
         use MoveAttribute::*;
 
         let mut i = 0;

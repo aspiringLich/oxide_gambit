@@ -2,8 +2,6 @@ use bevy::math::Vec2;
 use bevy::prelude::{Res, ResMut};
 use bevy::window::{Window, Windows};
 
-use crate::chess_logic::Pos;
-
 pub struct WindowInfo {
     pub size: Vec2,
     pub cursor_pos: Vec2,
@@ -14,7 +12,7 @@ impl WindowInfo {
         WindowInfo { size: Vec2::new(0.0, 0.0), cursor_pos: Vec2::new(0.0, 0.0) }
     }
 
-    pub fn chessboard_pos(&self) -> Option<Pos> {
+    pub fn chessboard_pos(&self) -> Option<u8> {
         use crate::render::setup::SQ_SIZE;
         // if the cursor is within the bounds of the chessboard
         if self.cursor_pos.x > self.size.x / 2.0 - SQ_SIZE * 4.0
@@ -25,7 +23,7 @@ impl WindowInfo {
             // send where the mouse clicked on the chessboard
             let x = (self.cursor_pos.x - self.size.x / 2.0 + SQ_SIZE * 4.0) / SQ_SIZE;
             let y = (self.cursor_pos.y - self.size.y / 2.0 + SQ_SIZE * 4.0) / SQ_SIZE;
-            return Some(Pos(x as u8 + y as u8 * 8));
+            return Some(x as u8 + y as u8 * 8);
             //dbg!(x as u8 + y as u8 * 8);
         }
         None
