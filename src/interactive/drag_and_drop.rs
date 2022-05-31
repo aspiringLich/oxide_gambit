@@ -21,22 +21,22 @@ pub fn toggle_select_square(
     state: Res<ChessState>,
 ) {
     use MouseEvent::*;
+    use PieceVariant::*;
+
+    let piece = piece.as_mut();
 
     let event = mouse_ev.iter().next();
-    if event.is_none() {
-        return;
-    }
-    let PressChessboard(pos) = event.unwrap();
-
-    // if this is a valid square to move a piece
-    let mut visibility = visib_quert.single_mut();
-    if state.occupied(*pos) && state.team(*pos) == state.turn && piece.piece_id() == 0 {
-        visibility.is_visible = true;
-        piece.id = PieceType(state.id(*pos));
-    // if we click somewhere, do a thing
-    } else if piece.piece_id() != 0 {
-        visibility.is_visible = false;
-        piece.id = PieceType(0);
+    if let Some(PressChessboard(pos)) = event {
+        // if this is a valid square to move a piece
+        let mut visibility = visib_quert.single_mut();
+        if state.occupied(*pos) && state.team(*pos) == state.turn && piece.variant() == None {
+            visibility.is_visible = true;
+            *piece = Piece::new(state.at(*pos), *pos);
+        // if we click somewhere, do a thing
+        } else if piece.variant() != None {
+            visibility.is_visible = false;
+            *piece = Default::default();
+        }
     }
 }
 
@@ -55,8 +55,8 @@ pub fn update_select_square(
         None => return,
     };
 
-    // some constants
-    let map_range = |from: (f32, f32), to: (f32, f32), n: f32| {
+    // some constant stuffs
+    fn map_range(from: (f32, f32), to: (f32, f32), n: f32) -> f32 {
         to.0 + (n - from.0) * (to.1 - to.0) / (from.1 - from.0)
     };
     const SELECT_COLOR: [[u8; 3]; 2] = [[255, 196, 12], [245, 199, 26]];

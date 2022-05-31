@@ -3,12 +3,12 @@ use bevy::{
     prelude::{EventWriter, MouseButton, Res},
 };
 
-use crate::chess_logic::Pos;
+use crate::chess_logic::Position;
 
 use super::WindowInfo;
 
 pub enum MouseEvent {
-    PressChessboard(Pos),
+    PressChessboard(Position),
 }
 
 /// processes mouse events and sends them
@@ -29,18 +29,19 @@ pub fn send_mouse_events(
     }
 }
 
-pub fn cursor_square(window: &Res<WindowInfo>) -> Option<Pos> {
+pub fn cursor_square(window: &Res<WindowInfo>) -> Option<Position> {
     use crate::render::setup::SQ_SIZE;
     // if the cursor is within the bounds of the chessboard
-    if window.cursor_pos.x > window.size.x / 2.0 - SQ_SIZE * 4.0
-        && window.cursor_pos.x < window.size.x / 2.0 + SQ_SIZE * 4.0
-        && window.cursor_pos.y < window.size.y / 2.0 + SQ_SIZE * 4.0
-        && window.cursor_pos.y > window.size.y / 2.0 - SQ_SIZE * 4.0
-    {
+    let (x, y) = (window.cursor_pos.x, window.cursor_pos.y);
+    let (width, height) = (window.size.x, window.size.y);
+
+    let (xmin, xmax) = ((width / 2. - SQ_SIZE * 4.), (width / 2. + SQ_SIZE * 4.));
+    let (ymin, ymax) = ((height / 2. - SQ_SIZE * 4.), (height / 2. + SQ_SIZE * 4.));
+    if x >= xmin && x <= xmax && y >= ymin && y <= ymax {
         // send where the mouse clicked on the chessboard
-        let x = (window.cursor_pos.x - window.size.x / 2.0 + SQ_SIZE * 4.0) / SQ_SIZE;
-        let y = (window.cursor_pos.y - window.size.y / 2.0 + SQ_SIZE * 4.0) / SQ_SIZE;
-        return Some(Pos(x as u8 + y as u8 * 8));
+        let x = (x - xmin) / SQ_SIZE;
+        let y = (y - ymin) / SQ_SIZE;
+        return Some(Position(x as u8 + y as u8 * 8));
         //dbg!(x as u8 + y as u8 * 8);
     }
     None

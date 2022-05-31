@@ -1,4 +1,6 @@
-use super::{ChessMove, Piece, PieceType, Pos};
+use bevy::prelude::default;
+
+use super::{ChessMove, Piece, PieceType, PieceVariant, Position};
 
 /// stores the state of the chessboard
 #[derive(Debug)]
@@ -12,8 +14,9 @@ pub struct ChessState {
 
 impl ChessState {
     pub const fn new() -> Self {
+        use PieceVariant::*;
         ChessState {
-            board: [Default::default(); 64],
+            board: [PieceType(false, None); 64],
             // storing the team may be redundant but hey
             pieces: [vec![], vec![]],
             turn: true,
@@ -24,7 +27,7 @@ impl ChessState {
     pub fn add_piece(&mut self, ch: char, square: u8) {
         let id = PieceType::from_char(ch);
         self.board[square as usize] = id.clone();
-        self.pieces[id.team() as usize].push(Piece::new(Pos(square), id));
+        self.pieces[id.team() as usize].push(Piece::new(id, Position(square)));
     }
 }
 

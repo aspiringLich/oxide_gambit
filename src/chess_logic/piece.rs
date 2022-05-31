@@ -8,8 +8,8 @@ pub struct Piece {
 }
 
 impl Piece {
-    pub fn new(variant: PieceType, position: u8) -> Self {
-        Piece { variant, position: Position(position) }
+    pub fn new(variant: PieceType, position: Position) -> Self {
+        Piece { variant, position }
     }
 
     pub const fn team(&self) -> bool {
@@ -31,20 +31,20 @@ impl Piece {
     }
 
     // try to move in a way movement specifies
-    pub fn try_to(&self, movement: (i8, i8)) -> Option<u8> {
+    pub fn try_to(&self, movement: (i8, i8)) -> Option<Position> {
         let (x, y) = movement;
         let (x, y) = (
             u8::wrapping_add(self.x(), x.to_be_bytes()[0]),
             u8::wrapping_add(self.y(), y.to_be_bytes()[0]),
         );
-        let out = if x >= 8 || y >= 8 { None } else { Some(x + y * 8) };
+        let out = if x >= 8 || y >= 8 { None } else { Some(Position(x + y * 8)) };
         out
     }
 }
 
 impl Default for Piece {
     fn default() -> Self {
-        Self { variant: PieceType::None, position: 0 }
+        Self { variant: Default::default(), position: Position(0) }
     }
 }
 

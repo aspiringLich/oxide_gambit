@@ -10,7 +10,7 @@ use chess_logic::ChessState;
 use interactive::*;
 use render::*;
 
-use crate::chess_logic::{Piece, PieceType, Pos};
+use crate::chess_logic::{Piece, PieceType, PieceVariant, Position};
 
 enum PluginGroup {
     Interactive, // interactive elements, drag and drop and whatnot
@@ -18,6 +18,7 @@ enum PluginGroup {
 struct Holder(PluginGroup);
 impl Plugin for Holder {
     fn build(&self, app: &mut App) {
+        use PieceVariant::*;
         use PluginGroup::*;
         match self.0 {
             Interactive => app
@@ -29,9 +30,10 @@ impl Plugin for Holder {
                 .add_system(
                     toggle_select_square.run_on_event::<MouseEvent>().after(update_window_info),
                 )
+                .add_system(toggle_target_squares.after(toggle_select_square))
                 .add_system(
                     update_select_square
-                        .run_unless_resource_equals(Piece::new(Pos(0), PieceType(0)))
+                        .run_unless_resource_equals(Piece::default())
                         .after(toggle_select_square),
                 ),
         };
@@ -56,6 +58,6 @@ fn main() {
         .add_startup_system(setup::setup)
         .add_plugin(Holder(Interactive))
         .insert_resource(ChessState::from_FEN(&rook_test))
-        .insert_resource(Piece::new(Pos(0), PieceType(0)))
+        .insert_resource(Piece::default())
         .run();
 }

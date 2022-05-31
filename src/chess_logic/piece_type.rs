@@ -1,6 +1,6 @@
 #[derive(PartialEq, Copy, Clone, Debug)]
 pub enum PieceVariant {
-    None,
+    None = 0,
     Pawn,
     Rook,
     Knight,
@@ -10,14 +10,14 @@ pub enum PieceVariant {
 }
 
 #[derive(PartialEq, Copy, Clone, Debug)]
-pub struct PieceType(bool, PieceVariant);
+pub struct PieceType(pub bool, pub PieceVariant);
 
 impl PieceType {
-    pub fn team(&self) -> bool {
+    pub const fn team(&self) -> bool {
         self.0
     }
 
-    pub fn variant(&self) -> PieceVariant {
+    pub const fn variant(&self) -> PieceVariant {
         self.1
     }
 
