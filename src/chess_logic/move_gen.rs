@@ -52,12 +52,20 @@ impl ChessState {
     }
 
     pub fn move_gen(&mut self) {
+        use PieceVariant::*;
         for piece in self.pieces[self.turn as usize].clone() {
             let mut target = {
                 match piece.variant() {
+                    None => panic!("wee woo invalid piece in piece vec"),
                     Pawn => self.gen_pawn_moves(piece),
                     Rook => self.gen_sliding(piece, vec![(0, 1), (0, -1), (1, 0), (-1, 0)]),
-                    _ => panic!(),
+                    Bishop => self.gen_sliding(piece, vec![(1, 1), (1, -1), (-1, -1), (-1, 1)]),
+                    Knight => todo!(),
+                    King => todo!(),
+                    Queen => self.gen_sliding(
+                        piece,
+                        vec![(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)],
+                    ),
                 }
             };
             self.moves.append(&mut target);
@@ -108,18 +116,17 @@ impl ChessState {
         let dir = if piece.team() { 1 } else { -1 };
         let mut out: Vec<ChessMove> = vec![];
 
-        let double_available =
-            || (piece.y() == 2 && piece.team()) || (piece.y() == 6 && !piece.team());
-        let promotion_available =
-            || (piece.y() == 6 && piece.team()) || (piece.y() == 1 && !piece.team());
+        let double_available = || piece.y() == [6, 1][piece.team() as usize];
+        let promotion_available = || piece.y() == [1, 6][piece.team() as usize];
 
+        let mut push_move =
+            |attribute, target| out.push(ChessMove::new(piece.position, target, attribute));
         let target: Position = default();
-        let mut push_move = |attribute| out.push(ChessMove::new(piece.position, target, attribute));
 
         // forward
         if let Some(target) = piece.try_to((0, dir)) {
             if !self.occupied(target) {
-                push_move(if promotion_available() { Promotion } else { None })
+                push_move(if promotion_available() { Promotion } else { None }, target)
             }
         }
 
@@ -127,7 +134,7 @@ impl ChessState {
         if double_available() {
             if let Some(target) = piece.try_to((0, dir * 2)) {
                 if !self.occupied(target) {
-                    push_move(None)
+                    push_move(None, target)
                 }
             }
         }
@@ -136,7 +143,7 @@ impl ChessState {
         let mut capture = |movement: (i8, i8)| {
             if let Some(target) = piece.try_to(movement) {
                 if self.occupied(target) && self.capturable(target) {
-                    push_move(if promotion_available() { Promotion } else { None })
+                    push_move(if promotion_available() { Promotion } else { None }, target)
                 }
             }
         };

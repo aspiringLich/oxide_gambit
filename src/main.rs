@@ -36,6 +36,7 @@ impl Plugin for Holder {
                         .with_system(
                             toggle_target_squares
                             .run_on_event::<MouseEvent>()
+                            .after("select")
                         )
                     )
                 .add_system(
