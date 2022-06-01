@@ -8,12 +8,13 @@ It probably will not be very good.
 
 ## Features:
 
+* Chess working almost (real)
 * Bevy
 * italian cuisine interlaced into my software
 
 ## To-Do:
 
-* Move generation
+* Move generation (mostly done)
 * Position Evaluation
     * Piece Counting
     * Board mask
