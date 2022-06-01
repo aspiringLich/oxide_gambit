@@ -1,15 +1,10 @@
 use super::{highlight::TargetSquare, mouse_event::cursor_square, MouseEvent, WindowInfo};
 use crate::{
-    chess_logic::*, interactive::highlight::toggle_target_squares, render::setup::vec_from_posz,
+    chess_logic::*,
+    interactive::highlight::toggle_target_squares,
+    render::{display_piece::DrawnPiece, setup::vec_from_posz},
 };
-use bevy::{
-    core::Time,
-    prelude::{
-        Color, Component, Entity, EventReader, In, Local, Query, Res, ResMut, Transform,
-        Visibility, With,
-    },
-    sprite::Sprite,
-};
+use bevy::{core::Time, prelude::*, sprite::Sprite};
 
 #[derive(Component)]
 pub struct SelectedSquare();
@@ -35,7 +30,7 @@ pub fn toggle_select_square(
         // if we click somewhere, do a thing
         } else if piece.variant() != None {
             visibility.is_visible = false;
-            *piece = Default::default();
+            *piece = default();
         }
     }
 }
@@ -73,4 +68,36 @@ pub fn update_select_square(
         SELECT_COLOR[color][2],
         (map_range((-1.0, 1.0), (0.2, 0.4), (secs * 4.0).sin()) * 255.0) as u8,
     );
+}
+
+// update state and re-render pieces
+pub fn update_move(
+    mut commands: Commands,
+    mut state: ResMut<ChessState>,
+    piece: Res<Piece>,
+    mut mouse_ev: EventReader<MouseEvent>,
+    mut query: Query<Entity, With<DrawnPiece>>,
+    asset_server: Res<AssetServer>,
+) {
+    use MouseEvent::*;
+
+    if let Some(PressChessboard(pos)) = mouse_ev.iter().next() {
+        // if we cant find the move
+        if state.moves.iter().find(|m| m.origin == piece.position && m.target == *pos).is_none() {
+            return;
+        }
+
+        //let PressChessboard(pos) =
+        state.excecute_move(*piece, *pos);
+        state.regen_moves();
+
+        dbg!(&state);
+
+        // despawn the pieces
+        for piece in query.iter_mut() {
+            commands.entity(piece).despawn();
+        }
+        // re-spawn the pieces
+        state.render_pieces(commands, &asset_server)
+    }
 }

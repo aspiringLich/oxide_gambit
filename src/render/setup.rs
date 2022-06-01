@@ -39,10 +39,8 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>, state: Res<
     // draw the chessboard squares
     draw_chessboard(&mut commands);
 
-    // draw the pieces
-    for (i, piece) in state.board.iter().enumerate() {
-        piece.draw(Position::new(i as u8), &mut commands, &asset_server);
-    }
+    // render those pieces
+    state.render_pieces(commands, &asset_server)
 }
 
 /// draw the squares of the chessboard

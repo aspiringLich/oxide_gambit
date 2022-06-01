@@ -51,7 +51,7 @@ impl ChessState {
             }
         }
         state.move_gen();
-        dbg!(&state.moves);
+        //dbg!(&state.moves);
         return state;
     }
 }

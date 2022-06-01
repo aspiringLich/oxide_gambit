@@ -25,16 +25,30 @@ impl Plugin for Holder {
                 .add_event::<MouseEvent>()
                 .insert_resource(WindowInfo::empty())
                 .add_startup_system(init_interactive)
-                .add_system(send_mouse_events.before(update_window_info))
-                .add_system(update_window_info)
-                .add_system(
-                    toggle_select_square.run_on_event::<MouseEvent>().after(update_window_info),
-                )
-                .add_system(toggle_target_squares.after(toggle_select_square))
+                .add_system(send_mouse_events.before("window"))
+                .add_system(update_window_info.label("window"))
+                // spawn highlight and target squares
+                .add_system_set(
+                    SystemSet::new()
+                        .label("spawn squares")
+                        .after("window")
+                        .with_system(toggle_select_square.run_on_event::<MouseEvent>().label("select"))
+                        .with_system(
+                            toggle_target_squares
+                            .run_on_event::<MouseEvent>()
+                        )
+                    )
                 .add_system(
                     update_select_square
                         .run_unless_resource_equals(Piece::default())
-                        .after(toggle_select_square),
+                        .after("spawn squares")
+                )
+                .add_system(
+                    update_move
+                        .run_on_event::<MouseEvent>()
+                        .run_unless_resource_equals(Piece::default())
+                        .after("window")
+                        .before("select")
                 ),
         };
     }
@@ -43,7 +57,7 @@ impl Plugin for Holder {
 fn main() {
     let starting_pos: String =
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string();
-    let rook_test: String = "8/8/8/3R4/8/8/8/8 w KQkq - 0 1".to_string();
+    let rook_test: String = "8/8/8/1B6/2R5/8/1P6/8 w KQkq - 0 1".to_string();
     // let state: State = State::from_FEN(&starting_pos);
     // dbg!(state);
     use PluginGroup::*;

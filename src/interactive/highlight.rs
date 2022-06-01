@@ -1,5 +1,5 @@
 use bevy::{
-    hierarchy::{BuildChildren, DespawnRecursiveExt},
+    hierarchy::{BuildChildren, DespawnRecursiveExt, Parent},
     math::Vec3,
     prelude::{
         Color, Commands, Component, Entity, EventReader, Query, Res, ResMut, Transform, Visibility,
@@ -42,7 +42,7 @@ pub fn toggle_target_squares(
     state: Res<ChessState>,
     mut commands: Commands,
     piece: Res<Piece>,
-    target_query: Query<Entity, With<TargetSquare>>,
+    mut target_query: Query<Entity, With<TargetSquare>>,
 ) {
     use PieceVariant::*;
 
@@ -55,10 +55,10 @@ pub fn toggle_target_squares(
                 to.push(chessmove.target);
             }
         }
-        let target = commands.spawn().insert(TargetSquare).id();
+
         // spawn the target squares
         for pos in to {
-            let entity = commands
+            commands
                 .spawn_bundle(SpriteBundle {
                     transform: Transform {
                         translation: vec_from_posz(pos, 2.5),
@@ -68,10 +68,11 @@ pub fn toggle_target_squares(
                     sprite: Sprite { color: Color::rgba_u8(0, 0, 0, 127), ..Default::default() },
                     ..Default::default()
                 })
-                .id();
-            commands.entity(target).add_child(entity).insert(TargetSquare);
+                .insert(TargetSquare);
         }
     } else {
-        commands.entity(target_query.single()).despawn_recursive();
+        for entity in target_query.iter_mut() {
+            commands.entity(entity).despawn();
+        }
     }
 }

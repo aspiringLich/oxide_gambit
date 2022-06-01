@@ -7,6 +7,7 @@ use crate::chess_logic::Position;
 
 use super::WindowInfo;
 
+#[derive(Debug)]
 pub enum MouseEvent {
     PressChessboard(Position),
 }

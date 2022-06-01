@@ -16,6 +16,10 @@ impl Position {
     pub const fn x(self) -> u8 {
         self.0 % 8
     }
+
+    pub const fn int(self) -> usize {
+        self.0 as usize
+    }
 }
 
 impl Default for Position {
