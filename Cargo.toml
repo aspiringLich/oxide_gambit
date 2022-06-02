@@ -9,6 +9,8 @@ edition = "2021"
 bevy = "0.7.0"
 iyes_loopless = "0.5.1"
 
+lazy_static = "1.4.0"
+
 
 [workspace.metadata.dylint]
 libraries = [

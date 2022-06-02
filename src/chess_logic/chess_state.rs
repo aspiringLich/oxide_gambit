@@ -1,6 +1,6 @@
 use bevy::prelude::default;
 
-use std::fmt::Debug;
+use std::{collections::VecDeque, fmt::Debug};
 
 use super::{ChessMove, Piece, PieceType, PieceVariant, Position};
 
@@ -9,19 +9,19 @@ pub struct ChessState {
     pub board: [PieceType; 64],  // board representation: square wise
     pub pieces: [Vec<Piece>; 2], // board representation: piece wise
     pub turn: bool,              // true for white's move, false for black
-    pub moves: Vec<ChessMove>,
+    pub moves: VecDeque<ChessMove>,
     // private values that shouldnt be
 }
 
 impl ChessState {
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         use PieceVariant::*;
         ChessState {
             board: [PieceType(false, None); 64],
             // storing the team may be redundant but hey
             pieces: [vec![], vec![]],
             turn: true,
-            moves: vec![],
+            moves: default(),
         }
     }
 
@@ -66,8 +66,19 @@ impl Debug for ChessState {
         out += "\n";
 
         // print out moves
-        for m in self.moves.iter() {
-            out += &format!("{} => {}\n", m.origin.int(), m.target.int());
+        for (i, m) in self.moves.iter().enumerate() {
+            out += &format!(
+                "{:16}",
+                format!(
+                    "({}) {} => {}",
+                    &piece_char(self.at(m.origin)),
+                    m.origin.int(),
+                    m.target.int()
+                )
+            );
+            if i % 4 == 3 {
+                out += "\n";
+            }
         }
 
         // print out pieces

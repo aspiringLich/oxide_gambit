@@ -1,3 +1,4 @@
+pub mod check;
 pub mod chess_state;
 pub mod excecute_move;
 pub mod fen_string;
@@ -6,6 +7,7 @@ pub mod piece;
 pub mod piece_type;
 pub mod position;
 
+pub use check::*;
 pub use chess_state::*;
 pub use excecute_move::*;
 use fen_string::*;

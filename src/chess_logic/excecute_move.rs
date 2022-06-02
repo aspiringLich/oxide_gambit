@@ -5,11 +5,6 @@ use crate::chess_logic::Piece;
 use super::{ChessMove, ChessState, Position};
 
 impl ChessState {
-    pub fn regen_moves(&mut self) {
-        self.moves = vec![];
-        self.move_gen();
-    }
-
     /// Change state
     pub fn excecute_move(&mut self, piece: Piece, pos: Position) {
         // if this is a capture
@@ -27,5 +22,6 @@ impl ChessState {
         // update the pieces
         self.pieces[self.turn as usize].iter_mut().find(|&&mut p| p == piece).unwrap().position =
             pos;
+        self.turn = !self.turn;
     }
 }

@@ -2270,6 +2270,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "iyes_loopless",
+ "lazy_static",
 ]
 
 [[package]]

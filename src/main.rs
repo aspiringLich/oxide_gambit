@@ -10,7 +10,10 @@ use chess_logic::ChessState;
 use interactive::*;
 use render::*;
 
-use crate::chess_logic::{Piece, PieceType, PieceVariant, Position};
+use crate::chess_logic::Piece;
+
+#[macro_use]
+extern crate lazy_static;
 
 enum PluginGroup {
     Interactive, // interactive elements, drag and drop and whatnot
@@ -18,7 +21,6 @@ enum PluginGroup {
 struct Holder(PluginGroup);
 impl Plugin for Holder {
     fn build(&self, app: &mut App) {
-        use PieceVariant::*;
         use PluginGroup::*;
         match self.0 {
             Interactive => app
@@ -58,7 +60,7 @@ impl Plugin for Holder {
 fn main() {
     let starting_pos: String =
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string();
-    let rook_test: String = "8/8/8/1B6/2R5/8/1P6/8 w KQkq - 0 1".to_string();
+    //let rook_test: String = "8/8/8/1B6/2R5/8/1P6/8 w KQkq - 0 1".to_string();
     // let state: State = State::from_FEN(&starting_pos);
     // dbg!(state);
     use PluginGroup::*;
@@ -72,7 +74,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup::setup)
         .add_plugin(Holder(Interactive))
-        .insert_resource(ChessState::from_FEN(&rook_test))
+        .insert_resource(ChessState::from_FEN(&starting_pos))
         .insert_resource(Piece::default())
         .run();
 }

@@ -89,7 +89,7 @@ pub fn update_move(
 
         //let PressChessboard(pos) =
         state.excecute_move(*piece, *pos);
-        state.regen_moves();
+        state.move_gen();
 
         dbg!(&state);
 

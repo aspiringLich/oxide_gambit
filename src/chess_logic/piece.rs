@@ -31,7 +31,7 @@ impl Piece {
     }
 
     // try to move in a way movement specifies
-    pub fn try_to(&self, movement: (i8, i8)) -> Option<Position> {
+    pub const fn try_to(&self, movement: (i8, i8)) -> Option<Position> {
         let (x, y) = movement;
         let (x, y) = (
             u8::wrapping_add(self.x(), x.to_be_bytes()[0]),
