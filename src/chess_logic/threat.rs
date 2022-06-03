@@ -1,8 +1,11 @@
 use std::{cmp::max, ops::Index};
 
-use bevy::prelude::default;
+use bevy::prelude::*;
 
-use crate::chess_logic::PieceVariant;
+use crate::{
+    chess_logic::PieceVariant,
+    render::{vec_from_coord, vec_from_posz, SQ_SIZE},
+};
 
 use super::{ChessState, Moves, Piece, PieceType, Position};
 
@@ -21,16 +24,29 @@ impl ChessState {
     /// remove threats from a range of positions
     /// assumes that the positions are diagonal / orthogonal from each other
     /// includes new_pos, does not include pos
-    fn remove_from_pos_range(&mut self, mut pos: Position, new_pos: Position, piece: Piece) {
-        let (x, y) = pos.rel_from(new_pos);
+    fn rem_from_pos_range(&mut self, mut pos: Position, new_pos: Position, (x, y): (i8, i8)) {
         let mut itr = 1;
         // we actually got blocked off by the piece oh noess
         while pos != new_pos {
+            dbg!(pos.0);
             pos.modify(x * itr + y * 8 * itr);
-            self.rem_threat(piece, pos);
+            self.rem_threat(Piece::new(self.at(pos), pos), pos);
             itr += 1;
         }
     }
+
+    /// same as remove but add
+    /// wow
+    fn add_from_pos_range(&mut self, mut pos: Position, new_pos: Position, (x, y): (i8, i8)) {
+        // we actually got blocked off by the piece oh noess
+        let mut itr = 1;
+        while pos != new_pos {
+            pos.modify(x * itr + y * 8 * itr);
+            self.add_threat(Piece::new(self.at(pos), pos), pos);
+            itr += 1;
+        }
+    }
+
     /// do before updating state
     pub fn update_threat(&mut self, piece: Piece, new_pos: Position) {
         use PieceVariant::*;
@@ -42,11 +58,14 @@ impl ChessState {
 
         // returns a number from 0-8
         let coord_to_index = |(x, y): (i8, i8)| ((x.signum() + 1) + 3 * (y.signum() + 1)) as usize;
-        let index_to_coord = |i: usize| -> (i8, i8) { (i as i8 / 3 - 1, i as i8 % 3 - 1) };
+        let index_to_coord = |i: usize| -> (i8, i8) { (i as i8 % 3 - 1, i as i8 / 3 - 1) };
 
         // closest piece on each diagonal / orthagonal
         let mut closest_piece: [Piece; 9] = default();
         let mut distances: [i8; 9] = [i8::MAX; 9];
+
+        let move_dir =
+            if piece.variant() == Knight { 4 } else { coord_to_index(piece.rel_from(new_pos)) };
 
         // go through the pieces and find the closest ones
         for &new_piece in pieces[0].iter().chain(pieces[1].iter()) {
@@ -63,6 +82,8 @@ impl ChessState {
         // reset middle
         closest_piece[4] = default();
 
+        //dbg!(closest_piece);
+
         // for each closest piece, check if its valid,
         // if it satisfies criteria, remove all its threatenned squares in that direction and regenerate
         for (i, check_piece) in closest_piece.iter().enumerate() {
@@ -71,9 +92,26 @@ impl ChessState {
                 || (variant == Rook && i % 2 == 1)
                 || (variant == Bishop && i % 2 == 0)
             {
-                eprintln!("gaming");
-                self.remove_from_pos_range(check_piece.position, piece.position, *check_piece);
-                self.add_threat_dir(*check_piece, index_to_coord(i));
+                eprint!("gaming: ");
+
+                // if the piece moved on the same axis, reset threatenned squares and check until the piece
+                if i == move_dir || i == 8 - move_dir {
+                    eprint!("same axis: {} => {}: ", check_piece.position.0, new_pos.0);
+                    let (x, y) = index_to_coord(8 - i);
+                    let (x, y) = (x.signum(), y.signum());
+                    dbg!((x, y));
+                    self.rem_from_pos_range(check_piece.position, piece.position, (x, y));
+                    self.add_from_pos_range(check_piece.position, new_pos, (x, y));
+                }
+                // if the "piece" opposite to the piece is nothing, just extend threatenned squares
+                else {
+                    eprint!("extend: {} & {}: ", piece.position.0, 8 - i);
+                    self.add_threat_dir(
+                        Piece::new(check_piece.variant, piece.position),
+                        index_to_coord(8 - i),
+                    )
+                }
+                dbg!(check_piece);
             }
         }
     }
@@ -136,12 +174,15 @@ impl ChessState {
 
     /// add threatenned squares in one direction
     #[inline]
-    fn add_threat_dir(&mut self, piece: Piece, movement: (i8, i8)) {
-        while let Some(pos) = piece.position.try_to(movement) {
+    fn add_threat_dir(&mut self, piece: Piece, (x, y): (i8, i8)) {
+        let mut itr = 1;
+        while let Some(pos) = piece.try_to((x * itr, y * itr)) {
+            //dbg!(pos.0);
             self.add_threat(piece, pos);
             if self.occupied(pos) {
                 return;
             }
+            itr += 1;
         }
     }
 }
@@ -187,17 +228,51 @@ impl ChessState {
 
     /// add threatenned squares in one direction
     #[inline]
-    fn rem_threat_dir(&mut self, piece: Piece, movement: (i8, i8)) {
-        while let Some(pos) = piece.position.try_to(movement) {
+    fn rem_threat_dir(&mut self, piece: Piece, (x, y): (i8, i8)) {
+        let mut itr = 1;
+        while let Some(pos) = piece.position.try_to((x * itr, y * itr)) {
+            //dbg!(pos.0);
             self.rem_threat(piece, pos);
             if self.occupied(pos) {
                 return;
             }
+            itr += 1;
         }
     }
 
     #[inline]
     fn rem_threat(&mut self, piece: Piece, pos: Position) {
         self.threatened[piece.team() as usize].squares[pos.int()] -= 1;
+    }
+}
+
+/// stores the ids for every entity in the threat square thingie
+#[derive(Component)]
+pub struct ThreatEntity(u8);
+
+pub fn init_threat_squares(mut commands: Commands) {
+    for n in 0..64u8 {
+        commands
+            .spawn_bundle(SpriteBundle {
+                transform: Transform {
+                    translation: vec_from_posz(Position(n), 5.0),
+                    scale: Vec3::new(SQ_SIZE, SQ_SIZE, 0.0),
+                    ..Default::default()
+                },
+                sprite: Sprite { color: Color::rgba_u8(255, 0, 0, 128), ..Default::default() },
+                visibility: Visibility { is_visible: false },
+                ..Default::default()
+            })
+            .insert(ThreatEntity(n));
+    }
+}
+
+pub fn update_threat_squares(
+    state: Res<ChessState>,
+    mut query: Query<(&mut Visibility, &ThreatEntity)>,
+) {
+    for (mut visibility, &ThreatEntity(square)) in query.iter_mut() {
+        visibility.is_visible = state.threatened[0].squares[square as usize] > 0;
+        //    || state.threatened[1].squares[square as usize] > 0;
     }
 }

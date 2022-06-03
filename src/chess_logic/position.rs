@@ -38,7 +38,7 @@ impl Position {
     }
 
     pub fn modify(&mut self, input: i8) {
-        *self = Position((self.0 as i8 + input) as u8);
+        self.0 = (self.0 as i8 + input) as u8;
     }
 }
 

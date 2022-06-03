@@ -6,7 +6,7 @@ use bevy::prelude::*;
 use iyes_loopless::prelude::*;
 
 use ai::*;
-use chess_logic::ChessState;
+use chess_logic::*;
 use interactive::*;
 use render::*;
 
@@ -17,6 +17,7 @@ extern crate lazy_static;
 
 enum PluginGroup {
     Interactive, // interactive elements, drag and drop and whatnot
+    Debug,       // Debug your heart out
 }
 struct Holder(PluginGroup);
 impl Plugin for Holder {
@@ -50,9 +51,13 @@ impl Plugin for Holder {
                     update_move
                         .run_on_event::<MouseEvent>()
                         .run_unless_resource_equals(Piece::default())
+                        .label("move")
                         .after("window")
                         .before("select")
                 ),
+            Debug => app
+                .add_startup_system(init_threat_squares)
+                .add_system(update_threat_squares.after("move")),
         };
     }
 }
@@ -74,6 +79,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup::setup)
         .add_plugin(Holder(Interactive))
+        .add_plugin(Holder(Debug))
         .insert_resource(ChessState::from_FEN(&starting_pos))
         .insert_resource(Piece::default())
         .run();

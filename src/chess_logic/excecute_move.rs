@@ -12,6 +12,8 @@ impl ChessState {
 
         // if this is a capture
         if self.occupied(pos) && self.capturable(pos) {
+            // remove the threatened piece's targetted squares
+            self.rem_threat_piece(Piece::new(self.at(pos), pos));
             // remove the targetted piece from the vector
             let remove = Piece::new(self.board[pos.int()], pos);
             let pieces = &mut self.pieces[!self.turn as usize];
