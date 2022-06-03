@@ -50,6 +50,7 @@ impl ChessState {
                 ),
             }
         }
+        state.gen_threat();
         state.move_gen();
         //dbg!(&state.moves);
         return state;

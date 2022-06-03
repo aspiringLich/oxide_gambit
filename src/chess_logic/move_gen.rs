@@ -18,20 +18,30 @@ impl ChessMove {
     }
 }
 
-enum MovesIndex {
-    M_Straight = 0,
-    M_Diagonal,
-    M_All,
-    M_Knight,
+#[derive(Debug, Clone, Copy)]
+pub enum Moves {
+    RookMoves = 0,
+    BishopMoves,
+    QueenMoves,
+    KnightMoves,
+    PawnWMoves,
+    PawnBMobes,
+}
+impl Moves {
+    pub fn get(self) -> &'static Vec<(i8, i8)> {
+        &MOVES[self as usize]
+    }
 }
 
 lazy_static! {
-    static ref MOVES: [Vec<(i8, i8)>; 4] = {
-        let mut m: [Vec<(i8, i8)>; 4] = default();
+    static ref MOVES: [Vec<(i8, i8)>; 6] = {
+        let mut m: [Vec<(i8, i8)>; 6] = default();
         m[0] = vec![(0, 1), (1, 0), (0, -1), (-1, 0)];
         m[1] = vec![(1, 1), (1, -1), (-1, -1), (-1, 1)];
         m[2] = vec![(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, -1), (-1, 1)];
         m[3] = vec![(-1, 2), (1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1)];
+        m[4] = vec![(1, 1), (-1, 1)];
+        m[5] = vec![(1, -1), (-1, -1)];
         m
     };
 }
@@ -57,39 +67,31 @@ impl ChessState {
     pub const fn variant(&self, pos: Position) -> PieceVariant {
         self.at(pos).variant()
     }
-}
-impl ChessState {
+
     /// generate the moves based on the current board state
     pub fn move_gen(&mut self) {
-        use MovesIndex::*;
+        use Moves::*;
         use PieceVariant::*;
 
         self.moves.clear();
 
-        for piece in self.pieces[self.turn as usize].clone() {
+        let pieces: &Vec<Piece> = unsafe { std::mem::transmute(&self.pieces[self.turn as usize]) };
+
+        for &piece in pieces {
             match piece.variant() {
                 None => panic!("wee woo invalid piece in piece vec or something"),
                 // pawn
                 Pawn => self.gen_pawn_moves(piece),
                 // sliding pieces
-                Rook => self.gen_sliding(piece, &MOVES[M_Straight as usize]),
-                Bishop => self.gen_sliding(piece, &MOVES[M_Diagonal as usize]),
-                Queen => self.gen_sliding(piece, &MOVES[M_All as usize]),
+                Rook => self.gen_sliding(piece, RookMoves.get()),
+                Bishop => self.gen_sliding(piece, BishopMoves.get()),
+                Queen => self.gen_sliding(piece, QueenMoves.get()),
                 // "static" pieces
-                King => self.gen_static(piece, &MOVES[M_All as usize]),
-                Knight => self.gen_static(piece, &MOVES[M_Knight as usize]),
+                King => self.gen_static(piece, QueenMoves.get()),
+                Knight => self.gen_static(piece, KnightMoves.get()),
             }
         }
-    }
-
-    fn push_move(&mut self, piece: Piece, pos: Position) {
-        if self.occupied(pos) {
-            if self.capturable(pos) {
-                self.moves.push_front(ChessMove::new(piece.position, pos));
-            }
-        } else {
-            self.moves.push_back(ChessMove::new(piece.position, pos));
-        }
+        dbg!(self);
     }
 
     /// generate the moves for a static set of movements
@@ -97,7 +99,13 @@ impl ChessState {
     pub fn gen_static(&mut self, piece: Piece, movements: &Vec<(i8, i8)>) {
         for movement in movements {
             if let Some(pos) = piece.try_to(*movement) {
-                self.push_move(piece, pos)
+                if self.occupied(pos) {
+                    if self.capturable(pos) {
+                        self.moves.push_front(ChessMove::new(piece.position, pos));
+                    }
+                } else {
+                    self.moves.push_back(ChessMove::new(piece.position, pos));
+                }
             }
         }
     }
@@ -119,7 +127,14 @@ impl ChessState {
         let mut iter = 1;
         while let Some(pos) = piece.try_to((x * iter, y * iter)) {
             // if its occupied oh noes
-            self.push_move(piece, pos);
+            if self.occupied(pos) {
+                if self.capturable(pos) {
+                    self.moves.push_front(ChessMove::new(piece.position, pos));
+                }
+                return;
+            } else {
+                self.moves.push_back(ChessMove::new(piece.position, pos));
+            }
             iter += 1;
         }
     }
@@ -136,7 +151,11 @@ impl ChessState {
         // forward
         if let Some(pos) = piece.try_to((0, dir)) {
             if !self.occupied(pos) {
-                self.moves.push_back(ChessMove::new(piece.position, pos))
+                if promotion_available() {
+                    self.moves.push_front(ChessMove::new(piece.position, pos))
+                } else {
+                    self.moves.push_back(ChessMove::new(piece.position, pos))
+                }
             }
         }
 

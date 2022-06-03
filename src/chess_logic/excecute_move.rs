@@ -7,6 +7,9 @@ use super::{ChessMove, ChessState, Position};
 impl ChessState {
     /// Change state
     pub fn excecute_move(&mut self, piece: Piece, pos: Position) {
+        // update threatenned squares
+        self.update_threat(piece, pos);
+
         // if this is a capture
         if self.occupied(pos) && self.capturable(pos) {
             // remove the targetted piece from the vector

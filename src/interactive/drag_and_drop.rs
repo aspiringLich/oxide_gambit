@@ -87,11 +87,11 @@ pub fn update_move(
             return;
         }
 
+        //dbg!(&state);
+
         //let PressChessboard(pos) =
         state.excecute_move(*piece, *pos);
         state.move_gen();
-
-        dbg!(&state);
 
         // despawn the pieces
         for piece in query.iter_mut() {

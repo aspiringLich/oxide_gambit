@@ -1,10 +1,35 @@
+use bevy::prelude::default;
+
 use super::{PieceType, PieceVariant, Position};
 
+use std::fmt::Debug;
+
 /// represents a piece, with a type and position
-#[derive(PartialEq, Copy, Clone, Debug)]
+#[derive(PartialEq, Copy, Clone)]
 pub struct Piece {
     pub variant: PieceType,
     pub position: Position,
+}
+
+impl Debug for Piece {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use crate::display_piece::PIECE_CHAR;
+
+        let mut out: String = default();
+
+        out += &format!(
+            "Piece: {} ({})\n",
+            if self.variant() as usize > 0 {
+                let ch = PIECE_CHAR[self.variant() as usize - 1];
+                format!("{}  ", if self.team() { ch.to_ascii_uppercase() } else { ch })
+            } else {
+                format!(".  ")
+            },
+            self.position.int()
+        );
+
+        f.write_str(&out)
+    }
 }
 
 impl Piece {
@@ -32,13 +57,12 @@ impl Piece {
 
     // try to move in a way movement specifies
     pub const fn try_to(&self, movement: (i8, i8)) -> Option<Position> {
-        let (x, y) = movement;
-        let (x, y) = (
-            u8::wrapping_add(self.x(), x.to_be_bytes()[0]),
-            u8::wrapping_add(self.y(), y.to_be_bytes()[0]),
-        );
-        let out = if x >= 8 || y >= 8 { None } else { Some(Position(x + y * 8)) };
-        out
+        self.position.try_to(movement)
+    }
+
+    /// pieces position relative from a new position
+    pub const fn rel_from(&self, pos: Position) -> (i8, i8) {
+        self.position.rel_from(pos)
     }
 }
 

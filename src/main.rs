@@ -10,7 +10,7 @@ use chess_logic::ChessState;
 use interactive::*;
 use render::*;
 
-use crate::chess_logic::Piece;
+use crate::chess_logic::{Piece, PieceType, PieceVariant, Position};
 
 #[macro_use]
 extern crate lazy_static;

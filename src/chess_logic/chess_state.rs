@@ -2,7 +2,7 @@ use bevy::prelude::default;
 
 use std::{collections::VecDeque, fmt::Debug};
 
-use super::{ChessMove, Piece, PieceType, PieceVariant, Position};
+use super::{ChessMove, Piece, PieceType, PieceVariant, Position, Threat};
 
 /// stores the state of the chessboard
 pub struct ChessState {
@@ -10,7 +10,7 @@ pub struct ChessState {
     pub pieces: [Vec<Piece>; 2], // board representation: piece wise
     pub turn: bool,              // true for white's move, false for black
     pub moves: VecDeque<ChessMove>,
-    // private values that shouldnt be
+    pub threatened: [Threat; 2], // private values that shouldnt be
 }
 
 impl ChessState {
@@ -22,6 +22,7 @@ impl ChessState {
             pieces: [vec![], vec![]],
             turn: true,
             moves: default(),
+            threatened: default(),
         }
     }
 
@@ -40,20 +41,47 @@ impl Debug for ChessState {
         let piece_char = |piece: PieceType| {
             if piece.variant() as usize > 0 {
                 let ch = PIECE_CHAR[piece.variant() as usize - 1];
-                format!("{} ", if piece.team() { ch.to_ascii_uppercase() } else { ch })
+                format!("{}  ", if piece.team() { ch.to_ascii_uppercase() } else { ch })
             } else {
-                format!(". ")
+                format!(".  ")
             }
         };
 
         // print out board representation
         for i in 0..64 {
+            if i % 8 == 0 {
+                out += &format!("\n{:2}: ", (7 - (i / 8)) * 8);
+            }
             let pos = Position(i);
             out += &piece_char(self.at(Position(pos.x() + 8 * (7 - pos.y()))));
-            if i % 8 == 7 {
-                out += "\n";
+        }
+        out += "\n\n";
+
+        out += "    White:                      Black:";
+        // print out threatenned squares
+        for i in 0..8 {
+            out += &format!("\n{:2}: ", (7 - i) * 8);
+            for j in 0..8 {
+                let pos = Position((7 - i) * 8 + j);
+                let threat = self.threat_at(pos, true);
+                if threat > 0 {
+                    out += &format!("{:<3}", threat)
+                } else {
+                    out += ".  "
+                };
+            }
+            out += "    ";
+            for j in 0..8 {
+                let pos = Position((7 - i) * 8 + j);
+                let threat = self.threat_at(pos, false);
+                if threat > 0 {
+                    out += &format!("{:<3}", threat)
+                } else {
+                    out += ".  "
+                };
             }
         }
+        out += "\n\n";
 
         // print out piece representation
         for piece in self.pieces[0].iter() {
@@ -71,7 +99,7 @@ impl Debug for ChessState {
                 "{:16}",
                 format!(
                     "({}) {} => {}",
-                    &piece_char(self.at(m.origin)),
+                    &piece_char(self.at(m.origin)).chars().next().unwrap(),
                     m.origin.int(),
                     m.target.int()
                 )
