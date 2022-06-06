@@ -1,9 +1,10 @@
-use std::{cmp::max, ops::Index};
-
 use bevy::prelude::*;
 
 use crate::{
-    chess_logic::PieceVariant,
+    chess_logic::{
+        position::{coord_to_index, index_to_coord, is_45},
+        PieceVariant,
+    },
     render::{vec_from_coord, vec_from_posz, SQ_SIZE},
 };
 
@@ -28,7 +29,7 @@ impl ChessState {
         let mut itr = 1;
         // we actually got blocked off by the piece oh noess
         while pos != new_pos {
-            dbg!(pos.0);
+            eprintln!("rem pos range: {}", pos.0);
             pos.modify(x * itr + y * 8 * itr);
             self.rem_threat(Piece::new(self.at(pos), pos), pos);
             itr += 1;
@@ -41,13 +42,14 @@ impl ChessState {
         // we actually got blocked off by the piece oh noess
         let mut itr = 1;
         while pos != new_pos {
+            eprintln!("add pos range: {}", pos.0);
             pos.modify(x * itr + y * 8 * itr);
             self.add_threat(Piece::new(self.at(pos), pos), pos);
             itr += 1;
         }
     }
 
-    /// do before updating state
+    /// do before updating state, doesnt update the squares of a captured piece
     pub fn update_threat(&mut self, piece: Piece, new_pos: Position) {
         use PieceVariant::*;
 
@@ -56,46 +58,66 @@ impl ChessState {
 
         let pieces: &[Vec<Piece>; 2] = unsafe { std::mem::transmute(&self.pieces) };
 
-        // returns a number from 0-8
-        let coord_to_index = |(x, y): (i8, i8)| ((x.signum() + 1) + 3 * (y.signum() + 1)) as usize;
-        let index_to_coord = |i: usize| -> (i8, i8) { (i as i8 % 3 - 1, i as i8 / 3 - 1) };
+        let (x, y) = piece.rel_from(new_pos);
+        let move_dir = if piece.variant() == Knight { 4 } else { coord_to_index(x, y) };
+
+        // you moved in a way that blocks yourself off
+        if piece.variant() == Queen || piece.variant() == [Bishop, Rook][move_dir % 2] {
+            self.add_threat_dir(piece, index_to_coord(8 - move_dir));
+        }
 
         // closest piece on each diagonal / orthagonal
-        let mut closest_piece: [Piece; 9] = default();
-        let mut distances: [i8; 9] = [i8::MAX; 9];
+        let mut unblock_piece: [(Piece, i8); 9] = [(default(), i8::MAX); 9];
+        let mut block_piece: [(Piece, i8); 9] = [(default(), i8::MAX); 9];
 
-        let move_dir =
-            if piece.variant() == Knight { 4 } else { coord_to_index(piece.rel_from(new_pos)) };
+        let check_piece = |array: &mut [(Piece, i8); 9], (x, y): (i8, i8), piece: Piece| {
+            if is_45(x, y) {
+                let max = if x == 0 { y.abs() } else { x.abs() };
+                let index = coord_to_index(x, y);
+                if max < array[index].1 {
+                    array[index] = (piece, max);
+                }
+            }
+        };
 
         // go through the pieces and find the closest ones
         for &new_piece in pieces[0].iter().chain(pieces[1].iter()) {
             let (x, y) = piece.rel_from(new_piece.position);
-            if x == 0 || y == 0 || x.abs() == y.abs() {
-                let max = if x == 0 { y.abs() } else { x.abs() };
-                let index = coord_to_index((x, y));
-                if max < distances[index] {
-                    distances[index] = max;
-                    closest_piece[index] = new_piece;
-                }
-            }
+            check_piece(&mut unblock_piece, (x, y), new_piece);
+            let (x, y) = new_pos.rel_from(new_piece.position);
+            check_piece(&mut block_piece, (x, y), new_piece);
         }
         // reset middle
-        closest_piece[4] = default();
+        unblock_piece[4] = default();
+        block_piece[4] = default();
 
-        //dbg!(closest_piece);
+        // remove our piece
+        block_piece[8 - move_dir] = default();
 
-        // for each closest piece, check if its valid,
+        eprintln!("Unblocked: ");
+        for item in unblock_piece {
+            dbg!(item.0);
+        }
+        eprintln!("Blocked: ");
+        for item in block_piece {
+            dbg!(item.0);
+        }
+
+        // TODO (?): maybe you could use the distance to the piece to calculate threatened squares more efficiently?
+
+        // for each piece we could unblock, check if its valid,
         // if it satisfies criteria, remove all its threatenned squares in that direction and regenerate
-        for (i, check_piece) in closest_piece.iter().enumerate() {
+        for (i, (check_piece, _)) in unblock_piece.iter().enumerate() {
             let variant = check_piece.variant();
-            if variant == Queen
-                || (variant == Rook && i % 2 == 1)
-                || (variant == Bishop && i % 2 == 0)
-            {
+            if variant == Queen || variant == [Bishop, Rook][i % 2] {
                 eprint!("gaming: ");
 
+                if check_piece.position == new_pos {
+                    // remove the threatened piece's targetted squares
+                    self.rem_threat_piece(Piece::new(self.at(new_pos), new_pos));
+                }
                 // if the piece moved on the same axis, reset threatenned squares and check until the piece
-                if i == move_dir || i == 8 - move_dir {
+                else if i == move_dir || i == 8 - move_dir {
                     eprint!("same axis: {} => {}: ", check_piece.position.0, new_pos.0);
                     let (x, y) = index_to_coord(8 - i);
                     let (x, y) = (x.signum(), y.signum());
@@ -103,15 +125,33 @@ impl ChessState {
                     self.rem_from_pos_range(check_piece.position, piece.position, (x, y));
                     self.add_from_pos_range(check_piece.position, new_pos, (x, y));
                 }
-                // if the "piece" opposite to the piece is nothing, just extend threatenned squares
+                // just extend out the squares
                 else {
-                    eprint!("extend: {} & {}: ", piece.position.0, 8 - i);
+                    eprint!(
+                        "extend: {} & {} {}+: ",
+                        check_piece.position.0,
+                        8 - i,
+                        piece.position.0
+                    );
                     self.add_threat_dir(
                         Piece::new(check_piece.variant, piece.position),
                         index_to_coord(8 - i),
                     )
                 }
+            }
+        }
+
+        // for each piece that we could block, same dealio check if its valid
+        // if it satisfies yadda yadda remove threatenned squares in that direction
+        for (i, (check_piece, _)) in block_piece.iter().enumerate() {
+            let variant = check_piece.variant();
+            if variant == Queen || variant == [Bishop, Rook][i % 2] {
+                eprint!("block: {} & {}", check_piece.position.0, 8 - i);
                 dbg!(check_piece);
+                self.rem_threat_dir(
+                    Piece::new(check_piece.variant, new_pos),
+                    index_to_coord(8 - i),
+                );
             }
         }
     }
@@ -177,7 +217,7 @@ impl ChessState {
     fn add_threat_dir(&mut self, piece: Piece, (x, y): (i8, i8)) {
         let mut itr = 1;
         while let Some(pos) = piece.try_to((x * itr, y * itr)) {
-            //dbg!(pos.0);
+            eprintln!("add dir: {}", pos.0);
             self.add_threat(piece, pos);
             if self.occupied(pos) {
                 return;
@@ -230,8 +270,9 @@ impl ChessState {
     #[inline]
     fn rem_threat_dir(&mut self, piece: Piece, (x, y): (i8, i8)) {
         let mut itr = 1;
+
         while let Some(pos) = piece.position.try_to((x * itr, y * itr)) {
-            //dbg!(pos.0);
+            eprintln!("rem dir: {}", pos.0);
             self.rem_threat(piece, pos);
             if self.occupied(pos) {
                 return;
@@ -272,7 +313,7 @@ pub fn update_threat_squares(
     mut query: Query<(&mut Visibility, &ThreatEntity)>,
 ) {
     for (mut visibility, &ThreatEntity(square)) in query.iter_mut() {
-        visibility.is_visible = state.threatened[0].squares[square as usize] > 0;
-        //    || state.threatened[1].squares[square as usize] > 0;
+        visibility.is_visible = state.threatened[1].squares[square as usize] > 0;
+        //    || state.threatened[0].squares[square as usize] > 0;
     }
 }

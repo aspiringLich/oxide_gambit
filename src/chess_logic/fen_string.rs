@@ -1,9 +1,10 @@
 use super::*;
+use bevy::prelude::default;
 
 impl ChessState {
     /// loads a FEN string into the board state
     pub fn from_FEN(str: &str) -> Self {
-        let mut state: ChessState = Self::new();
+        let mut state: ChessState = default();
         let mut section = 0; // which section of the FEN string are we on?
 
         // 0    => pieces on the board  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"

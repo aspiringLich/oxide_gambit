@@ -18,7 +18,7 @@ impl Debug for Piece {
         let mut out: String = default();
 
         out += &format!(
-            "Piece: {} ({})\n",
+            "Piece: {} ({})",
             if self.variant() as usize > 0 {
                 let ch = PIECE_CHAR[self.variant() as usize - 1];
                 format!("{}  ", if self.team() { ch.to_ascii_uppercase() } else { ch })
