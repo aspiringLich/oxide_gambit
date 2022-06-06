@@ -2,30 +2,36 @@ use bevy::prelude::default;
 
 use std::{collections::VecDeque, fmt::Debug};
 
-use super::{ChessMove, Piece, PieceType, PieceVariant, Position, Threat};
+use super::{pin::PinType, ChessMove, Piece, PieceType, PieceVariant, Position, Threat};
 
 /// stores the state of the chessboard
 pub struct ChessState {
-    pub board: [PieceType; 64],  // board representation: square wise
-    pub pieces: [Vec<Piece>; 2], // board representation: piece wise
-    pub turn: bool,              // true for white's move, false for black
-    pub moves: VecDeque<ChessMove>,
-    pub threatened: [Threat; 2], // private values that shouldnt be
+    pub board: [PieceType; 64],       // board representation: square wise
+    pub pieces: [Vec<Piece>; 2],      // board representation: piece wise
+    pub turn: bool,                   // true for white's move, false for black
+    pub moves: VecDeque<ChessMove>,   // I GET TO USE A VECDEQUE also stores all the chess moves
+    pub threatened: [Threat; 2],      // which squares are under attack aaa
+    pub king_position: [Position; 2], // where 2 find kings
+    pub pinned_pieces: Vec<PinType>,  // are any of the current pieces pinned
 }
 
-impl ChessState {
-    pub fn new() -> Self {
+impl Default for ChessState {
+    fn default() -> Self {
         use PieceVariant::*;
-        ChessState {
+        Self {
             board: [PieceType(false, None); 64],
             // storing the team may be redundant but hey
             pieces: [vec![], vec![]],
             turn: true,
             moves: default(),
             threatened: default(),
+            king_position: default(),
+            pinned_pieces: default(),
         }
     }
+}
 
+impl ChessState {
     pub fn add_piece(&mut self, ch: char, square: u8) {
         let id = PieceType::from_char(ch);
         self.board[square as usize] = id.clone();

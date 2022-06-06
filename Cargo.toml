@@ -8,8 +8,10 @@ edition = "2021"
 [dependencies]
 bevy = "0.7.0"
 iyes_loopless = "0.5.1"
+bevy-inspector-egui = "0.11.0"
 
 lazy_static = "1.4.0"
+
 
 
 [workspace.metadata.dylint]

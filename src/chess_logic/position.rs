@@ -47,3 +47,18 @@ impl Default for Position {
         Position(0)
     }
 }
+
+#[inline]
+pub fn is_45(x: i8, y: i8) -> bool {
+    x.abs() == y.abs() || x == 0 || y == 0
+}
+
+#[inline]
+pub fn coord_to_index(x: i8, y: i8) -> usize {
+    ((x.signum() + 1) + 3 * (y.signum() + 1)) as usize
+}
+
+#[inline]
+pub fn index_to_coord(i: usize) -> (i8, i8) {
+    (i as i8 % 3 - 1, i as i8 / 3 - 1)
+}

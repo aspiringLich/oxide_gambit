@@ -3,6 +3,7 @@ mod chess_logic;
 mod interactive;
 mod render;
 use bevy::prelude::*;
+use bevy_inspector_egui::WorldInspectorPlugin;
 use iyes_loopless::prelude::*;
 
 use ai::*;
@@ -56,6 +57,7 @@ impl Plugin for Holder {
                         .before("select")
                 ),
             Debug => app
+                .add_plugin(WorldInspectorPlugin::new())
                 .add_startup_system(init_threat_squares)
                 .add_system(update_threat_squares.after("move")),
         };
@@ -63,9 +65,9 @@ impl Plugin for Holder {
 }
 
 fn main() {
-    let starting_pos: String =
-        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string();
-    //let rook_test: String = "8/8/8/1B6/2R5/8/1P6/8 w KQkq - 0 1".to_string();
+    // let starting_pos: String =
+    //     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string();
+    let starting_pos: String = "8/2b5/8/1B6/2R5/8/1P6/8 w KQkq - 0 1".to_string();
     // let state: State = State::from_FEN(&starting_pos);
     // dbg!(state);
     use PluginGroup::*;
