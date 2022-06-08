@@ -21,31 +21,40 @@ impl Default for Threat {
     }
 }
 
+pub fn possible_threat(variant: PieceVariant, dir: usize) -> bool {
+    use PieceVariant::*;
+    variant == Queen || variant == [Bishop, Rook][dir % 2]
+}
+
+const DEBUG: bool = false;
+
 impl ChessState {
     /// remove threats from a range of positions
     /// assumes that the positions are diagonal / orthogonal from each other
     /// includes new_pos, does not include pos
     fn rem_from_pos_range(&mut self, mut pos: Position, new_pos: Position, (x, y): (i8, i8)) {
-        let mut itr = 1;
+        let old_pos = pos;
         // we actually got blocked off by the piece oh noess
         while pos != new_pos {
-            eprintln!("rem pos range: {}", pos.0);
-            pos.modify(x * itr + y * 8 * itr);
-            self.rem_threat(Piece::new(self.at(pos), pos), pos);
-            itr += 1;
+            pos.modify(x + y * 8);
+            if DEBUG {
+                eprintln!("rem pos range: {}", pos.0);
+            }
+            self.rem_threat(Piece::new(self.at(old_pos), old_pos), pos);
         }
     }
 
     /// same as remove but add
     /// wow
     fn add_from_pos_range(&mut self, mut pos: Position, new_pos: Position, (x, y): (i8, i8)) {
+        let old_pos = pos;
         // we actually got blocked off by the piece oh noess
-        let mut itr = 1;
         while pos != new_pos {
-            eprintln!("add pos range: {}", pos.0);
-            pos.modify(x * itr + y * 8 * itr);
-            self.add_threat(Piece::new(self.at(pos), pos), pos);
-            itr += 1;
+            pos.modify(x + y * 8);
+            if DEBUG {
+                eprintln!("add pos range: {}", pos.0);
+            }
+            self.add_threat(Piece::new(self.at(old_pos), old_pos), pos);
         }
     }
 
@@ -84,8 +93,11 @@ impl ChessState {
         for &new_piece in pieces[0].iter().chain(pieces[1].iter()) {
             let (x, y) = piece.rel_from(new_piece.position);
             check_piece(&mut unblock_piece, (x, y), new_piece);
+
             let (x, y) = new_pos.rel_from(new_piece.position);
+            // if unblock_piece[coord_to_index(x, y)].0 != new_piece {
             check_piece(&mut block_piece, (x, y), new_piece);
+            // }
         }
         // reset middle
         unblock_piece[4] = default();
@@ -109,8 +121,8 @@ impl ChessState {
         // if it satisfies criteria, remove all its threatenned squares in that direction and regenerate
         for (i, (check_piece, _)) in unblock_piece.iter().enumerate() {
             let variant = check_piece.variant();
-            if variant == Queen || variant == [Bishop, Rook][i % 2] {
-                eprint!("gaming: ");
+            if possible_threat(variant, i) {
+                // eprint!("gaming: ");
 
                 if check_piece.position == new_pos {
                     // remove the threatened piece's targetted squares
@@ -118,21 +130,23 @@ impl ChessState {
                 }
                 // if the piece moved on the same axis, reset threatenned squares and check until the piece
                 else if i == move_dir || i == 8 - move_dir {
-                    eprint!("same axis: {} => {}: ", check_piece.position.0, new_pos.0);
+                    if DEBUG {
+                        eprint!("same axis: {} => {}: ", check_piece.position.0, new_pos.0);
+                    }
                     let (x, y) = index_to_coord(8 - i);
-                    let (x, y) = (x.signum(), y.signum());
-                    dbg!((x, y));
                     self.rem_from_pos_range(check_piece.position, piece.position, (x, y));
                     self.add_from_pos_range(check_piece.position, new_pos, (x, y));
                 }
                 // just extend out the squares
                 else {
-                    eprint!(
-                        "extend: {} & {} {}+: ",
-                        check_piece.position.0,
-                        8 - i,
-                        piece.position.0
-                    );
+                    if DEBUG {
+                        eprint!(
+                            "extend: {} & {} {}+: ",
+                            check_piece.position.0,
+                            8 - i,
+                            piece.position.0
+                        );
+                    }
                     self.add_threat_dir(
                         Piece::new(check_piece.variant, piece.position),
                         index_to_coord(8 - i),
@@ -145,13 +159,22 @@ impl ChessState {
         // if it satisfies yadda yadda remove threatenned squares in that direction
         for (i, (check_piece, _)) in block_piece.iter().enumerate() {
             let variant = check_piece.variant();
-            if variant == Queen || variant == [Bishop, Rook][i % 2] {
-                eprint!("block: {} & {}", check_piece.position.0, 8 - i);
+            if i != move_dir && i != 8 - move_dir && possible_threat(check_piece.variant(), i) {
+                if DEBUG {
+                    eprint!("block: {} & {}", check_piece.position.0, 8 - i);
+                }
                 dbg!(check_piece);
-                self.rem_threat_dir(
-                    Piece::new(check_piece.variant, new_pos),
-                    index_to_coord(8 - i),
-                );
+
+                let piece = Piece::new(check_piece.variant, new_pos);
+                let dir = index_to_coord(8 - i);
+                if let Some(pos) = piece.try_to(dir) {
+                    // if the next square will be a zero return
+                    // we dont need to remove anything
+                    if self.threat_at(pos, self.turn) == 0 {
+                        continue;
+                    }
+                    self.rem_threat_dir(piece, dir);
+                }
             }
         }
     }
@@ -217,7 +240,9 @@ impl ChessState {
     fn add_threat_dir(&mut self, piece: Piece, (x, y): (i8, i8)) {
         let mut itr = 1;
         while let Some(pos) = piece.try_to((x * itr, y * itr)) {
-            eprintln!("add dir: {}", pos.0);
+            if DEBUG {
+                eprintln!("add dir: {}", pos.0);
+            }
             self.add_threat(piece, pos);
             if self.occupied(pos) {
                 return;
@@ -283,6 +308,7 @@ impl ChessState {
 
     #[inline]
     fn rem_threat(&mut self, piece: Piece, pos: Position) {
+        // dbg!(self.threatened[piece.team() as usize].squares[pos.int()]);
         self.threatened[piece.team() as usize].squares[pos.int()] -= 1;
     }
 }

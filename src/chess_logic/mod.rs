@@ -10,7 +10,7 @@ pub mod threat;
 
 pub use chess_state::*;
 pub use excecute_move::*;
-use fen_string::*;
+pub use fen_string::*;
 pub use move_gen::*;
 pub use piece::*;
 pub use piece_type::*;

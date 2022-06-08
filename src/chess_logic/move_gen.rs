@@ -47,7 +47,7 @@ lazy_static! {
 }
 
 impl ChessState {
-    pub const fn at(&self, pos: Position) -> PieceType {
+    pub fn at(&self, pos: Position) -> PieceType {
         self.board[pos.0 as usize]
     }
 
@@ -55,16 +55,16 @@ impl ChessState {
         self.at(pos).variant() != PieceVariant::None
     }
 
-    pub const fn team(&self, pos: Position) -> bool {
+    pub fn team(&self, pos: Position) -> bool {
         self.at(pos).team()
     }
 
     /// if a square is capturable, check if occupied first
-    pub const fn capturable(&self, pos: Position) -> bool {
+    pub fn capturable(&self, pos: Position) -> bool {
         (self.team(pos) != self.turn)
     }
 
-    pub const fn variant(&self, pos: Position) -> PieceVariant {
+    pub fn variant(&self, pos: Position) -> PieceVariant {
         self.at(pos).variant()
     }
 

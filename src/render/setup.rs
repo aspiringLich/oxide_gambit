@@ -5,6 +5,8 @@ use crate::{
 };
 use bevy::prelude::*;
 
+use super::ChessboardSquare;
+
 // constants
 pub const SQ_SIZE: f32 = 64.0; // size of the chess squares
 pub const IMG_SIZE: f32 = 140.0; // size of the images were loading
@@ -40,35 +42,32 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>, state: Res<
     draw_chessboard(&mut commands);
 
     // render those pieces
-    state.render_pieces(commands, &asset_server)
+    state.render_pieces(&mut commands, &asset_server)
 }
 
 /// draw the squares of the chessboard
 fn draw_chessboard(commands: &mut Commands) {
-    for file in 0..8 {
-        for rank in 0..8 {
-            // check if color should be light or dark
-            let mut color: bool = false;
-            if file % 2 == 1 {
-                color = !color
-            }
-            if rank % 2 == 1 {
-                color = !color
-            }
+    commands
+        .spawn_bundle(SpriteBundle { ..default() })
+        .insert(ChessboardSquare)
+        .insert(Name::new("Chessboard Squares Parent"))
+        .with_children(|parent| {
+            for pos in 0..64 {
+                // check if color should be light or dark
+                let color: bool = (pos + (pos / 8)) % 2 == 0;
 
-            // spawn the square
-            commands.spawn_bundle(SpriteBundle {
-                transform: Transform {
-                    translation: vec_from_coord(rank, file),
-                    scale: Vec3::new(SQ_SIZE, SQ_SIZE, 0.0),
-                    ..Default::default()
-                },
-                sprite: Sprite {
-                    color: if color { SQ_LIGHT } else { SQ_DARK },
-                    ..Default::default()
-                },
-                ..Default::default()
-            });
-        }
-    }
+                // spawn the chessboard Square
+                parent
+                    .spawn_bundle(SpriteBundle {
+                        transform: Transform {
+                            translation: vec_from_posz(Position(pos), 0.0),
+                            scale: Vec3::new(SQ_SIZE, SQ_SIZE, 0.0),
+                            ..default()
+                        },
+                        sprite: Sprite { color: [SQ_LIGHT, SQ_DARK][color as usize], ..default() },
+                        ..default()
+                    })
+                    .insert(Name::new(format!("Square {}", pos)));
+            }
+        });
 }

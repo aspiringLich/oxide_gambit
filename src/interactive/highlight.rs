@@ -1,26 +1,21 @@
 use bevy::{
+    core::Name,
     hierarchy::{BuildChildren, DespawnRecursiveExt, Parent},
     math::Vec3,
-    prelude::{
-        Color, Commands, Component, Entity, EventReader, Query, Res, ResMut, Transform, Visibility,
-        With,
-    },
+    prelude::*,
     sprite::{Sprite, SpriteBundle},
     utils::Instant,
 };
 
 use crate::{
     chess_logic::PieceVariant,
-    interactive::SelectedSquare,
+    interactive::{SelectedSquare, TargetSquare},
     render::setup::{vec_from_posz, SQ_SIZE},
 };
 
 use crate::chess_logic::{ChessState, Piece, PieceType, Position};
 
 use super::mouse_event::MouseEvent;
-
-#[derive(Component)]
-pub struct TargetSquare;
 
 // initialize stuff for interactive
 pub fn init_interactive(mut commands: Commands) {
@@ -35,7 +30,13 @@ pub fn init_interactive(mut commands: Commands) {
             visibility: Visibility { is_visible: false },
             ..Default::default()
         })
-        .insert(SelectedSquare());
+        .insert(SelectedSquare())
+        .insert(Name::new("Selected Square"));
+
+    commands
+        .spawn_bundle(SpriteBundle { ..default() })
+        .insert(TargetSquare)
+        .insert(Name::new("Target Square Parent"));
 }
 
 pub fn toggle_target_squares(
@@ -46,18 +47,12 @@ pub fn toggle_target_squares(
 ) {
     use PieceVariant::*;
 
+    let parent = target_query.single_mut();
+
     // run after you set piece variant
     if piece.variant() != None {
-        // get all chess moves that start with the selected piece
-        let mut to: Vec<Position> = vec![];
-        for chessmove in &state.moves {
-            if chessmove.origin == piece.position {
-                to.push(chessmove.target);
-            }
-        }
-
         // spawn the target squares
-        for pos in to {
+        for pos in state.moves.iter().filter(|x| x.origin == piece.position).map(|x| x.target) {
             commands
                 .spawn_bundle(SpriteBundle {
                     transform: Transform {
@@ -68,11 +63,10 @@ pub fn toggle_target_squares(
                     sprite: Sprite { color: Color::rgba_u8(0, 0, 0, 127), ..Default::default() },
                     ..Default::default()
                 })
-                .insert(TargetSquare);
+                .insert(Parent(parent))
+                .insert(Name::new("Target Marker"));
         }
     } else {
-        for entity in target_query.iter_mut() {
-            commands.entity(entity).despawn();
-        }
+        commands.entity(parent).despawn_descendants()
     }
 }

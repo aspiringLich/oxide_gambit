@@ -1,3 +1,6 @@
+#![allow(warnings)] // comment to enjoy 8 hours of fixing warnings
+#![feature(let_else)] // use for check_pins in pins.rs
+
 mod ai;
 mod chess_logic;
 mod interactive;
@@ -6,12 +9,9 @@ use bevy::prelude::*;
 use bevy_inspector_egui::WorldInspectorPlugin;
 use iyes_loopless::prelude::*;
 
-use ai::*;
 use chess_logic::*;
 use interactive::*;
 use render::*;
-
-use crate::chess_logic::{Piece, PieceType, PieceVariant, Position};
 
 #[macro_use]
 extern crate lazy_static;
@@ -58,16 +58,16 @@ impl Plugin for Holder {
                 ),
             Debug => app
                 .add_plugin(WorldInspectorPlugin::new())
-                .add_startup_system(init_threat_squares)
-                .add_system(update_threat_squares.after("move")),
+                // .add_startup_system(init_threat_squares)
+                // .add_system(update_threat_squares.after("move")),
         };
     }
 }
 
 fn main() {
-    // let starting_pos: String =
-    //     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string();
-    let starting_pos: String = "8/2b5/8/1B6/2R5/8/1P6/8 w KQkq - 0 1".to_string();
+    let starting_pos: String =
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string();
+    // let starting_pos: String = "8/2b5/8/1B6/2R5/8/1P6/8 w KQkq - 0 1".to_string();
     // let state: State = State::from_FEN(&starting_pos);
     // dbg!(state);
     use PluginGroup::*;

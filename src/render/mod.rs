@@ -6,4 +6,10 @@ pub use display_piece::*;
 pub use setup::*;
 pub use theme::*;
 
-pub use bevy::prelude::*;
+use bevy::prelude::Component;
+
+#[derive(Component)]
+struct ChessboardSquare;
+
+#[derive(Component)]
+pub struct DrawnPiece;

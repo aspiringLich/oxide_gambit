@@ -36,6 +36,10 @@ impl ChessState {
         let id = PieceType::from_char(ch);
         self.board[square as usize] = id.clone();
         self.pieces[id.team() as usize].push(Piece::new(id, Position(square)));
+
+        if id.variant() == PieceVariant::King {
+            self.king_position[id.team() as usize] = Position(square);
+        }
     }
 }
 

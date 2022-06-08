@@ -1,13 +1,10 @@
-use super::{highlight::TargetSquare, mouse_event::cursor_square, MouseEvent, WindowInfo};
+use super::{mouse_event::cursor_square, MouseEvent, SelectedSquare, WindowInfo};
 use crate::{
     chess_logic::*,
     interactive::highlight::toggle_target_squares,
-    render::{display_piece::DrawnPiece, setup::vec_from_posz},
+    render::{setup::vec_from_posz, DrawnPiece},
 };
 use bevy::{core::Time, prelude::*, sprite::Sprite};
-
-#[derive(Component)]
-pub struct SelectedSquare();
 
 pub fn toggle_select_square(
     mut visib_quert: Query<&mut Visibility, With<SelectedSquare>>,
@@ -91,13 +88,13 @@ pub fn update_move(
 
         //let PressChessboard(pos) =
         state.excecute_move(*piece, *pos);
+        state.check_pins();
         state.move_gen();
 
         // despawn the pieces
-        for piece in query.iter_mut() {
-            commands.entity(piece).despawn();
-        }
+        commands.entity(query.single_mut()).despawn_recursive();
+
         // re-spawn the pieces
-        state.render_pieces(commands, &asset_server)
+        state.render_pieces(&mut commands, &asset_server)
     }
 }
