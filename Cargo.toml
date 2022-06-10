@@ -9,6 +9,7 @@ edition = "2021"
 bevy = "0.7.0"
 iyes_loopless = "0.5.1"
 bevy-inspector-egui = "0.11.0"
+bevy_prototype_debug_lines = "0.7"
 
 lazy_static = "1.4.0"
 

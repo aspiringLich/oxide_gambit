@@ -106,13 +106,15 @@ impl ChessState {
         // remove our piece
         block_piece[8 - move_dir] = default();
 
-        eprintln!("Unblocked: ");
-        for item in unblock_piece {
-            dbg!(item.0);
-        }
-        eprintln!("Blocked: ");
-        for item in block_piece {
-            dbg!(item.0);
+        if DEBUG {
+            eprintln!("Unblocked: ");
+            for item in unblock_piece {
+                dbg!(item.0);
+            }
+            eprintln!("Blocked: ");
+            for item in block_piece {
+                dbg!(item.0);
+            }
         }
 
         // TODO (?): maybe you could use the distance to the piece to calculate threatened squares more efficiently?
@@ -162,8 +164,8 @@ impl ChessState {
             if i != move_dir && i != 8 - move_dir && possible_threat(check_piece.variant(), i) {
                 if DEBUG {
                     eprint!("block: {} & {}", check_piece.position.0, 8 - i);
+                    dbg!(check_piece);
                 }
-                dbg!(check_piece);
 
                 let piece = Piece::new(check_piece.variant, new_pos);
                 let dir = index_to_coord(8 - i);
@@ -297,7 +299,9 @@ impl ChessState {
         let mut itr = 1;
 
         while let Some(pos) = piece.position.try_to((x * itr, y * itr)) {
-            eprintln!("rem dir: {}", pos.0);
+            if DEBUG {
+                eprintln!("rem dir: {}", pos.0);
+            }
             self.rem_threat(piece, pos);
             if self.occupied(pos) {
                 return;

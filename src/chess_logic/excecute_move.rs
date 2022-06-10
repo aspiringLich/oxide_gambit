@@ -1,12 +1,20 @@
 use bevy::prelude::*;
 
-use crate::chess_logic::Piece;
+use crate::chess_logic::{piece_type::PieceVariant, Piece};
 
 use super::{ChessMove, ChessState, Position};
 
 impl ChessState {
     /// Change state
     pub fn excecute_move(&mut self, piece: Piece, pos: Position) {
+        use PieceVariant::*;
+
+        // things we may need to update for specific pieces
+        match piece.variant() {
+            King => self.king_position[self.turn as usize] = pos,
+            _ => {}
+        };
+
         // if this is a capture
         if self.occupied(pos) && self.capturable(pos) {
             let remove = Piece::new(self.board[pos.int()], pos);

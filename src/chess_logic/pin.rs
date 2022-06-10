@@ -2,6 +2,8 @@ use std::cmp::max;
 
 use bevy::prelude::default;
 
+use crate::chess_logic::position::index_to_coord;
+
 use super::{
     chess_state::ChessState,
     position::{coord_to_index, is_45, Position},
@@ -9,10 +11,9 @@ use super::{
     Piece,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum PinType {
-    Pinned,           // a piece is completely pinned
-    PinDir((u8, u8)), // a piece can still move along this direction (and its inverse)
+    Pinned((i8, i8)), // a piece can still move along this direction (and its inverse)
     None,             // a piece is not pinned
 }
 
@@ -22,7 +23,17 @@ impl Default for PinType {
     }
 }
 
+const DEBUG: bool = true;
+
 impl ChessState {
+    pub fn opp_turn(&self) -> usize {
+        !self.turn as usize
+    }
+
+    pub fn turn(&self) -> usize {
+        self.turn as usize
+    }
+
     pub fn king(&self, turn: bool) -> Position {
         self.king_position[self.turn as usize]
     }
@@ -57,26 +68,29 @@ impl ChessState {
             }
         }
 
-        eprintln!("Closest black pieces: ");
-        for item in closest[0] {
-            if let Some((index, _)) = item {
-                dbg!(self.pieces[0][index]);
-            } else {
-                dbg!(Piece::default());
+        if DEBUG {
+            dbg!(self.king_position);
+            eprintln!("Closest black pieces: ");
+            for item in closest[0] {
+                if let Some((index, _)) = item {
+                    dbg!(self.pieces[0][index]);
+                } else {
+                    dbg!(Piece::default());
+                }
             }
-        }
-        eprintln!("Closest white pieces: ");
-        for item in closest[1] {
-            if let Some((index, _)) = item {
-                dbg!(self.pieces[1][index]);
-            } else {
-                dbg!(Piece::default());
+            eprintln!("Closest white pieces: ");
+            for item in closest[1] {
+                if let Some((index, _)) = item {
+                    dbg!(self.pieces[1][index]);
+                } else {
+                    dbg!(Piece::default());
+                }
             }
         }
 
-        for item in closest[self.turn as usize]
+        for item in closest[1]
             .iter()
-            .zip(closest[!self.turn as usize].iter())
+            .zip(closest[0].iter())
             .enumerate()
             .filter(|(i, x)| x.0.is_some() && x.1.is_some())
         {
@@ -86,15 +100,19 @@ impl ChessState {
             let piece_index = [closest_white.0, closest_black.0];
             let distance = [closest_white.1, closest_black.1];
 
-            eprintln!("Closest piece pairs:");
-            dbg!(self.pieces[0][piece_index[!self.turn as usize]]);
-            dbg!(self.pieces[1][piece_index[self.turn as usize]]);
+            // if theres a possible threat
+            if possible_threat(self.pieces[self.opp_turn()][piece_index[self.turn()]].variant(), i)
+            {
+                dbg!(self.pieces[self.turn as usize][piece_index[self.turn as usize]]);
 
-            if possible_threat(
-                self.pieces[!self.turn as usize][piece_index[self.turn as usize]].variant(),
-                i,
-            ) {
-                dbg!(self.pieces[!self.turn as usize][piece_index[self.turn as usize]], i);
+                // get the piece we would like the modify
+                let turn = self.turn();
+                let mod_pin = &mut self.pinned_pieces[piece_index[turn]];
+
+                use PinType::*;
+                if *mod_pin == None {
+                    let mod_pin = Pinned(index_to_coord(i));
+                }
             }
         }
     }

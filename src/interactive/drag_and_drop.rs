@@ -5,6 +5,7 @@ use crate::{
     render::{setup::vec_from_posz, DrawnPiece},
 };
 use bevy::{core::Time, prelude::*, sprite::Sprite};
+use bevy_prototype_debug_lines::DebugLines;
 
 pub fn toggle_select_square(
     mut visib_quert: Query<&mut Visibility, With<SelectedSquare>>,
