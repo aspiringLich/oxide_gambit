@@ -200,14 +200,14 @@ impl ChessState {
                 } else {
                     self.add_move_back(piece, pos, (0, dir), index);
                 }
-            }
-        }
 
-        // double forward
-        if double_available() {
-            if let Some(pos) = piece.try_to((0, dir * 2)) {
-                if !self.occupied(pos) {
-                    self.add_move_back(piece, pos, (0, dir * 2), index);
+                // double forward
+                if double_available() {
+                    if let Some(pos) = piece.try_to((0, dir * 2)) {
+                        if !self.occupied(pos) {
+                            self.add_move_back(piece, pos, (0, dir * 2), index);
+                        }
+                    }
                 }
             }
         }
