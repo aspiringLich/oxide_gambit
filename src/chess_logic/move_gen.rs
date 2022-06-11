@@ -1,5 +1,7 @@
 use std::{borrow::Borrow, collections::VecDeque};
 
+use crate::chess_logic::pin::PinType;
+
 use super::{ChessState, Piece, PieceType, PieceVariant, Position};
 use bevy::prelude::*;
 
@@ -64,8 +66,49 @@ impl ChessState {
         (self.team(pos) != self.turn)
     }
 
+    /// get the variant of the piece at this position
     pub fn variant(&self, pos: Position) -> PieceVariant {
         self.at(pos).variant()
+    }
+
+    /// add a move to the front (this is a good move)
+    pub fn add_move_front(
+        &mut self,
+        piece: Piece,
+        target: Position,
+        direction: (i8, i8),
+        index: usize,
+    ) {
+        use PinType::*;
+        // if the pin direction is not where were trying to move return
+        if let Pinned(dir) = self.pinned_pieces[index] {
+            eprintln!(
+                "pinned
+            "
+            );
+            if direction != dir && direction != (-dir.0, -dir.1) {
+                return;
+            }
+        }
+        self.moves.push_front(ChessMove::new(piece.position, target));
+    }
+
+    /// add a move to the back (this is an ok move)
+    pub fn add_move_back(
+        &mut self,
+        piece: Piece,
+        target: Position,
+        direction: (i8, i8),
+        index: usize,
+    ) {
+        use PinType::*;
+        // if the pin direction is not where were trying to move return
+        if let Pinned(dir) = self.pinned_pieces[index] {
+            if !(direction == dir || direction == (-dir.0, -dir.1)) {
+                return;
+            }
+        }
+        self.moves.push_front(ChessMove::new(piece.position, target));
     }
 
     /// generate the moves based on the current board state
@@ -77,18 +120,19 @@ impl ChessState {
 
         let pieces: &Vec<Piece> = unsafe { std::mem::transmute(&self.pieces[self.turn as usize]) };
 
-        for &piece in pieces {
+        for (i, &piece) in pieces.iter().enumerate() {
+            //dbg!(&self.pinned_pieces[i]);
             match piece.variant() {
                 None => panic!("wee woo invalid piece in piece vec or something"),
                 // pawn
-                Pawn => self.gen_pawn_moves(piece),
+                Pawn => self.gen_pawn_moves(piece, i),
                 // sliding pieces
-                Rook => self.gen_sliding(piece, RookMoves.get()),
-                Bishop => self.gen_sliding(piece, BishopMoves.get()),
-                Queen => self.gen_sliding(piece, QueenMoves.get()),
+                Rook => self.gen_sliding(piece, RookMoves.get(), i),
+                Bishop => self.gen_sliding(piece, BishopMoves.get(), i),
+                Queen => self.gen_sliding(piece, QueenMoves.get(), i),
                 // "static" pieces
-                King => self.gen_static(piece, QueenMoves.get()),
-                Knight => self.gen_static(piece, KnightMoves.get()),
+                King => self.gen_static(piece, QueenMoves.get(), i),
+                Knight => self.gen_static(piece, KnightMoves.get(), i),
             }
         }
         dbg!(self);
@@ -96,15 +140,15 @@ impl ChessState {
 
     /// generate the moves for a static set of movements
     #[inline]
-    pub fn gen_static(&mut self, piece: Piece, movements: &Vec<(i8, i8)>) {
+    pub fn gen_static(&mut self, piece: Piece, movements: &Vec<(i8, i8)>, index: usize) {
         for movement in movements {
             if let Some(pos) = piece.try_to(*movement) {
                 if self.occupied(pos) {
                     if self.capturable(pos) {
-                        self.moves.push_front(ChessMove::new(piece.position, pos));
+                        self.add_move_front(piece, pos, *movement, index);
                     }
                 } else {
-                    self.moves.push_back(ChessMove::new(piece.position, pos));
+                    self.add_move_back(piece, pos, *movement, index);
                 }
             }
         }
@@ -112,15 +156,15 @@ impl ChessState {
 
     /// generate moves on a list of directions
     #[inline]
-    pub fn gen_sliding(&mut self, piece: Piece, movements: &Vec<(i8, i8)>) {
+    pub fn gen_sliding(&mut self, piece: Piece, movements: &Vec<(i8, i8)>, index: usize) {
         for movement in movements {
-            self.gen_sliding_dir(piece, *movement);
+            self.gen_sliding_dir(piece, *movement, index);
         }
     }
 
     /// generate all pieces in a direction
     #[inline]
-    pub fn gen_sliding_dir(&mut self, piece: Piece, direction: (i8, i8)) {
+    pub fn gen_sliding_dir(&mut self, piece: Piece, direction: (i8, i8), index: usize) {
         let (x, y) = direction;
 
         // while we can still move in this direction
@@ -129,11 +173,11 @@ impl ChessState {
             // if its occupied oh noes
             if self.occupied(pos) {
                 if self.capturable(pos) {
-                    self.moves.push_front(ChessMove::new(piece.position, pos));
+                    self.add_move_front(piece, pos, direction, index);
                 }
                 return;
             } else {
-                self.moves.push_back(ChessMove::new(piece.position, pos));
+                self.add_move_back(piece, pos, direction, index);
             }
             iter += 1;
         }
@@ -142,7 +186,7 @@ impl ChessState {
     /// generate moves a pawn could take
     /// TODO: add en passant
     #[inline]
-    pub fn gen_pawn_moves(&mut self, piece: Piece) {
+    pub fn gen_pawn_moves(&mut self, piece: Piece, index: usize) {
         let dir = if piece.team() { 1 } else { -1 };
 
         let double_available = || piece.y() == [6, 1][piece.team() as usize];
@@ -152,9 +196,9 @@ impl ChessState {
         if let Some(pos) = piece.try_to((0, dir)) {
             if !self.occupied(pos) {
                 if promotion_available() {
-                    self.moves.push_front(ChessMove::new(piece.position, pos))
+                    self.add_move_front(piece, pos, (0, dir), index);
                 } else {
-                    self.moves.push_back(ChessMove::new(piece.position, pos))
+                    self.add_move_back(piece, pos, (0, dir), index);
                 }
             }
         }
@@ -163,7 +207,7 @@ impl ChessState {
         if double_available() {
             if let Some(pos) = piece.try_to((0, dir * 2)) {
                 if !self.occupied(pos) {
-                    self.moves.push_back(ChessMove::new(piece.position, pos))
+                    self.add_move_back(piece, pos, (0, dir * 2), index);
                 }
             }
         }
@@ -172,7 +216,7 @@ impl ChessState {
         let mut capture = |movement: (i8, i8)| {
             if let Some(pos) = piece.try_to(movement) {
                 if self.occupied(pos) && self.capturable(pos) {
-                    self.moves.push_back(ChessMove::new(piece.position, pos))
+                    self.add_move_back(piece, pos, movement, index);
                 }
             }
         };
