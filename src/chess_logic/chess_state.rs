@@ -9,6 +9,10 @@ pub struct ChessState {
     pub board: [PieceType; 64],            // board representation: square wise
     pub pieces: [Vec<Piece>; 2],           // board representation: piece wise
     pub turn: bool,                        // true for white's move, false for black
+    pub castling: [[bool; 2]; 2],          // kingside / queenside castling rights
+    pub en_passant: Vec<Position>,         // store the possible target squares for en passant
+    pub halfmove_clock: usize, // halfmove counter - when it reaches 100 the game is drawn
+    pub fullmoves: usize,      // number of times black has moved essentially
     pub moves: VecDeque<ChessMove>, // I GET TO USE A VECDEQUE also stores all the chess moves
     pub constraint: Option<Vec<Position>>, // if the king is under check, constrain the squares said king can go to
     pub threatened: [Threat; 2],           // which squares are under attack aaa
@@ -23,6 +27,10 @@ impl Default for ChessState {
             // storing the team may be redundant but hey
             pieces: [vec![], vec![]],
             turn: true,
+            castling: [[false; 2]; 2],
+            en_passant: default(),
+            halfmove_clock: 0,
+            fullmoves: 1,
             moves: default(),
             constraint: default(),
             threatened: default(),
