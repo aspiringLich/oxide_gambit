@@ -26,6 +26,10 @@ impl Default for PinType {
 const DEBUG: bool = true;
 
 impl ChessState {
+    pub fn checked(&self) -> bool {
+        self.threatened[self.opp_turn()].squares[self.king_position[self.turn()].0 as usize] > 0
+    }
+
     pub fn opp_turn(&self) -> usize {
         !self.turn as usize
     }
@@ -42,9 +46,14 @@ impl ChessState {
         let pieces: &[Vec<Piece>; 2] = unsafe { std::mem::transmute(&self.pieces) };
 
         // closest pieces
-        let mut closest: [[Option<(usize, u8)>; 9]; 2] = [[None; 9]; 2];
+        let mut closest: [[Option<(usize, u8)>; 9]; 2] = [[Option::None; 9]; 2];
 
         self.pinned_pieces = vec![PinType::None; self.pieces[self.turn as usize].len()];
+        self.constraint = Option::None;
+
+        let king_pos = self.king_position[self.turn()];
+
+        let mut knight_index = usize::MAX;
 
         // find closest pieces for each team
         for team in 0..=1 {
@@ -63,6 +72,12 @@ impl ChessState {
                     } else {
                         *item = Some((i, max));
                     }
+                } else if piece.variant() == Knight
+                    && piece.team() != self.turn
+                    && self.checked()
+                    && KnightMoves.get().contains(&piece.position.rel_from(self.king(self.turn)))
+                {
+                    knight_index = i;
                 }
             }
         }
@@ -87,17 +102,90 @@ impl ChessState {
             }
         }
 
-        for item in closest[1]
-            .iter()
-            .zip(closest[0].iter())
-            .enumerate()
-            .filter(|(i, x)| x.0.is_some() && x.1.is_some())
-        {
+        let zip = closest[0].iter().zip(closest[1].iter()).enumerate();
+
+        use crate::move_gen::Moves::*;
+        use crate::PieceVariant::*;
+
+        if self.checked() {
+            // dbg!(zip.clone().collect::<Vec<_>>());
+            // go through the items if theres only the other team
+            let other_only = zip
+                .clone()
+                .filter(|(i, x)| {
+                    let x = [x.0, x.1];
+                    ((x[self.turn()].is_none() || x[self.turn()].unwrap().1 == u8::MAX)
+                        && x[self.opp_turn()].is_some())
+                })
+                .map(|(i, x)| (i, [x.1, x.0][self.turn()]));
+            dbg!(other_only.clone().collect::<Vec<_>>());
+
+            let mut itr = 0;
+            let mut other_squares: Vec<Position> = vec![];
+
+            // if were not being threatenned by a knight...
+            if knight_index == usize::MAX {
+                for item in other_only {
+                    if let (i, Some(item)) = item {
+                        let piece = self.pieces[self.opp_turn()][item.0];
+                        let pos = piece.position;
+                        let check_threat = || possible_threat(piece.variant(), i);
+
+                        if check_threat() {
+                            eprint!("threat found whee");
+                            dbg!(piece);
+                            if itr == 0 {
+                                other_squares = self
+                                    .gen_sliding_dir_pos(piece, index_to_coord(i))
+                                    .unwrap_or(vec![]);
+                                if other_squares.is_empty() {
+                                    continue;
+                                }
+                                other_squares.push(pos);
+                            }
+                            itr += 1;
+                        // if its a knight or pawn and is threatening king
+                        } else if (piece.variant() == Pawn
+                            && [PawnWMoves, PawnBMoves][self.turn()]
+                                .get()
+                                .contains(&pos.rel_from(king_pos)))
+                        {
+                            if DEBUG {
+                                eprintln!("pawn moment")
+                            }
+                            itr += 1;
+                            other_squares.push(pos);
+                        }
+                    }
+                }
+                // if theres one piece thats a threat,
+                if itr == 1 {
+                    other_squares.sort_by(|&a, &b| a.0.cmp(&b.0));
+                    self.constraint = Some(other_squares);
+                } else if itr > 1 {
+                    self.constraint = Some(vec![]);
+                }
+            // knight moment
+            } else {
+                if DEBUG {
+                    eprintln!("knight moment")
+                }
+                self.constraint = Some(vec![self.pieces[self.opp_turn()][knight_index].position]);
+            }
+
+            if DEBUG {
+                dbg!(itr);
+                dbg!(&self.constraint);
+            }
+        }
+
+        // go through the items if both are some
+        for item in zip.filter(|(i, x)| (x.0.is_some() && x.1.is_some())) {
             let (i, (Some(closest_black), Some(closest_white))) = item else { unreachable!() };
 
             // the index / distance of the closest pieces
-            let piece_index = [closest_white.0, closest_black.0];
-            let distance = [closest_white.1, closest_black.1];
+            let piece_index = [closest_black.0, closest_white.0];
+            let distance = [closest_black.1, closest_white.1];
 
             // if theres a possible threat and the opposite team is closer
             if possible_threat(self.pieces[self.opp_turn()][piece_index[self.opp_turn()]].variant(), i)

@@ -11,7 +11,7 @@ impl ChessState {
 
         // things we may need to update for specific pieces
         match piece.variant() {
-            King => self.king_position[self.turn as usize] = pos,
+            King => self.king_position[piece.team() as usize] = pos,
             _ => {}
         };
 

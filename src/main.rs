@@ -66,7 +66,9 @@ impl Plugin for Holder {
 
 fn main() {
     let starting_pos: String =
-        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string();
+        "rnbqkbnr/pppppppp/8/1N6/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1".to_string();
+    // let starting_pos: String =
+    //     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string();
     // let starting_pos: String = "8/2b5/8/1B6/2R5/8/1P6/8 w KQkq - 0 1".to_string();
     // let state: State = State::from_FEN(&starting_pos);
     // dbg!(state);

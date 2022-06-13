@@ -9,6 +9,12 @@ pub enum PieceVariant {
     Queen,
 }
 
+impl Default for PieceVariant {
+    fn default() -> Self {
+        Self::None
+    }
+}
+
 #[derive(PartialEq, Copy, Clone, Debug)]
 pub struct PieceType(pub bool, pub PieceVariant);
 

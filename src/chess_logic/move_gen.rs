@@ -27,7 +27,7 @@ pub enum Moves {
     QueenMoves,
     KnightMoves,
     PawnWMoves,
-    PawnBMobes,
+    PawnBMoves,
 }
 impl Moves {
     pub fn get(self) -> &'static Vec<(i8, i8)> {
@@ -80,12 +80,16 @@ impl ChessState {
         index: usize,
     ) {
         use PinType::*;
+
+        // if we have a constraint on the squares to move to
+        if let Some(limit) = &self.constraint {
+            if limit.binary_search_by(|&x| x.0.cmp(&target.0)).is_err() {
+                return;
+            }
+        }
         // if the pin direction is not where were trying to move return
         if let Pinned(dir) = self.pinned_pieces[index] {
-            eprintln!(
-                "pinned
-            "
-            );
+            eprintln!("pinned");
             if direction != dir && direction != (-dir.0, -dir.1) {
                 return;
             }
@@ -102,6 +106,12 @@ impl ChessState {
         index: usize,
     ) {
         use PinType::*;
+        // if we have a constraint on the squares to move to
+        if let Some(limit) = &self.constraint {
+            if limit.binary_search_by(|&x| x.0.cmp(&target.0)).is_err() {
+                return;
+            }
+        }
         // if the pin direction is not where were trying to move return
         if let Pinned(dir) = self.pinned_pieces[index] {
             if !(direction == dir || direction == (-dir.0, -dir.1)) {
@@ -143,6 +153,12 @@ impl ChessState {
     pub fn gen_static(&mut self, piece: Piece, movements: &Vec<(i8, i8)>, index: usize) {
         for movement in movements {
             if let Some(pos) = piece.try_to(*movement) {
+                // you cant move into threatenned squares if king
+                if piece.variant() == PieceVariant::King
+                    && self.threatened[self.opp_turn()].squares[pos.int()] > 0
+                {
+                    continue;
+                }
                 if self.occupied(pos) {
                     if self.capturable(pos) {
                         self.add_move_front(piece, pos, *movement, index);
@@ -222,5 +238,30 @@ impl ChessState {
         };
         capture((dir, dir));
         capture((-dir, dir));
+    }
+
+    /// generate all pieces in a direction
+    #[inline]
+    pub fn gen_sliding_dir_pos(&self, piece: Piece, direction: (i8, i8)) -> Option<Vec<Position>> {
+        use crate::PieceVariant::*;
+        let mut out: Vec<Position> = vec![];
+        let (x, y) = direction;
+
+        // while we can still move in this direction
+        let mut iter = 1;
+        while let Some(pos) = piece.try_to((x * iter, y * iter)) {
+            // if its occupied oh noes
+            if self.occupied(pos) {
+                if self.at(pos).variant() != King {
+                    return Option::None;
+                }
+                out.push(pos);
+                return Some(out);
+            } else {
+                out.push(pos);
+            }
+            iter += 1;
+        }
+        Some(out)
     }
 }

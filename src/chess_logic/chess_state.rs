@@ -6,24 +6,25 @@ use super::{pin::PinType, ChessMove, Piece, PieceType, PieceVariant, Position, T
 
 /// stores the state of the chessboard
 pub struct ChessState {
-    pub board: [PieceType; 64],       // board representation: square wise
-    pub pieces: [Vec<Piece>; 2],      // board representation: piece wise
-    pub turn: bool,                   // true for white's move, false for black
-    pub moves: VecDeque<ChessMove>,   // I GET TO USE A VECDEQUE also stores all the chess moves
-    pub threatened: [Threat; 2],      // which squares are under attack aaa
-    pub king_position: [Position; 2], // where 2 find kings
-    pub pinned_pieces: Vec<PinType>,  // are any of the current pieces pinned
+    pub board: [PieceType; 64],            // board representation: square wise
+    pub pieces: [Vec<Piece>; 2],           // board representation: piece wise
+    pub turn: bool,                        // true for white's move, false for black
+    pub moves: VecDeque<ChessMove>, // I GET TO USE A VECDEQUE also stores all the chess moves
+    pub constraint: Option<Vec<Position>>, // if the king is under check, constrain the squares said king can go to
+    pub threatened: [Threat; 2],           // which squares are under attack aaa
+    pub king_position: [Position; 2],      // where 2 find kings
+    pub pinned_pieces: Vec<PinType>,       // are any of the current pieces pinned
 }
 
 impl Default for ChessState {
     fn default() -> Self {
-        use PieceVariant::*;
         Self {
-            board: [PieceType(false, None); 64],
+            board: [default(); 64],
             // storing the team may be redundant but hey
             pieces: [vec![], vec![]],
             turn: true,
             moves: default(),
+            constraint: default(),
             threatened: default(),
             king_position: default(),
             pinned_pieces: default(),

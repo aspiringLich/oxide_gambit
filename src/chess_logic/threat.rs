@@ -26,7 +26,7 @@ pub fn possible_threat(variant: PieceVariant, dir: usize) -> bool {
     variant == Queen || variant == [Bishop, Rook][dir % 2]
 }
 
-const DEBUG: bool = false;
+const DEBUG: bool = true;
 
 impl ChessState {
     /// remove threats from a range of positions
@@ -136,7 +136,7 @@ impl ChessState {
                         eprint!("same axis: {} => {}: ", check_piece.position.0, new_pos.0);
                     }
                     let (x, y) = index_to_coord(8 - i);
-                    self.rem_from_pos_range(check_piece.position, piece.position, (x, y));
+                    self.rem_threat_dir(*check_piece, index_to_coord(8 - i));
                     self.add_from_pos_range(check_piece.position, new_pos, (x, y));
                 }
                 // just extend out the squares
@@ -172,7 +172,7 @@ impl ChessState {
                 if let Some(pos) = piece.try_to(dir) {
                     // if the next square will be a zero return
                     // we dont need to remove anything
-                    if self.threat_at(pos, self.turn) == 0 {
+                    if self.occupied(new_pos) || self.threat_at(pos, self.turn) == 0 {
                         continue;
                     }
                     self.rem_threat_dir(piece, dir);
@@ -207,7 +207,7 @@ impl ChessState {
             Queen => self.add_threat_sliding(piece, QueenMoves.get()),
             // static pieces
             Pawn => {
-                self.add_threat_static(piece, [PawnBMobes, PawnWMoves][piece.team() as usize].get())
+                self.add_threat_static(piece, [PawnBMoves, PawnWMoves][piece.team() as usize].get())
             }
             Knight => self.add_threat_static(piece, KnightMoves.get()),
             King => self.add_threat_static(piece, QueenMoves.get()),
@@ -268,7 +268,7 @@ impl ChessState {
             Queen => self.rem_threat_sliding(piece, QueenMoves.get()),
             // static pieces
             Pawn => {
-                self.rem_threat_static(piece, [PawnBMobes, PawnWMoves][piece.team() as usize].get())
+                self.rem_threat_static(piece, [PawnBMoves, PawnWMoves][piece.team() as usize].get())
             }
             Knight => self.rem_threat_static(piece, KnightMoves.get()),
             King => self.rem_threat_static(piece, QueenMoves.get()),

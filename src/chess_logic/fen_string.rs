@@ -54,7 +54,7 @@ impl ChessState {
         state.gen_threat();
         state.check_pins();
         state.move_gen();
-        //dbg!(&state.moves);
+        dbg!(&state.moves);
         return state;
     }
 }
