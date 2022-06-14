@@ -64,6 +64,16 @@ impl Piece {
     pub const fn rel_from(&self, pos: Position) -> (i8, i8) {
         self.position.rel_from(pos)
     }
+
+    /// the position one forward from piece
+    pub const fn forward(&self) -> Option<Position> {
+        self.try_to([(0, -1), (0, 1)][self.team() as usize])
+    }
+
+    /// the position one backward from piece
+    pub const fn backward(&self) -> Option<Position> {
+        self.try_to([(0, 1), (0, -1)][self.team() as usize])
+    }
 }
 
 impl Default for Piece {

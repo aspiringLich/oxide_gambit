@@ -47,6 +47,7 @@ impl ChessState {
 
         // closest pieces
         let mut closest: [[Option<(usize, u8)>; 9]; 2] = [[Option::None; 9]; 2];
+        let mut valid: [bool; 9] = [true; 9];
 
         self.pinned_pieces = vec![PinType::None; self.pieces[self.turn as usize].len()];
         self.constraint = Option::None;
@@ -67,7 +68,10 @@ impl ChessState {
                     // if theres something there already set the distance to max to show its invalid
                     // if its our own guy
                     if let Some(x) = item {
-                        *x = if team == self.turn() { (i, u8::MAX) } else { (i, max) };
+                        if self.turn() == i {
+                            valid[i] = false;
+                        }
+                        *x = [(i, max), *x][(max > x.1) as usize];
                     // otherwise if theres nothing there update it
                     } else {
                         *item = Some((i, max));
@@ -86,7 +90,8 @@ impl ChessState {
             dbg!(self.king_position);
             eprintln!("Closest black pieces: ");
             for item in closest[0] {
-                if let Some((index, _)) = item {
+                if let Some((index, i)) = item {
+                    eprint!("{} ", i);
                     dbg!(self.pieces[0][index]);
                 } else {
                     dbg!(Piece::default());
@@ -94,7 +99,8 @@ impl ChessState {
             }
             eprintln!("Closest white pieces: ");
             for item in closest[1] {
-                if let Some((index, _)) = item {
+                if let Some((index, i)) = item {
+                    eprint!("{} ", i);
                     dbg!(self.pieces[1][index]);
                 } else {
                     dbg!(Piece::default());
@@ -186,11 +192,22 @@ impl ChessState {
             // the index / distance of the closest pieces
             let piece_index = [closest_black.0, closest_white.0];
             let distance = [closest_black.1, closest_white.1];
+            let dir = index_to_coord(8 - i);
+
+            // find the next piece after this
+            let our_piece = self.pieces[self.turn()][piece_index[self.turn()]];
+            let mut itr = 1;
+            while !self.occupied(our_piece.try_to((dir.0 * itr, dir.1 * itr)).unwrap()) {
+                itr += 1
+            }
+            let their_piece = self.at(our_piece.try_to((dir.0 * itr, dir.1 * itr)).unwrap());
+
+            dbg!(their_piece);
 
             // if theres a possible threat and the opposite team is closer
-            if possible_threat(self.pieces[self.opp_turn()][piece_index[self.opp_turn()]].variant(), i)
-                && distance[self.turn()] != u8::MAX // our closest person is not invalid
+            if possible_threat(their_piece.variant(), i)
                 && distance[self.opp_turn()] > distance[self.turn()]
+                && their_piece.team() != self.turn
             {
                 dbg!(self.pieces[self.turn as usize][piece_index[self.turn as usize]]);
 

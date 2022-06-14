@@ -63,10 +63,10 @@ impl ChessState {
                 }
                 // castling rights
                 2 => match ch {
-                    'q' => state.castling[0][0] = true,
-                    'k' => state.castling[0][1] = true,
-                    'Q' => state.castling[1][0] = true,
-                    'K' => state.castling[1][1] = true,
+                    'q' => state.castling[0] = true,
+                    'k' => state.castling[1] = true,
+                    'Q' => state.castling[2] = true,
+                    'K' => state.castling[3] = true,
                     '-' => {}
                     _ => panic(),
                 },

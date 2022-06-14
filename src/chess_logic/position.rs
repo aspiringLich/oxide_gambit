@@ -1,6 +1,12 @@
 /// acts as a wrapper for a u8, representing a position on a chessboard
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd)]
 pub struct Position(pub u8);
+
+impl Ord for Position {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.0.cmp(&other.0)
+    }
+}
 
 impl Position {
     pub const fn new(n: u8) -> Self {

@@ -72,6 +72,7 @@ impl ChessState {
     }
 
     /// add a move to the front (this is a good move)
+    #[inline]
     pub fn add_move_front(
         &mut self,
         piece: Piece,
@@ -79,11 +80,12 @@ impl ChessState {
         direction: (i8, i8),
         index: usize,
     ) {
+        use PieceVariant::*;
         use PinType::*;
 
         // if we have a constraint on the squares to move to
         if let Some(limit) = &self.constraint {
-            if limit.binary_search_by(|&x| x.0.cmp(&target.0)).is_err() {
+            if limit.binary_search(&target).is_err() && piece.variant() != King {
                 return;
             }
         }
@@ -98,6 +100,7 @@ impl ChessState {
     }
 
     /// add a move to the back (this is an ok move)
+    #[inline]
     pub fn add_move_back(
         &mut self,
         piece: Piece,
@@ -105,10 +108,12 @@ impl ChessState {
         direction: (i8, i8),
         index: usize,
     ) {
+        use PieceVariant::*;
         use PinType::*;
+
         // if we have a constraint on the squares to move to
         if let Some(limit) = &self.constraint {
-            if limit.binary_search_by(|&x| x.0.cmp(&target.0)).is_err() {
+            if limit.binary_search(&target).is_err() && piece.variant() != King {
                 return;
             }
         }
@@ -118,7 +123,7 @@ impl ChessState {
                 return;
             }
         }
-        self.moves.push_front(ChessMove::new(piece.position, target));
+        self.moves.push_back(ChessMove::new(piece.position, target));
     }
 
     /// generate the moves based on the current board state
@@ -145,6 +150,8 @@ impl ChessState {
                 Knight => self.gen_static(piece, KnightMoves.get(), i),
             }
         }
+
+        self.gen_castling();
         dbg!(self);
     }
 

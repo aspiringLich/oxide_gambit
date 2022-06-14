@@ -9,7 +9,7 @@ pub struct ChessState {
     pub board: [PieceType; 64],            // board representation: square wise
     pub pieces: [Vec<Piece>; 2],           // board representation: piece wise
     pub turn: bool,                        // true for white's move, false for black
-    pub castling: [[bool; 2]; 2],          // kingside / queenside castling rights
+    pub castling: [bool; 4],               // kingside / queenside castling rights
     pub en_passant: Vec<Position>,         // store the possible target squares for en passant
     pub halfmove_clock: usize, // halfmove counter - when it reaches 100 the game is drawn
     pub fullmoves: usize,      // number of times black has moved essentially
@@ -27,7 +27,7 @@ impl Default for ChessState {
             // storing the team may be redundant but hey
             pieces: [vec![], vec![]],
             turn: true,
-            castling: [[false; 2]; 2],
+            castling: [false; 4],
             en_passant: default(),
             halfmove_clock: 0,
             fullmoves: 1,
@@ -110,6 +110,22 @@ impl Debug for ChessState {
         for piece in self.pieces[1].iter() {
             out += &piece_char(piece.variant);
         }
+
+        // castling rights
+        out += "\nCastling Rights: ";
+        for i in 0..4 {
+            let castling_chars: [char; 4] = ['q', 'k', 'Q', 'K'];
+            if self.castling[i] {
+                out.push(castling_chars[i])
+            }
+        }
+
+        // en passant
+        out += "\nEn Passant: ";
+        for pos in &self.en_passant {
+            out += &format!("({})", pos.0);
+        }
+
         out += "\n";
 
         // print out moves

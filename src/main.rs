@@ -64,11 +64,20 @@ impl Plugin for Holder {
     }
 }
 
+enum StartingPos {
+    Standard = 0,
+    Castling,
+}
+use StartingPos::*;
+
+const starting_pos: [&str; 2] = [
+    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ",
+    "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0",
+];
+
 fn main() {
     // let starting_pos: String =
     //     "rnbqkbnr/pppppppp/8/1N6/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1".to_string();
-    let starting_pos: String =
-        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string();
     // let starting_pos: String = "8/2b5/8/1B6/2R5/8/1P6/8 w KQkq - 0 1".to_string();
     // let state: State = State::from_FEN(&starting_pos);
     // dbg!(state);
@@ -84,7 +93,7 @@ fn main() {
         .add_startup_system(setup::setup)
         .add_plugin(Holder(Interactive))
         .add_plugin(Holder(Debug))
-        .insert_resource(ChessState::from_FEN(&starting_pos))
+        .insert_resource(ChessState::from_FEN(starting_pos[Castling as usize]))
         .insert_resource(Piece::default())
         .run();
 }
