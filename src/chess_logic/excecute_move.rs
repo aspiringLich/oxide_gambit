@@ -27,6 +27,9 @@ impl ChessState {
         use Option::None;
         use PieceVariant::*;
 
+        let turn = self.turn();
+
+        let mut promotion = false;
         // things we may need to update for specific pieces
         match piece.variant() {
             King => {
@@ -53,6 +56,7 @@ impl ChessState {
                 }
                 // promotion
                 else if pos.y() == [0, 7][self.turn()] {
+                    promotion = true;
                 }
             }
             _ => {}
@@ -81,6 +85,17 @@ impl ChessState {
         if piece.variant() == King {
             // check to make sure we dont need to move that rook too
             self.do_king_move(piece, pos);
+        } else if promotion {
+            eprintln!("PREMOTION REE");
+            self.move_piece_threat(piece, pos);
+            let to_queen = Piece::new(self.at(pos), pos);
+            self.add_threat_piece(Piece::new(PieceType(self.turn, Queen), pos));
+
+            let mut iter = self.pieces[turn].iter_mut();
+            let to_queen = iter.find(|&&mut x| x == to_queen).unwrap();
+            to_queen.variant = PieceType(to_queen.team(), Queen);
+
+            self.board[pos.int()] = to_queen.variant;
         } else {
             self.move_piece_threat(piece, pos);
         }

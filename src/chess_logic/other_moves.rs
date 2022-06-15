@@ -109,20 +109,24 @@ impl ChessState {
         if let Some(target) = self.en_passant {
             let dir = [1, -1][self.turn()];
 
-            let left = target.try_to((-1, dir)).unwrap();
-            let right = target.try_to((1, dir)).unwrap();
+            let left = target.try_to((-1, dir));
+            let right = target.try_to((1, dir));
 
-            let piece = Piece::new(self.at(left), left);
-            if piece.variant() == Pawn && piece.team() == self.turn {
-                let index = self.pieces[self.turn()].iter().position(|&x| x == piece).unwrap();
-                self.add_move_front(piece, target, (1, -dir), index);
+            if let Some(left) = left {
+                let piece = Piece::new(self.at(left), left);
+                if piece.variant() == Pawn && piece.team() == self.turn {
+                    let index = self.pieces[self.turn()].iter().position(|&x| x == piece).unwrap();
+                    self.add_move_front(piece, target, (1, -dir), index);
+                }
             }
 
-            let piece = Piece::new(self.at(right), right);
-            if piece.variant() == Pawn && piece.team() == self.turn {
+            if let Some(right) = right {
                 let piece = Piece::new(self.at(right), right);
-                let index = self.pieces[self.turn()].iter().position(|&x| x == piece).unwrap();
-                self.add_move_front(piece, target, (-1, -dir), index);
+                if piece.variant() == Pawn && piece.team() == self.turn {
+                    let piece = Piece::new(self.at(right), right);
+                    let index = self.pieces[self.turn()].iter().position(|&x| x == piece).unwrap();
+                    self.add_move_front(piece, target, (-1, -dir), index);
+                }
             }
         }
     }
