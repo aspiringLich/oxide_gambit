@@ -50,8 +50,13 @@ impl ChessState {
         self.board[piece.position.int()] = default();
 
         // update the pieces
-        self.pieces[self.turn as usize].iter_mut().find(|&&mut p| p == piece).unwrap().position =
-            pos;
+        // dbg!(&self.pieces);
+        // dbg!(piece);
+        self.pieces[piece.team() as usize]
+            .iter_mut()
+            .find(|&&mut p| p == piece)
+            .unwrap()
+            .position = pos;
     }
 
     /// moves a piece and does not update threatened squares
@@ -61,8 +66,7 @@ impl ChessState {
         self.board[piece.position.int()] = default();
 
         // update the pieces
-        self.pieces[self.turn as usize].iter_mut().find(|&&mut p| p == piece).unwrap().position =
-            pos;
+        self.pieces[self.turn()].iter_mut().find(|&&mut p| p == piece).unwrap().position = pos;
     }
 
     /// excecute the castle thing maybe if its valid
@@ -98,5 +102,28 @@ impl ChessState {
         self.move_piece_threat(rook, rook_target);
         // rook.position = rook_target;
         // self.add_threat_piece(rook);
+    }
+
+    pub fn gen_en_passant(&mut self) {
+        use PieceVariant::*;
+        if let Some(target) = self.en_passant {
+            let dir = [1, -1][self.turn()];
+
+            let left = target.try_to((-1, dir)).unwrap();
+            let right = target.try_to((1, dir)).unwrap();
+
+            let piece = Piece::new(self.at(left), left);
+            if piece.variant() == Pawn && piece.team() == self.turn {
+                let index = self.pieces[self.turn()].iter().position(|&x| x == piece).unwrap();
+                self.add_move_front(piece, target, (1, -dir), index);
+            }
+
+            let piece = Piece::new(self.at(right), right);
+            if piece.variant() == Pawn && piece.team() == self.turn {
+                let piece = Piece::new(self.at(right), right);
+                let index = self.pieces[self.turn()].iter().position(|&x| x == piece).unwrap();
+                self.add_move_front(piece, target, (-1, -dir), index);
+            }
+        }
     }
 }

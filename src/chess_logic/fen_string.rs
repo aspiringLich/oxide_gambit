@@ -73,7 +73,7 @@ impl ChessState {
                 // en passant
                 3 => {
                     if ch.is_ascii_digit() {
-                        state.en_passant.push(std_position_to_pos(prev_char, ch));
+                        state.en_passant = Some(std_position_to_pos(prev_char, ch));
                     }
                 }
                 // halfmove clock

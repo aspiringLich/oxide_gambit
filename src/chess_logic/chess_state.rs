@@ -10,7 +10,7 @@ pub struct ChessState {
     pub pieces: [Vec<Piece>; 2],           // board representation: piece wise
     pub turn: bool,                        // true for white's move, false for black
     pub castling: [bool; 4],               // kingside / queenside castling rights
-    pub en_passant: Vec<Position>,         // store the possible target squares for en passant
+    pub en_passant: Option<Position>,      // store the possible target squares for en passant
     pub halfmove_clock: usize, // halfmove counter - when it reaches 100 the game is drawn
     pub fullmoves: usize,      // number of times black has moved essentially
     pub moves: VecDeque<ChessMove>, // I GET TO USE A VECDEQUE also stores all the chess moves
@@ -105,10 +105,12 @@ impl Debug for ChessState {
         // print out piece representation
         for piece in self.pieces[0].iter() {
             out += &piece_char(piece.variant);
+            out += &format!("({:2})", piece.position.0);
         }
         out += "\n";
         for piece in self.pieces[1].iter() {
             out += &piece_char(piece.variant);
+            out += &format!("({:2})", piece.position.0);
         }
 
         // castling rights

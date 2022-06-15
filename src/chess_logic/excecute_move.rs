@@ -2,15 +2,29 @@ use std::mem::swap;
 
 use bevy::prelude::*;
 
-use crate::chess_logic::{piece_type::PieceVariant, Piece};
+use crate::chess_logic::{
+    piece_type::{PieceType, PieceVariant},
+    Piece,
+};
 
 use super::{ChessMove, ChessState, Position};
 
 pub const CASTLING_POS: [u8; 4] = [56, 63, 0, 7];
 
 impl ChessState {
+    pub fn remove_piece(&mut self, piece: Piece) {
+        // remove the pieces targetted squares
+        self.rem_threat_piece(piece);
+        // remove the targetted piece from the vector
+        let pieces = &mut self.pieces[!self.turn as usize];
+        // if you panic here something went wrong with syncing board and piece vecs
+        pieces.swap_remove(pieces.iter().position(|&p| p == piece).unwrap());
+        self.board[piece.position.int()] = default();
+    }
+
     /// Change state
     pub fn excecute_move(&mut self, piece: Piece, pos: Position) {
+        use Option::None;
         use PieceVariant::*;
 
         // things we may need to update for specific pieces
@@ -23,23 +37,22 @@ impl ChessState {
                 // try to do castling
             }
             Pawn => {
-                let turn = self.turn();
-
+                self.en_passant = None;
+                let diff = (piece.position.0 as i8 - pos.0 as i8).abs();
                 // if this was a double forward
-                if (piece.position.0 as i8 - pos.0 as i8).abs() == 16 {
-                    self.en_passant.push(piece.forward().unwrap());
-                } else {
-                    // remove en passant
-                    if piece.y() == [4, 3][self.turn()] {
-                        let rmv = self
-                            .en_passant
-                            .iter_mut()
-                            .position(|&mut x| x == piece.backward().unwrap());
-                        // dbg!(piece_backward());
-                        if let Some(rmv) = rmv {
-                            self.en_passant.swap_remove(rmv);
-                        }
-                    }
+                if diff == 16 {
+                    self.en_passant = Some(piece.forward().unwrap());
+                }
+                // if this was a capture and its unoccupied, its en passant!!
+                else if diff != 8 && !self.occupied(pos) {
+                    let target = pos.try_to([(0, 1), (0, -1)][self.turn()]).unwrap();
+                    let target_piece = Piece::new(self.at(target), target);
+                    dbg!(target_piece);
+                    self.move_piece_threat(target_piece, pos);
+                    //dbg!(&self);
+                }
+                // promotion
+                else if pos.y() == [0, 7][self.turn()] {
                 }
             }
             _ => {}
@@ -63,14 +76,6 @@ impl ChessState {
             let pieces = &mut self.pieces[!self.turn as usize];
             // if you panic here something went wrong with syncing board and piece vecs
             pieces.swap_remove(pieces.iter().position(|&p| p == remove).unwrap());
-
-            if remove.variant() == Pawn && pos.y() == [4, 3][self.opp_turn()] {
-                let rmv =
-                    self.en_passant.iter_mut().position(|&mut x| x == remove.backward().unwrap());
-                if let Some(rmv) = rmv {
-                    self.en_passant.swap_remove(rmv);
-                }
-            }
         }
 
         if piece.variant() == King {

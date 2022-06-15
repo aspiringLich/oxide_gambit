@@ -23,7 +23,7 @@ impl Default for PinType {
     }
 }
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 
 impl ChessState {
     pub fn checked(&self) -> bool {

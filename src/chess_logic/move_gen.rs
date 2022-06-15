@@ -152,6 +152,7 @@ impl ChessState {
         }
 
         self.gen_castling();
+        self.gen_en_passant();
         dbg!(self);
     }
 
@@ -238,8 +239,8 @@ impl ChessState {
         // capture
         let mut capture = |movement: (i8, i8)| {
             if let Some(pos) = piece.try_to(movement) {
-                if self.occupied(pos) && self.capturable(pos) {
-                    self.add_move_back(piece, pos, movement, index);
+                if (self.occupied(pos) && self.capturable(pos)) {
+                    self.add_move_front(piece, pos, movement, index);
                 }
             }
         };

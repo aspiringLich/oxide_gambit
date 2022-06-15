@@ -260,6 +260,10 @@ impl ChessState {
         use Moves::*;
         use PieceVariant::*;
 
+        if DEBUG {
+            eprint!("rmv piecey");
+            dbg!(piece);
+        }
         match piece.variant() {
             None => panic!("tried to remove threatenned squares of an invalid piece aaaa"),
             // sliding pieces
@@ -278,6 +282,7 @@ impl ChessState {
     /// add threatened squares in specified directions
     #[inline]
     fn rem_threat_sliding(&mut self, piece: Piece, movements: &Vec<(i8, i8)>) {
+        // dbg!(&self);
         for movement in movements {
             self.rem_threat_dir(piece, *movement);
         }
@@ -288,6 +293,9 @@ impl ChessState {
     fn rem_threat_static(&mut self, piece: Piece, movements: &Vec<(i8, i8)>) {
         for movement in movements {
             if let Some(pos) = piece.try_to(*movement) {
+                if DEBUG {
+                    eprintln!("rem stat: {}", pos.0);
+                }
                 self.rem_threat(piece, pos);
             }
         }
@@ -296,11 +304,16 @@ impl ChessState {
     /// add threatenned squares in one direction
     #[inline]
     fn rem_threat_dir(&mut self, piece: Piece, (x, y): (i8, i8)) {
+        if DEBUG {
+            eprint!("rem threat derr: ");
+            dbg!(piece);
+        }
         let mut itr = 1;
 
         while let Some(pos) = piece.position.try_to((x * itr, y * itr)) {
             if DEBUG {
                 eprintln!("rem dir: {}", pos.0);
+                // dbg!(self.at(pos));
             }
             self.rem_threat(piece, pos);
             if self.occupied(pos) {

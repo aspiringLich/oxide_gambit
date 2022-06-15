@@ -67,12 +67,14 @@ impl Plugin for Holder {
 enum StartingPos {
     Standard = 0,
     Castling,
+    EnPassant,
 }
 use StartingPos::*;
 
-const starting_pos: [&str; 2] = [
+const starting_pos: [&str; 3] = [
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ",
     "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0",
+    "rnbqkbnr/pppppppp/8/4P3/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 ",
 ];
 
 fn main() {
@@ -85,15 +87,17 @@ fn main() {
 
     App::new()
         .insert_resource(WindowDescriptor {
-            position: Some(Vec2::new(0.0, 0.0)),
+            // position: Some(Vec2::new(0.0, 0.0)),
             title: "Oxide Gambit".to_string(),
+            // width: 1920.0,
+            // height: 1080.0,
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup::setup)
         .add_plugin(Holder(Interactive))
         .add_plugin(Holder(Debug))
-        .insert_resource(ChessState::from_FEN(starting_pos[Castling as usize]))
+        .insert_resource(ChessState::from_FEN(starting_pos[EnPassant as usize]))
         .insert_resource(Piece::default())
         .run();
 }
