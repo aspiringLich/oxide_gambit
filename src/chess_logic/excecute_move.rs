@@ -24,6 +24,7 @@ impl ChessState {
 
     /// Change state
     pub fn excecute_move(&mut self, piece: Piece, pos: Position) {
+        // loop {}
         use Option::None;
         use PieceVariant::*;
 
@@ -86,7 +87,6 @@ impl ChessState {
             // check to make sure we dont need to move that rook too
             self.do_king_move(piece, pos);
         } else if promotion {
-            eprintln!("PREMOTION REE");
             self.move_piece_threat(piece, pos);
             let to_queen = Piece::new(self.at(pos), pos);
             self.add_threat_piece(Piece::new(PieceType(self.turn, Queen), pos));

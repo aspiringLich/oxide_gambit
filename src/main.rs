@@ -74,7 +74,7 @@ use StartingPos::*;
 
 const starting_pos: [&str; 4] = [
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ",
-    "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0",
+    "r3k2r/3q4/8/8/8/8/3Q4/R3K2R w KQkq - 0",
     "rnbqkbnr/pppppppp/8/4P3/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 ",
     "8/PPPPPPPP/K7/8/8/k7/pppppppp/8 w - - 0 ",
 ];
@@ -99,7 +99,7 @@ fn main() {
         .add_startup_system(setup::setup)
         .add_plugin(Holder(Interactive))
         .add_plugin(Holder(Debug))
-        .insert_resource(ChessState::from_FEN(starting_pos[Promotion as usize]))
+        .insert_resource(ChessState::from_FEN(starting_pos[Standard as usize]))
         .insert_resource(Piece::default())
         .run();
 }

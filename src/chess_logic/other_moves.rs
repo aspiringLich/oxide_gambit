@@ -1,7 +1,8 @@
 use crate::chess_logic::pin::PinType;
 
 use super::{
-    move_gen::ChessMove, piece, ChessState, Piece, PieceType, PieceVariant, Position, CASTLING_POS,
+    move_gen::ChessMove, piece, position::coord_to_index, threat::possible_threat, ChessState,
+    Piece, PieceType, PieceVariant, Position, CASTLING_POS,
 };
 use bevy::prelude::*;
 
@@ -10,15 +11,22 @@ impl ChessState {
     pub fn castling_scan(&self, pos: Position, dir: (i8, i8)) -> bool {
         let mut itr = 1;
         while let Some(new_pos) = pos.try_to((dir.0 * itr, dir.1 * itr)) {
-            if (self.occupied(new_pos) || self.threat_at(new_pos, !self.turn) > 0)
-                && !(new_pos.x() == 0 || new_pos.x() == 7)
-            {
+            if itr <= 2 {
+                if self.threat_at(new_pos, !self.turn) > 0 {
+                    return false;
+                }
+            }
+            if (self.occupied(new_pos)) {
                 eprint!("failed at");
                 dbg!(new_pos);
                 return false;
             }
             itr += 1;
+            if new_pos.x() == 1 || new_pos.x() == 6 {
+                break;
+            }
         }
+
         return true;
     }
 
@@ -69,6 +77,18 @@ impl ChessState {
         self.pieces[self.turn()].iter_mut().find(|&&mut p| p == piece).unwrap().position = pos;
     }
 
+    /// the piece at the selected dir
+    pub fn piece_at_dir(&self, pos: Position, dir: (i8, i8)) -> Option<Piece> {
+        let mut itr = 1;
+        while let Some(new_pos) = pos.try_to((dir.0 * itr, dir.1 * itr)) {
+            if self.occupied(new_pos) {
+                return Some(Piece::new(self.at(new_pos), new_pos));
+            }
+            itr += 1;
+        }
+        None
+    }
+
     /// excecute the castle thing maybe if its valid
     pub fn do_king_move(&mut self, piece: Piece, to: Position) {
         let diff = piece.position.0 as i8 - to.0 as i8;
@@ -98,8 +118,13 @@ impl ChessState {
         let mut rook = Piece::new(PieceType(self.turn, PieceVariant::Rook), rook_pos);
 
         self.move_piece_threat(piece, to);
-        self.threatened[self.turn()].squares[self.king(self.turn).int()] -= 1;
         self.move_piece_threat(rook, rook_target);
+
+        if let Some(piece) = self.piece_at_dir(self.king(self.turn), (-dir.0, 0)) {
+            if possible_threat(piece.variant(), coord_to_index(-dir.0, 0)) {
+                self.threatened[self.turn()].squares[self.king(self.turn).int()] -= 1;
+            }
+        }
         // rook.position = rook_target;
         // self.add_threat_piece(rook);
     }
