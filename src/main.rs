@@ -5,6 +5,7 @@ mod ai;
 mod chess_logic;
 mod interactive;
 mod render;
+pub mod marker;
 use bevy::prelude::*;
 use bevy_inspector_egui::WorldInspectorPlugin;
 use iyes_loopless::prelude::*;

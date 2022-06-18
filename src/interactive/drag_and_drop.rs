@@ -89,6 +89,7 @@ pub fn update_move(
 
         //let PressChessboard(pos) =
         state.excecute_move(*piece, *pos);
+        dbg!(&state);
 
         // despawn the pieces
         commands.entity(query.single_mut()).despawn_recursive();

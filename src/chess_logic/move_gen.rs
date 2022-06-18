@@ -153,7 +153,6 @@ impl ChessState {
 
         self.gen_castling();
         self.gen_en_passant();
-        dbg!(self);
     }
 
     /// generate the moves for a static set of movements

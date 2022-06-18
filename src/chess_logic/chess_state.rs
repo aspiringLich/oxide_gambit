@@ -5,6 +5,7 @@ use std::{collections::VecDeque, fmt::Debug};
 use super::{pin::PinType, ChessMove, Piece, PieceType, PieceVariant, Position, Threat};
 
 /// stores the state of the chessboard
+#[derive(Clone)]
 pub struct ChessState {
     pub board: [PieceType; 64],            // board representation: square wise
     pub pieces: [Vec<Piece>; 2],           // board representation: piece wise
@@ -145,6 +146,9 @@ impl Debug for ChessState {
                 out += "\n";
             }
         }
+
+        out += "\nBoard Evaluation: ";
+        out += &format!("{}", self.evaluate());
 
         // print out pieces
         f.write_str(&out)

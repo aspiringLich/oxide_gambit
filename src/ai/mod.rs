@@ -1,5 +1,8 @@
 pub mod ai_sys;
-pub mod app_state;
-
 pub use ai_sys::*;
-pub use app_state::*;
+
+pub mod minimax;
+pub use minimax::*;
+
+pub mod board_eval;
+pub use board_eval::*;

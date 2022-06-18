@@ -10,7 +10,7 @@ use crate::{
 
 use super::{ChessState, Moves, Piece, PieceType, Position};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Threat {
     pub squares: [u8; 64],
 }
