@@ -11,17 +11,17 @@ It probably will not be very good.
 <img align = "right" src = "img/example_screenshot.png" width = 40%>
 
 * Bevy
-* Chess working almost (real)
+* Chess working (real)
     * Fun fact chess is annoying
     * Move Generation
     * Threatened Square Updating
     * Pin Detection
     * Constraint Detection
+    * En Passant, Castling, etc.
 * italian cuisine interlaced into my software
 
 ## To-Do:
 
-* Fancy things like En Passant (coming soon)
 * Position Evaluation
     * Piece Counting
     * Board mask
