@@ -16,7 +16,7 @@ It probably will not be very good.
 |🔵|Maybe?|
 
 ## **Chess Logic** 
-| Feature  | Status |
+| <div style="width:300px">Feature</div> | Status |
 |-| :-: |
 |Move Generation|🟢|
 |Threatened Square Updating|🟢|
@@ -25,7 +25,7 @@ It probably will not be very good.
 |En Passant, Castling, Promotion, etc.|🟢|
 
 ## **Evaluation Function**
-| Feature  | Status |
+| <div style="width:300px">Feature</div>  | Status |
 |-| :-: |
 |Piece Counting|🟢|
 |Board Mask|🔴|
@@ -34,7 +34,7 @@ It probably will not be very good.
 |Gradient Descent Constant Tweaker|🔵|
 
 ## **Search Algorithm**
-| Feature  | Status |
+| <div style="width:300px">Feature</div>  | Status |
 |-| :-: |
 |Minimax|🟢|
 |Alpha Beta Pruning|🔴|
@@ -46,7 +46,7 @@ It probably will not be very good.
 |Quiessence Search|🔵|
 
 ## **To-Do:**
-| Feature  | Status |
+| <div style="width:300px">Feature</div>  | Status |
 |-| :-: |
 |Make It Good|🔴|
 
