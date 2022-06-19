@@ -41,7 +41,7 @@ It probably will not be very good.
 |Move Ordering|🟢|
 |Transposition Table|🔴|
 |Iterative Deepenning|🔵|
-|Nullmove pruning|🔵|
+|Nullmove pruning|🔴|
 |Late-Move Reduction|🔵|
 |Quiessence Search|🔵|
 
