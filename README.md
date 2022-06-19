@@ -6,37 +6,48 @@ This is a chess engine written in Rust.
 
 It probably will not be very good.
 
-## Features:
-
 <img align = "right" src = "img/example_screenshot.png" width = 40%>
 
-* Bevy
-* Chess working (real)
-    * Fun fact chess is annoying
-    * Move Generation
-    * Threatened Square Updating
-    * Pin Detection
-    * Constraint Detection
-    * En Passant, Castling, etc.
-* italian cuisine interlaced into my software
+|Icon|Meaning|
+|----------|--------|
+|🟢|Complete|
+|🟡|In Progress|
+|🔴|Planned|
+|🔵|Maybe?|
 
-## To-Do:
+## **Chess Logic** 
+| Feature  | Status |
+|-| :-: |
+|Move Generation|🟢|
+|Threatened Square Updating|🟢|
+|Pin Detection|🟢|
+|Constraint Detection|🟢|
+|En Passant, Castling, Promotion, etc.|🟢|
 
-* Position Evaluation
-    * Piece Counting
-    * Board mask
-    * Check threatenned Squares
-    * Be fast (preferred)
-* Search Algorithm
-    * Alpha Beta Pruning
-    * Move Orderring
-    * Transposition table (??)
-    * Iterative Deepenning
-    * Nullmove pruning (???)
-    * Late-Move Reduction
-    * Quiessence Search
-    * Find optimizations with fancier names
-* Auto constant tweaking for evaluation function something something gradient descent something something
-* make it good
+## **Evaluation Function**
+| Feature  | Status |
+|-| :-: |
+|Piece Counting|🟢|
+|Board Mask|🔴|
+|Threatened Squares|🔴|
+|Pawn Structure|🔴|
+|Gradient Descent Constant Tweaker|🔵|
+
+## **Search Algorithm**
+| Feature  | Status |
+|-| :-: |
+|Minimax|🟢|
+|Alpha Beta Pruning|🔴|
+|Move Ordering|🟢|
+|Transposition Table|🔴|
+|Iterative Deepenning|🔵|
+|Nullmove pruning|🔵|
+|Late-Move Reduction|🔵|
+|Quiessence Search|🔵|
+
+## **To-Do:**
+| Feature  | Status |
+|-| :-: |
+|Make It Good|🔴|
 
 `..default()`
