@@ -6,6 +6,8 @@ use super::{
 };
 use bevy::prelude::*;
 
+const DEBUG: bool = false;
+
 impl ChessState {
     /// scan these squares for castling availability
     pub fn castling_scan(&self, pos: Position, dir: (i8, i8)) -> bool {
@@ -17,8 +19,11 @@ impl ChessState {
                 }
             }
             if (self.occupied(new_pos)) {
-                eprint!("failed at");
-                dbg!(new_pos);
+                if DEBUG {
+                    eprint!("failed at");
+                    dbg!(new_pos);
+                }
+
                 return false;
             }
             itr += 1;

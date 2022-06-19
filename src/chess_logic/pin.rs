@@ -124,7 +124,9 @@ impl ChessState {
                         && x[self.opp_turn()].is_some())
                 })
                 .map(|(i, x)| (i, [x.1, x.0][self.turn()]));
-            dbg!(other_only.clone().collect::<Vec<_>>());
+            if DEBUG {
+                dbg!(other_only.clone().collect::<Vec<_>>());
+            }
 
             let mut itr = 0;
             let mut other_squares: Vec<Position> = vec![];
@@ -138,8 +140,10 @@ impl ChessState {
                         let check_threat = || possible_threat(piece.variant(), i);
 
                         if check_threat() {
-                            eprint!("threat found whee");
-                            dbg!(piece);
+                            if DEBUG {
+                                eprint!("threat found whee");
+                                dbg!(piece);
+                            }
                             if itr == 0 {
                                 other_squares = self
                                     .gen_sliding_dir_pos(piece, index_to_coord(i))
@@ -202,14 +206,18 @@ impl ChessState {
             }
             let their_piece = self.at(our_piece.try_to((dir.0 * itr, dir.1 * itr)).unwrap());
 
-            dbg!(their_piece);
+            if DEBUG {
+                dbg!(their_piece);
+            }
 
             // if theres a possible threat and the opposite team is closer
             if possible_threat(their_piece.variant(), i)
                 && distance[self.opp_turn()] > distance[self.turn()]
                 && their_piece.team() != self.turn
             {
-                dbg!(self.pieces[self.turn as usize][piece_index[self.turn as usize]]);
+                if DEBUG {
+                    dbg!(self.pieces[self.turn as usize][piece_index[self.turn as usize]]);
+                }
 
                 // get the piece we would like the modify
                 let turn = self.turn();

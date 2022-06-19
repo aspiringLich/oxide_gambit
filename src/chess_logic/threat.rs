@@ -26,7 +26,7 @@ pub fn possible_threat(variant: PieceVariant, dir: usize) -> bool {
     variant == Queen || variant == [Bishop, Rook][dir % 2]
 }
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 
 impl ChessState {
     /// remove threats from a range of positions

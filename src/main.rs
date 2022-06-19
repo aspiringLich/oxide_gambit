@@ -1,11 +1,11 @@
 #![allow(warnings)] // comment to enjoy 8 hours of fixing warnings
 #![feature(let_else)] // use for check_pins in pins.rs
+#![feature(into_future)] // implemented on ChessMove
 
 mod ai;
 mod chess_logic;
 mod interactive;
 mod render;
-pub mod marker;
 use bevy::prelude::*;
 use bevy_inspector_egui::WorldInspectorPlugin;
 use iyes_loopless::prelude::*;
@@ -50,13 +50,16 @@ impl Plugin for Holder {
                         .after("spawn squares")
                 )
                 .add_system(
-                    update_move
+                    attempt_move_piece
                         .run_on_event::<MouseEvent>()
                         .run_unless_resource_equals(Piece::default())
                         .label("move")
                         .after("window")
                         .before("select")
-                ),
+                )
+                .add_system(
+                    excecute_calc_task
+                    .after("move")),
             Debug => app
                 .add_plugin(WorldInspectorPlugin::new())
                 // .add_startup_system(init_threat_squares)
@@ -72,6 +75,8 @@ enum StartingPos {
     Promotion,
 }
 use StartingPos::*;
+
+use crate::ai::excecute_calc_task;
 
 const starting_pos: [&str; 4] = [
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ",

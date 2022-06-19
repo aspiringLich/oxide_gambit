@@ -22,7 +22,15 @@ impl ChessState {
         self.board[piece.position.int()] = default();
     }
 
-    /// Change state
+    /// change state with a chess move
+    pub fn excecute_chess_move(&mut self, chess_move: ChessMove) {
+        self.excecute_move(
+            Piece::new(self.at(chess_move.origin), chess_move.origin),
+            chess_move.target,
+        );
+    }
+
+    /// Change state with a piece moving to a position
     pub fn excecute_move(&mut self, piece: Piece, pos: Position) {
         // loop {}
         use Option::None;
@@ -31,6 +39,8 @@ impl ChessState {
         let turn = self.turn();
 
         let mut promotion = false;
+        self.en_passant = None;
+
         // things we may need to update for specific pieces
         match piece.variant() {
             King => {
@@ -41,7 +51,6 @@ impl ChessState {
                 // try to do castling
             }
             Pawn => {
-                self.en_passant = None;
                 let diff = (piece.position.0 as i8 - pos.0 as i8).abs();
                 // if this was a double forward
                 if diff == 16 {
@@ -49,10 +58,17 @@ impl ChessState {
                 }
                 // if this was a capture and its unoccupied, its en passant!!
                 else if diff != 8 && !self.occupied(pos) {
-                    let target = pos.try_to([(0, 1), (0, -1)][self.turn()]).unwrap();
+                    let mut target = pos.try_to([(0, 1), (0, -1)][self.turn()]).unwrap();
+
+                    // band aid?
+                    if !self.occupied(target) {
+                        target = pos.try_to([(0, 1), (0, -1)][!self.turn()]).unwrap();
+                    }
                     let target_piece = Piece::new(self.at(target), target);
+
                     dbg!(target_piece);
                     self.move_piece_threat(target_piece, pos);
+
                     //dbg!(&self);
                 }
                 // promotion

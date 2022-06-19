@@ -1,10 +1,11 @@
 use super::{mouse_event::cursor_square, MouseEvent, SelectedSquare, WindowInfo};
 use crate::{
+    ai::spawn_calc_task,
     chess_logic::*,
     interactive::highlight::toggle_target_squares,
     render::{setup::vec_from_posz, DrawnPiece},
 };
-use bevy::{core::Time, prelude::*, sprite::Sprite};
+use bevy::{core::Time, prelude::*, sprite::Sprite, tasks::AsyncComputeTaskPool};
 use bevy_prototype_debug_lines::DebugLines;
 
 pub fn toggle_select_square(
@@ -68,33 +69,48 @@ pub fn update_select_square(
     );
 }
 
-// update state and re-render pieces
-pub fn update_move(
+/// attempt to move a piece to a certain location
+pub fn attempt_move_piece(
     mut commands: Commands,
     mut state: ResMut<ChessState>,
-    piece: Res<Piece>,
-    mut mouse_ev: EventReader<MouseEvent>,
     mut query: Query<Entity, With<DrawnPiece>>,
     asset_server: Res<AssetServer>,
+    piece: Res<Piece>,
+    thread_pool: Res<AsyncComputeTaskPool>,
+    mut mouse_ev: EventReader<MouseEvent>,
 ) {
     use MouseEvent::*;
-
     if let Some(PressChessboard(pos)) = mouse_ev.iter().next() {
-        // if we cant find the move
-        if state.moves.iter().find(|m| m.origin == piece.position && m.target == *pos).is_none() {
+        // if the team is black or we cant find the move
+        let try_find_move =
+            &state.moves.iter().find(|m| m.origin == piece.position && m.target == *pos);
+        if state.team(piece.position) == false || try_find_move.is_none() {
             return;
         }
-
-        //dbg!(&state);
-
-        //let PressChessboard(pos) =
-        state.excecute_move(*piece, *pos);
-        dbg!(&state);
-
-        // despawn the pieces
-        commands.entity(query.single_mut()).despawn_recursive();
-
-        // re-spawn the pieces
-        state.render_pieces(&mut commands, &asset_server)
+        // update the move
+        let chess_move = *try_find_move.unwrap();
+        update_move(&mut commands, state.as_mut(), query, asset_server, chess_move);
+        // start the calculation for the ai's turn
+        let state = &state.as_ref();
+        spawn_calc_task(state, &mut commands, thread_pool);
     }
+}
+
+// update state and re-render pieces
+pub fn update_move(
+    commands: &mut Commands,
+    mut state: &mut ChessState,
+    mut query: Query<Entity, With<DrawnPiece>>,
+    asset_server: Res<AssetServer>,
+    chess_move: ChessMove,
+) {
+    //let PressChessboard(pos) =
+    state.excecute_chess_move(chess_move);
+    dbg!(&state);
+
+    // despawn the pieces
+    commands.entity(query.single_mut()).despawn_recursive();
+
+    // re-spawn the pieces
+    state.render_pieces(commands, &asset_server)
 }

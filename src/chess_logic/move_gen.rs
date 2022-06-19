@@ -91,7 +91,7 @@ impl ChessState {
         }
         // if the pin direction is not where were trying to move return
         if let Pinned(dir) = self.pinned_pieces[index] {
-            eprintln!("pinned");
+            // eprintln!("pinned");
             if direction != dir && direction != (-dir.0, -dir.1) {
                 return;
             }

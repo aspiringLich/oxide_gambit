@@ -51,6 +51,10 @@ impl ChessState {
             self.king_position[id.team() as usize] = Position(square);
         }
     }
+
+    pub fn piece_at(&self, pos: Position) -> Piece {
+        Piece::new(self.at(pos), pos)
+    }
 }
 
 impl Debug for ChessState {

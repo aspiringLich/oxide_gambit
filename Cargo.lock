@@ -2507,6 +2507,7 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy_prototype_debug_lines",
+ "futures-lite",
  "iyes_loopless",
  "lazy_static",
 ]

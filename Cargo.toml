@@ -13,7 +13,7 @@ bevy-inspector-egui = "0.11.0"
 bevy_prototype_debug_lines = "0.7"
 
 lazy_static = "1.4.0"
-
+futures-lite = "1.11.3"
 
 
 [workspace.metadata.dylint]
