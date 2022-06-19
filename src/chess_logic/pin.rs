@@ -2,7 +2,7 @@ use std::cmp::max;
 
 use bevy::prelude::default;
 
-use crate::chess_logic::position::index_to_coord;
+use crate::chess_logic::{piece_type::PieceType, position::index_to_coord};
 
 use super::{
     chess_state::ChessState,
@@ -201,10 +201,15 @@ impl ChessState {
             // find the next piece after this
             let our_piece = self.pieces[self.turn()][piece_index[self.turn()]];
             let mut itr = 1;
-            while !self.occupied(our_piece.try_to((dir.0 * itr, dir.1 * itr)).unwrap()) {
-                itr += 1
+            let mut try_pos = our_piece.try_to((dir.0 * itr, dir.1 * itr));
+            while try_pos.is_some() && !self.occupied(try_pos.unwrap()) {
+                itr += 1;
+                try_pos = our_piece.try_to((dir.0 * itr, dir.1 * itr));
             }
-            let their_piece = self.at(our_piece.try_to((dir.0 * itr, dir.1 * itr)).unwrap());
+            let their_piece: PieceType = match try_pos {
+                Some(n) => self.at(n),
+                _ => self.at(our_piece.try_to((dir.0 * (itr - 1), dir.1 * (itr - 1))).unwrap()),
+            };
 
             if DEBUG {
                 dbg!(their_piece);
