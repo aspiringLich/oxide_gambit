@@ -37,10 +37,10 @@ It probably will not be very good.
 | Feature  | Status |
 |-| :-: |
 |Minimax|🟢|
-|Alpha Beta Pruning|🔴|
+|Alpha Beta Pruning|🟢|
 |Move Ordering|🟢|
 |Transposition Table|🔴|
-|Iterative Deepenning|🔵|
+|Iterative Deepenning|🔴|
 |Nullmove pruning|🔴|
 |Late-Move Reduction|🔵|
 |Quiessence Search|🔵|
