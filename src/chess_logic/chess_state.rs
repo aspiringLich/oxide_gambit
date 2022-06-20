@@ -23,6 +23,8 @@ pub struct ChessState {
     pub pinned_pieces: Vec<PinType>,       // are any of the current pieces pinned
     pub queen: [u8; 2],
     pub endgame: bool,
+    pub inc_eval: f32,
+    pub static_eval: f32,
 }
 
 impl Default for ChessState {
@@ -43,11 +45,17 @@ impl Default for ChessState {
             pinned_pieces: default(),
             queen: [0; 2],
             endgame: false,
+            inc_eval: 0.0,
+            static_eval: 0.0,
         }
     }
 }
 
 impl ChessState {
+    pub fn evaluation(&self) -> f32 {
+        self.inc_eval + self.static_eval
+    }
+
     pub fn add_piece(&mut self, ch: char, square: u8) {
         use PieceVariant::*;
 
@@ -165,7 +173,7 @@ impl Debug for ChessState {
         }
 
         out += "\nBoard Evaluation: ";
-        out += &format!("{}", self.evaluate());
+        out += &format!("{}", self.evaluation());
 
         // print out pieces
         f.write_str(&out)

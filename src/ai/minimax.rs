@@ -49,7 +49,7 @@ impl ChessState {
         // dbg!(self);
         // if depth is zero, return the move
         if depth == 0 {
-            return self.evaluate();
+            return self.evaluation();
         }
 
         let mut max_val = f32::NEG_INFINITY;
@@ -59,9 +59,12 @@ impl ChessState {
 
         for &item in &self.moves {
             // negate as this will return the best move from the other team's point of view
-            let value = -self.make_move(item).minimax(depth - 1, info);
+            let mut value = self.make_move(item).minimax(depth - 1, info);
+            if !self.turn {
+                value = -value
+            }
 
-            // alpha beta pruning??
+            // alpha beta pruning
             if value < least_worst {
                 return value;
             }

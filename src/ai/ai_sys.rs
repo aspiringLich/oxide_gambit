@@ -6,7 +6,7 @@ use crate::{
 use bevy::{prelude::*, tasks::AsyncComputeTaskPool};
 use futures_lite::future;
 
-use super::{ComputeMove, DEBUG};
+use super::*;
 
 /// spawn an async task to calculate the next chess move
 pub fn spawn_calc_task(

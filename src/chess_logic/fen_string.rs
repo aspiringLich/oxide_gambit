@@ -88,6 +88,7 @@ impl ChessState {
         state.check_pins();
         state.move_gen();
         //dbg!(&state.moves);
+        dbg!(&state);
         return state;
     }
 }

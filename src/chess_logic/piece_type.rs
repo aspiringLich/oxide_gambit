@@ -2,11 +2,11 @@
 pub enum PieceVariant {
     None = 0,
     Pawn,
-    Rook,
     Knight,
     Bishop,
-    King,
+    Rook,
     Queen,
+    King,
 }
 
 impl Default for PieceVariant {

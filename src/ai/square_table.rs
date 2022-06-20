@@ -1,3 +1,4 @@
+use super::*;
 use crate::*;
 
 // piece square tables stolen from chessprogramming.org
@@ -39,8 +40,6 @@ const KING_END_TABLE_RAW: [i8; 64] = [
     10, 30, 20,
 ];
 
-const SQUARE_MULTIPLIER: f32 = 1.0 / 100.0;
-
 fn generate_from_table(table: [i8; 64]) -> [f32; 64] {
     let mut out: [f32; 64] = [0.0; 64];
     for i in 0..64 {
@@ -73,8 +72,10 @@ pub fn initialize_piece_tables() {
 
 impl Piece {
     pub fn get_square_value(&self, endgame: bool) -> f32 {
+        use PieceVariant::*;
+
         let pos = if self.team() { Position((7 - self.y()) * 8 + self.x()) } else { self.position };
-        return match self.variant() {
+        let out = match self.variant() {
             Pawn => PAWN_TABLE[pos.int()],
             Knight => KNIGHT_TABLE[pos.int()],
             Bishop => BISHOP_TABLE[pos.int()],
@@ -82,6 +83,8 @@ impl Piece {
             Queen => QUEEN_TABLE[pos.int()],
             King if !endgame => KING_MID_TABLE[pos.int()],
             King => KING_END_TABLE[pos.int()],
+            None => 0.0,
         };
+        return if self.team() { out } else { -out };
     }
 }

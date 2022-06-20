@@ -112,8 +112,9 @@ impl ChessState {
         }
 
         // if this is a capture
+        let mut remove = default();
         if self.occupied(pos) && self.capturable(pos) {
-            let remove = Piece::new(self.board[pos.int()], pos);
+            remove = Piece::new(self.board[pos.int()], pos);
             // remove the pieces targetted squares
             self.rem_threat_piece(remove);
             // remove the targetted piece from the vector
@@ -154,5 +155,12 @@ impl ChessState {
 
         self.check_pins();
         self.move_gen();
+
+        // run update evaluation function
+        self.update_evaluation(
+            piece,
+            pos,
+            if remove.variant() == PieceVariant::None { None } else { Some(remove) },
+        )
     }
 }

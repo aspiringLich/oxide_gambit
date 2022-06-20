@@ -5,7 +5,7 @@ use crate::chess_logic::{ChessState, PieceType, PieceVariant, Position};
 use super::{vec_from_coord, DrawnPiece};
 
 // piece characters from index
-pub const PIECE_CHAR: [char; 6] = ['p', 'r', 'n', 'b', 'k', 'q'];
+pub const PIECE_CHAR: [char; 6] = ['p', 'n', 'b', 'r', 'q', 'k'];
 
 impl PieceType {
     // return the image path of the given piece
