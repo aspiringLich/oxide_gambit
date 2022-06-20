@@ -7,11 +7,13 @@ use super::{pin::PinType, ChessMove, Piece, PieceType, PieceVariant, Position, T
 /// stores the state of the chessboard
 #[derive(Clone)]
 pub struct ChessState {
-    pub board: [PieceType; 64],            // board representation: square wise
-    pub pieces: [Vec<Piece>; 2],           // board representation: piece wise
-    pub turn: bool,                        // true for white's move, false for black
-    pub castling: [bool; 4],               // kingside / queenside castling rights
-    pub en_passant: Option<Position>,      // store the possible target squares for en passant
+    // vv hashable
+    pub board: [PieceType; 64],       // board representation: square wise
+    pub pieces: [Vec<Piece>; 2],      // board representation: piece wise
+    pub turn: bool,                   // true for white's move, false for black
+    pub castling: [bool; 4],          // kingside / queenside castling rights
+    pub en_passant: Option<Position>, // store the possible target squares for en passant
+    // vv unhashable
     pub halfmove_clock: usize, // halfmove counter - when it reaches 100 the game is drawn
     pub fullmoves: usize,      // number of times black has moved essentially
     pub moves: VecDeque<ChessMove>, // I GET TO USE A VECDEQUE also stores all the chess moves
@@ -19,6 +21,8 @@ pub struct ChessState {
     pub threatened: [Threat; 2],           // which squares are under attack aaa
     pub king_position: [Position; 2],      // where 2 find kings
     pub pinned_pieces: Vec<PinType>,       // are any of the current pieces pinned
+    pub queen: [u8; 2],
+    pub endgame: bool,
 }
 
 impl Default for ChessState {
@@ -37,19 +41,28 @@ impl Default for ChessState {
             threatened: default(),
             king_position: default(),
             pinned_pieces: default(),
+            queen: [0; 2],
+            endgame: false,
         }
     }
 }
 
 impl ChessState {
     pub fn add_piece(&mut self, ch: char, square: u8) {
+        use PieceVariant::*;
+
         let id = PieceType::from_char(ch);
         self.board[square as usize] = id.clone();
-        self.pieces[id.team() as usize].push(Piece::new(id, Position(square)));
 
-        if id.variant() == PieceVariant::King {
-            self.king_position[id.team() as usize] = Position(square);
-        }
+        let team = id.team() as usize;
+
+        self.pieces[team].push(Piece::new(id, Position(square)));
+
+        match id.variant() {
+            King => self.king_position[team] = Position(square),
+            Queen => self.queen[team] += 1,
+            _ => {}
+        };
     }
 
     pub fn piece_at(&self, pos: Position) -> Piece {

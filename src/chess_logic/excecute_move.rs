@@ -30,6 +30,29 @@ impl ChessState {
         );
     }
 
+    pub fn check_endgame(&mut self) {
+        use crate::PieceVariant::*;
+
+        if !self.endgame {
+            if self.queen == [0, 0] {
+                self.endgame = true;
+                return;
+            }
+            let mut flag = false;
+            let pieces: &Vec<Piece> =
+                unsafe { std::mem::transmute(&self.pieces[self.turn as usize]) };
+            for piece in pieces {
+                match piece.variant() {
+                    Rook => return,
+                    Bishop | Knight if !flag => flag = true,
+                    Bishop | Knight if flag => return,
+                    _ => {}
+                }
+            }
+            self.endgame = true;
+        }
+    }
+
     /// Change state with a piece moving to a position
     pub fn excecute_move(&mut self, piece: Piece, pos: Position) {
         // loop {}
@@ -97,6 +120,17 @@ impl ChessState {
             let pieces = &mut self.pieces[!self.turn as usize];
             // if you panic here something went wrong with syncing board and piece vecs
             pieces.swap_remove(pieces.iter().position(|&p| p == remove).unwrap());
+
+            // extra things to do based on the piece type
+            let team = remove.team() as usize;
+            match remove.variant() {
+                Queen => {
+                    self.queen[team] -= 1;
+                    self.check_endgame()
+                }
+                Rook => self.check_endgame(),
+                _ => {}
+            };
         }
 
         if piece.variant() == King {

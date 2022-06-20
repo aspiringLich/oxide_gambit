@@ -16,7 +16,7 @@ It probably will not be very good.
 |🔵|Maybe?|
 
 ## **Chess Logic** 
-| <div style="width:300em">Feature</div> | Status |
+| Feature | Status |
 |-| :-: |
 |Move Generation|🟢|
 |Threatened Square Updating|🟢|
@@ -28,7 +28,7 @@ It probably will not be very good.
 | Feature | Status |
 |-| :-: |
 |Piece Counting|🟢|
-|Board Mask|🔴|
+|Board Mask|🟢|
 |Threatened Squares|🔴|
 |Pawn Structure|🔴|
 |Gradient Descent Constant Tweaker|🔵|
@@ -42,6 +42,7 @@ It probably will not be very good.
 |Transposition Table|🔴|
 |Iterative Deepenning|🔴|
 |Nullmove pruning|🔴|
+|Opening Book|🔴|
 |Late-Move Reduction|🔵|
 |Quiessence Search|🔵|
 

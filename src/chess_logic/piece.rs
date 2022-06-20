@@ -33,44 +33,53 @@ impl Debug for Piece {
 }
 
 impl Piece {
+    #[inline]
     pub fn new(variant: PieceType, position: Position) -> Self {
         Piece { variant, position }
     }
 
+    #[inline]
     pub const fn team(&self) -> bool {
         self.variant.team()
     }
 
+    #[inline]
     pub const fn variant(&self) -> PieceVariant {
         self.variant.variant()
     }
 
     // unchecked return y position
+    #[inline]
     pub const fn y(&self) -> u8 {
         self.position.y()
     }
 
     // unchecked return x position
+    #[inline]
     pub const fn x(&self) -> u8 {
         self.position.x()
     }
 
     // try to move in a way movement specifies
+    #[inline]
     pub const fn try_to(&self, movement: (i8, i8)) -> Option<Position> {
         self.position.try_to(movement)
     }
 
     /// pieces position relative from a new position
+    #[inline]
     pub const fn rel_from(&self, pos: Position) -> (i8, i8) {
         self.position.rel_from(pos)
     }
 
     /// the position one forward from piece
+    #[inline]
     pub const fn forward(&self) -> Option<Position> {
         self.try_to([(0, -1), (0, 1)][self.team() as usize])
     }
 
     /// the position one backward from piece
+    #[inline]
     pub const fn backward(&self) -> Option<Position> {
         self.try_to([(0, 1), (0, -1)][self.team() as usize])
     }

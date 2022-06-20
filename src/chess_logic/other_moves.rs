@@ -37,6 +37,8 @@ impl ChessState {
 
     /// generate moves for castling
     pub fn gen_castling(&mut self) {
+        // dbg!(&self);
+        // dbg!(self.king_position);
         if self.checked() {
             return;
         }
