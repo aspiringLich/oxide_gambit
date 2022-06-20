@@ -59,6 +59,18 @@ lazy_static! {
     static ref KING_END_TABLE: [f32; 64] = generate_from_table(KING_END_TABLE_RAW);
 }
 
+/// initialize all the piece tables
+pub fn initialize_piece_tables() {
+    use lazy_static::initialize;
+    initialize(&PAWN_TABLE);
+    initialize(&KNIGHT_TABLE);
+    initialize(&BISHOP_TABLE);
+    initialize(&ROOK_TABLE);
+    initialize(&QUEEN_TABLE);
+    initialize(&KING_MID_TABLE);
+    initialize(&KING_END_TABLE);
+}
+
 impl Piece {
     pub fn get_square_value(&self, endgame: bool) -> f32 {
         let pos = if self.team() { Position((7 - self.y()) * 8 + self.x()) } else { self.position };
