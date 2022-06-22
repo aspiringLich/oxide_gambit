@@ -1,14 +1,24 @@
+use std::f32::NEG_INFINITY;
+
 use bevy::prelude::default;
 
 use crate::chess_logic::*;
 
 struct PruningInfo {
-    least_worst: [f32; 2], // the "alpha" and "beta", the least worst move of any given node found so far
+    alpha: f32,
+    beta: f32,
 }
 
 impl Default for PruningInfo {
     fn default() -> Self {
-        Self { least_worst: [f32::INFINITY; 2] }
+        Self { alpha: NEG_INFINITY, beta: f32::INFINITY }
+    }
+}
+
+impl PruningInfo {
+    /// update the necessary info for the next depth
+    pub fn update(&self) -> Self {
+        Self { alpha: -self.beta, beta: -self.alpha }
     }
 }
 
@@ -25,60 +35,57 @@ impl ChessState {
 
     /// the top level algorithm that will get the chess move as well
     pub fn run_minimax(&self, depth: usize) -> ChessMove {
-        let mut max_index = 0;
-        let mut max_val = f32::NEG_INFINITY;
+        let mut best_index = 0;
+        let mut best_score = f32::NEG_INFINITY;
 
         assert!(depth >= 1);
 
         let mut info: PruningInfo = default();
 
         for (i, item) in self.moves.iter().enumerate() {
-            // negate as this will return the best move from the other team's point of view
-            let value = -self.make_move(*item).minimax(depth - 1, &mut info);
-            if value > max_val {
-                max_val = value;
-                max_index = i;
+            let score = -self.make_move(*item).minimax(depth - 1, info.update());
+
+            if score > best_score {
+                best_index = i;
+                best_score = score;
+                if score > info.alpha {
+                    info.alpha = score;
+                }
             }
-            // dbg!(max_val);
         }
-        return self.moves[max_index];
+        eprintln!(
+            "Chose move with evaluation of {} ({:+})",
+            best_score,
+            self.evaluation() + best_score
+        );
+        return self.moves[best_index];
     }
 
     /// run the minimax algorithm on a chess state to a specified depth
-    fn minimax(&self, depth: usize, info: &mut PruningInfo) -> f32 {
+    fn minimax(&self, depth: usize, mut info: PruningInfo) -> f32 {
         // dbg!(self);
         // if depth is zero, return the move
         if depth == 0 {
-            return self.evaluation();
+            let out = self.evaluation();
+            return if self.turn { out } else { -out };
         }
 
-        let mut max_val = f32::NEG_INFINITY;
-        let mut min_val = f32::INFINITY;
-
-        let least_worst = info.least_worst[self.turn()];
+        let mut best_score: f32 = NEG_INFINITY;
 
         for &item in &self.moves {
-            // negate as this will return the best move from the other team's point of view
-            let mut value = self.make_move(item).minimax(depth - 1, info);
-            if !self.turn {
-                value = -value
-            }
+            let score = -self.make_move(item).minimax(depth - 1, info.update());
 
-            // alpha beta pruning
-            if value < least_worst {
-                return value;
+            if score >= info.beta {
+                return info.beta;
             }
-
-            if value > max_val {
-                max_val = value;
-            } else if value < min_val {
-                min_val = value;
+            if score > best_score {
+                best_score = score;
+                if score > info.alpha {
+                    info.alpha = score;
+                }
             }
         }
 
-        if min_val < info.least_worst[self.turn()] {
-            info.least_worst[self.turn()] = min_val;
-        }
-        return max_val;
+        return info.alpha;
     }
 }

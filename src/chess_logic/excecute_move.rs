@@ -89,7 +89,7 @@ impl ChessState {
                     }
                     let target_piece = Piece::new(self.at(target), target);
 
-                    dbg!(target_piece);
+                    // dbg!(target_piece);
                     self.move_piece_threat(target_piece, pos);
 
                     //dbg!(&self);

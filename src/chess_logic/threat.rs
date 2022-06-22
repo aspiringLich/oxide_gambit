@@ -12,7 +12,7 @@ use super::{ChessState, Moves, Piece, PieceType, Position};
 
 #[derive(Debug, Clone)]
 pub struct Threat {
-    pub squares: [u8; 64],
+    pub squares: [i8; 64],
 }
 
 impl Default for Threat {
@@ -181,7 +181,7 @@ impl ChessState {
         }
     }
 
-    pub fn threat_at(&self, pos: Position, team: bool) -> u8 {
+    pub fn threat_at(&self, pos: Position, team: bool) -> i8 {
         self.threatened[team as usize].squares[pos.int()]
     }
 

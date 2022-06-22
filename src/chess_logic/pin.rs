@@ -124,6 +124,15 @@ impl ChessState {
                         && x[self.opp_turn()].is_some())
                 })
                 .map(|(i, x)| (i, [x.1, x.0][self.turn()]));
+            let closer = zip
+                .clone()
+                .filter(|(i, x)| {
+                    let x = [x.0, x.1];
+                    x[self.turn()].is_some()
+                        && x[self.opp_turn()].is_some()
+                        && x[self.turn()].unwrap().0 < x[self.opp_turn()].unwrap().0
+                })
+                .map(|(i, x)| (i, [x.1, x.0][self.turn()]));
             if DEBUG {
                 dbg!(other_only.clone().collect::<Vec<_>>());
             }
@@ -133,7 +142,7 @@ impl ChessState {
 
             // if were not being threatenned by a knight...
             if knight_index == usize::MAX {
-                for item in other_only {
+                for item in other_only.chain(closer) {
                     if let (i, Some(item)) = item {
                         let piece = self.pieces[self.opp_turn()][item.0];
                         let pos = piece.position;
@@ -198,37 +207,37 @@ impl ChessState {
             let distance = [closest_black.1, closest_white.1];
             let dir = index_to_coord(8 - i);
 
-            // find the next piece after this
-            let our_piece = self.pieces[self.turn()][piece_index[self.turn()]];
-            let mut itr = 1;
-            let mut try_pos = our_piece.try_to((dir.0 * itr, dir.1 * itr));
-            while try_pos.is_some() && !self.occupied(try_pos.unwrap()) {
-                itr += 1;
-                try_pos = our_piece.try_to((dir.0 * itr, dir.1 * itr));
-            }
-            let their_piece: PieceType = match try_pos {
-                Some(n) => self.at(n),
-                _ => self.at(our_piece.try_to((dir.0 * (itr - 1), dir.1 * (itr - 1))).unwrap()),
-            };
+            // if the other piece is closer, we have a pin
+            if distance[self.opp_turn()] > distance[self.turn()] {
+                // find the next piece after this
+                let our_piece = self.pieces[self.turn()][piece_index[self.turn()]];
+                let mut itr = 1;
+                let mut try_pos = our_piece.try_to((dir.0 * itr, dir.1 * itr));
+                while try_pos.is_some() && !self.occupied(try_pos.unwrap()) {
+                    itr += 1;
+                    try_pos = our_piece.try_to((dir.0 * itr, dir.1 * itr));
+                }
+                let their_piece: PieceType = match try_pos {
+                    Some(n) => self.at(n),
+                    _ => self.at(our_piece.try_to((dir.0 * (itr - 1), dir.1 * (itr - 1))).unwrap()),
+                };
 
-            if DEBUG {
-                dbg!(their_piece);
-            }
-
-            // if theres a possible threat and the opposite team is closer
-            if possible_threat(their_piece.variant(), i)
-                && distance[self.opp_turn()] > distance[self.turn()]
-                && their_piece.team() != self.turn
-            {
                 if DEBUG {
-                    dbg!(self.pieces[self.turn as usize][piece_index[self.turn as usize]]);
+                    dbg!(their_piece);
                 }
 
-                // get the piece we would like the modify
-                let turn = self.turn();
+                // if theres a possible threat and the opposite team is closer
+                if possible_threat(their_piece.variant(), i) && their_piece.team() != self.turn {
+                    if DEBUG {
+                        dbg!(self.pieces[self.turn as usize][piece_index[self.turn as usize]]);
+                    }
 
-                use PinType::*;
-                self.pinned_pieces[piece_index[turn]] = Pinned(index_to_coord(i));
+                    // get the piece we would like the modify
+                    let turn = self.turn();
+
+                    use PinType::*;
+                    self.pinned_pieces[piece_index[turn]] = Pinned(index_to_coord(i));
+                }
             }
         }
     }
