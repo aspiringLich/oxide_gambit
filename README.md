@@ -29,7 +29,7 @@ It probably will not be very good.
 |-| :-: |
 |Piece Counting|🟢|
 |Board Mask|🟢|
-|Threatened Squares|🔴|
+|Threatened Squares|🟢|
 |Pawn Structure|🔴|
 |Gradient Descent Constant Tweaker|🔵|
 
