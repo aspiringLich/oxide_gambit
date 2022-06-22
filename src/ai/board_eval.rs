@@ -11,19 +11,58 @@ impl Piece {
 }
 
 impl ChessState {
+    /// is this piece threatened
+    pub fn threatened(&self, piece: Piece) -> bool {
+        self.threatened[!piece.team() as usize].squares[piece.position.int()] > 0
+    }
+
+    /// is this piece protected
+    pub fn protected(&self, piece: Piece) -> bool {
+        self.threatened[piece.team() as usize].squares[piece.position.int()] > 0
+    }
+
+    /// regenerate the static evaluation and output the eval
+    pub fn get_static_evaluation(&self) -> f32 {
+        let mut static_eval = 0.0;
+        // go through white and if a piece is threatened but not protected, or vice versa do smth
+        for piece in &self.pieces[1] {
+            let threatened = self.threatened(*piece);
+            let protected = self.protected(*piece);
+            if threatened ^ protected {
+                match threatened {
+                    true => static_eval -= piece.value() * THREATENED_WEIGHT,
+                    false => static_eval += piece.value() * PROTECTED_WEIGHT,
+                }
+            }
+        }
+        // dbg!(static_eval);
+        // same but flipped
+        for piece in &self.pieces[0] {
+            let threatened = self.threatened(*piece);
+            let protected = self.protected(*piece);
+            if threatened ^ protected {
+                match threatened {
+                    true => static_eval -= piece.value() * THREATENED_WEIGHT,
+                    false => static_eval += piece.value() * PROTECTED_WEIGHT,
+                }
+            }
+        }
+        // dbg!(static_eval);
+        return self.inc_eval + static_eval;
+    }
+
     pub fn init_evaluation(&mut self) {
         use PieceVariant::*;
 
         // check for checkmate and stalemate
         if self.moves.len() == 0 {
             if self.checked() {
-                self.static_eval = f32::NEG_INFINITY;
-                return;
+                self.inc_eval = f32::NEG_INFINITY;
             } else {
-                self.static_eval = 0.0;
                 self.inc_eval = 0.0;
-                return;
             }
+            self.done = true;
+            return;
         }
 
         for i in 0..=1 {
@@ -41,13 +80,12 @@ impl ChessState {
         // check for checkmate and stalemate
         if self.moves.len() == 0 {
             if self.checked() {
-                self.static_eval = f32::NEG_INFINITY;
-                return;
+                self.inc_eval = f32::NEG_INFINITY;
             } else {
-                self.static_eval = 0.0;
                 self.inc_eval = 0.0;
-                return;
             }
+            self.done = true;
+            return;
         }
 
         // get rid of the piece value and square value for a removed piece

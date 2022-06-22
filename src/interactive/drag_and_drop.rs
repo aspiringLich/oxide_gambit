@@ -84,7 +84,8 @@ pub fn attempt_move_piece(
         // if the team is black or we cant find the move
         let try_find_move =
             &state.moves.iter().find(|m| m.origin == piece.position && m.target == *pos);
-        if state.team(piece.position) == false || try_find_move.is_none() {
+        // TODO: add back check to make sure its not black
+        if try_find_move.is_none() {
             return;
         }
         // update the move

@@ -124,15 +124,6 @@ impl ChessState {
                         && x[self.opp_turn()].is_some())
                 })
                 .map(|(i, x)| (i, [x.1, x.0][self.turn()]));
-            let closer = zip
-                .clone()
-                .filter(|(i, x)| {
-                    let x = [x.0, x.1];
-                    x[self.turn()].is_some()
-                        && x[self.opp_turn()].is_some()
-                        && x[self.turn()].unwrap().0 < x[self.opp_turn()].unwrap().0
-                })
-                .map(|(i, x)| (i, [x.1, x.0][self.turn()]));
             if DEBUG {
                 dbg!(other_only.clone().collect::<Vec<_>>());
             }
@@ -142,7 +133,7 @@ impl ChessState {
 
             // if were not being threatenned by a knight...
             if knight_index == usize::MAX {
-                for item in other_only.chain(closer) {
+                for item in other_only {
                     if let (i, Some(item)) = item {
                         let piece = self.pieces[self.opp_turn()][item.0];
                         let pos = piece.position;
@@ -157,9 +148,6 @@ impl ChessState {
                                 other_squares = self
                                     .gen_sliding_dir_pos(piece, index_to_coord(i))
                                     .unwrap_or(vec![]);
-                                if other_squares.is_empty() {
-                                    continue;
-                                }
                                 other_squares.push(pos);
                             }
                             itr += 1;
@@ -181,8 +169,10 @@ impl ChessState {
                 if itr == 1 {
                     other_squares.sort_by(|&a, &b| a.0.cmp(&b.0));
                     self.constraint = Some(other_squares);
+                    return;
                 } else if itr > 1 {
                     self.constraint = Some(vec![]);
+                    return;
                 }
             // knight moment
             } else {
@@ -190,11 +180,33 @@ impl ChessState {
                     eprintln!("knight moment")
                 }
                 self.constraint = Some(vec![self.pieces[self.opp_turn()][knight_index].position]);
+                return;
             }
 
             if DEBUG {
                 dbg!(itr);
                 dbg!(&self.constraint);
+            }
+
+            // were still here, just keep scannin
+            // TODO: make not bad?
+            for dir in 0..8 {
+                if let Some(piece) = self.piece_at_dir(self.king(self.turn), index_to_coord(dir)) {
+                    if possible_threat(self.variant(piece.position), dir) {
+                        other_squares =
+                            self.gen_sliding_dir_pos(piece, index_to_coord(dir)).unwrap_or(vec![]);
+                        if other_squares.is_empty() {
+                            continue;
+                        }
+                        if DEBUG {
+                            dbg!("saldfjaslf");
+                        }
+                        other_squares.push(piece.position);
+                        other_squares.sort_by(|&a, &b| a.0.cmp(&b.0));
+                        self.constraint = Some(other_squares);
+                        return;
+                    }
+                }
             }
         }
 

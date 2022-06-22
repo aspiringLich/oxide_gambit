@@ -56,7 +56,7 @@ impl ChessState {
         eprintln!(
             "Chose move with evaluation of {} ({:+})",
             best_score,
-            self.evaluation() + best_score
+            self.get_static_evaluation() + best_score
         );
         return self.moves[best_index];
     }
@@ -66,7 +66,7 @@ impl ChessState {
         // dbg!(self);
         // if depth is zero, return the move
         if depth == 0 {
-            let out = self.evaluation();
+            let out = self.get_static_evaluation();
             return if self.turn { out } else { -out };
         }
 

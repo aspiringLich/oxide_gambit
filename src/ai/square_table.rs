@@ -43,7 +43,7 @@ const KING_END_TABLE_RAW: [i8; 64] = [
 fn generate_from_table(table: [i8; 64]) -> [f32; 64] {
     let mut out: [f32; 64] = [0.0; 64];
     for i in 0..64 {
-        out[i] = table[i] as f32 * SQUARE_MULTIPLIER;
+        out[i] = table[i] as f32 * SQUARE_WEIGHT;
     }
     return out;
 }

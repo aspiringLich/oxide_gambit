@@ -24,7 +24,7 @@ pub struct ChessState {
     pub queen: [u8; 2],
     pub endgame: bool,
     pub inc_eval: f32,
-    pub static_eval: f32,
+    pub done: bool,
 }
 
 impl Default for ChessState {
@@ -46,16 +46,12 @@ impl Default for ChessState {
             queen: [0; 2],
             endgame: false,
             inc_eval: 0.0,
-            static_eval: 0.0,
+            done: false,
         }
     }
 }
 
 impl ChessState {
-    pub fn evaluation(&self) -> f32 {
-        self.inc_eval + self.static_eval
-    }
-
     pub fn add_piece(&mut self, ch: char, square: u8) {
         use PieceVariant::*;
 
@@ -173,7 +169,7 @@ impl Debug for ChessState {
         }
 
         out += "\nBoard Evaluation: ";
-        out += &format!("{}", self.evaluation());
+        out += &format!("{}", self.get_static_evaluation());
 
         // print out pieces
         f.write_str(&out)

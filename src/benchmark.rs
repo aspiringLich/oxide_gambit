@@ -10,6 +10,7 @@ mod benchmarks {
     /// ~6.7 ms     - Alpha Beta Pruning
     /// ~7.8 ms     - Square Tables
     /// ~7.1 ms     - Incremental Evaluation
+    /// ~3.4 ms     - Fixed Alpha Beta Pruning lmao
     #[bench]
     fn bench_minimax(b: &mut Bencher) {
         let state = ChessState::from_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ");
