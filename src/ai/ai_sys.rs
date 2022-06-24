@@ -18,7 +18,7 @@ pub fn spawn_calc_task(
         eprintln!("Started Compute Task...");
     }
     let copy = state.clone();
-    let task = thread_pool.spawn(async move { copy.run_minimax(3) });
+    let task = thread_pool.spawn(async move { copy.run_minimax(4) });
     commands.spawn().insert(ComputeMove(task));
 }
 

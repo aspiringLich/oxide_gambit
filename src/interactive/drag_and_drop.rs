@@ -1,6 +1,6 @@
 use super::{mouse_event::cursor_square, MouseEvent, SelectedSquare, WindowInfo};
 use crate::{
-    ai::spawn_calc_task,
+    ai::ai_sys::spawn_calc_task,
     chess_logic::*,
     interactive::highlight::toggle_target_squares,
     render::{setup::vec_from_posz, DrawnPiece},

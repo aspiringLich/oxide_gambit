@@ -3,6 +3,8 @@ extern crate test;
 
 #[cfg(test)]
 mod benchmarks {
+    use crate::ai::square_table::initialize_piece_tables;
+
     use super::*;
     use test::Bencher;
 
@@ -16,7 +18,7 @@ mod benchmarks {
         let state = ChessState::from_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ");
 
         // initialize the piece square tables
-        ai::initialize_piece_tables();
+        initialize_piece_tables();
 
         b.iter(|| {
             state.run_minimax(3);

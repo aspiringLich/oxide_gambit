@@ -39,7 +39,7 @@ It probably will not be very good.
 |Minimax|🟢|
 |Alpha Beta Pruning|🟢|
 |Move Ordering|🟢|
-|Transposition Table|🔴|
+|Transposition Table|🟡|
 |Iterative Deepenning|🔴|
 |Nullmove pruning|🔴|
 |Opening Book|🔴|

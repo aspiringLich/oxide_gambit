@@ -79,7 +79,7 @@ enum StartingPos {
 }
 use StartingPos::*;
 
-use crate::ai::excecute_calc_task;
+use crate::ai::ai_sys::excecute_calc_task;
 
 const starting_pos: [&str; 4] = [
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ",

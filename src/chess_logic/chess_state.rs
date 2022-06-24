@@ -7,9 +7,9 @@ use super::{pin::PinType, ChessMove, Piece, PieceType, PieceVariant, Position, T
 /// stores the state of the chessboard
 #[derive(Clone)]
 pub struct ChessState {
+    pub pieces: [Vec<Piece>; 2], // board representation: piece wise
     // vv hashable
     pub board: [PieceType; 64],       // board representation: square wise
-    pub pieces: [Vec<Piece>; 2],      // board representation: piece wise
     pub turn: bool,                   // true for white's move, false for black
     pub castling: [bool; 4],          // kingside / queenside castling rights
     pub en_passant: Option<Position>, // store the possible target squares for en passant

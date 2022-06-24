@@ -1,4 +1,4 @@
-#[derive(PartialEq, Copy, Clone, Debug)]
+#[derive(PartialEq, Copy, Clone, Debug, Hash)]
 pub enum PieceVariant {
     None = 0,
     Pawn,
@@ -15,7 +15,7 @@ impl Default for PieceVariant {
     }
 }
 
-#[derive(PartialEq, Copy, Clone, Debug)]
+#[derive(PartialEq, Copy, Clone, Debug, Hash)]
 pub struct PieceType(pub bool, pub PieceVariant);
 
 impl PieceType {

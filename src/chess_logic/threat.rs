@@ -187,6 +187,7 @@ impl ChessState {
 
     /// add threatenned squares
     pub fn gen_threat(&mut self) {
+        self.threatened = [default(), default()];
         let pieces: &[Vec<Piece>; 2] = unsafe { std::mem::transmute(&self.pieces) };
 
         for &piece in pieces[0].iter().chain(pieces[1].iter()) {

@@ -1,5 +1,5 @@
 /// acts as a wrapper for a u8, representing a position on a chessboard
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Hash)]
 pub struct Position(pub u8);
 
 impl Ord for Position {
