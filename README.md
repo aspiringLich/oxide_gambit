@@ -25,6 +25,7 @@ It probably will not be very good.
 |Pin Detection|🟢|
 |Constraint Detection|🟢|
 |En Passant, Castling, Promotion, etc.|🟢|
+|Rewrite Most of This (It's Bad)|🔴|
 
 ## **Evaluation Function**
 | Feature | Status |
