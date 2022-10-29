@@ -1,11 +1,12 @@
-use super::*;
-use bevy::prelude::default;
+use super::{square::*, state::*};
+use anyhow::Result;
+use std::default::default;
 
-pub fn std_position_to_pos(file: char, rank: char) -> Position {
-    Position(rank as u8 - 'a' as u8 + (file as u8 - '0' as u8) * 8)
+pub fn std_position_to_pos(file: char, rank: char) -> Square {
+    Square::new(rank as u8 - 'a' as u8 + (file as u8 - '0' as u8) * 8)
 }
 
-impl ChessState {
+impl State {
     fn FEN_placement(&mut self, ch: char, square: &mut u8) {
         match ch {
             // skip <x> squares
@@ -21,8 +22,8 @@ impl ChessState {
     }
 
     /// loads a FEN string into the board state
-    pub fn from_FEN(str: &str) -> Self {
-        let mut state: ChessState = default();
+    pub fn from_FEN(str: &str) -> Result<Self> {
+        let mut state: State = default();
         let mut section = 0; // which section of the FEN string are we on?
 
         // 0    => pieces on the board  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
@@ -84,11 +85,9 @@ impl ChessState {
             }
             prev_char = ch;
         }
-        state.gen_threat();
-        state.check_pins();
-        state.move_gen();
+        state.setup();
         //dbg!(&state.moves);
         dbg!(&state);
-        return state;
+        return Ok(state);
     }
 }

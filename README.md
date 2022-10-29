@@ -6,6 +6,8 @@ This is a chess engine written in Rust.
 
 It probably will not be very good.
 
+**THIS PROJECT IS CURRENTLY UNDERGOING A MAJOR REWRITE**
+
 <img align = "right" src = "img/example_screenshot.png" width = 40%>
 
 |Icon|Meaning|

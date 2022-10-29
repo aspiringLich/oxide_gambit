@@ -1,9 +1,9 @@
-pub mod ai_sys;
-pub mod board_eval;
-pub mod hasher;
-pub mod minimax;
-pub mod square_table;
-pub mod transposition;
+mod ai_sys;
+mod board_eval;
+mod hasher;
+mod minimax;
+mod square_table;
+mod transposition;
 
 use bevy::{prelude::*, tasks::Task};
 
