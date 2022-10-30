@@ -1,7 +1,7 @@
 // mod fen_string;
-mod moves;
-mod pieces;
-mod square;
-mod state;
 
-mod bench;
+pub mod moves;
+pub mod pieces;
+pub mod raycast;
+pub mod square;
+pub mod state;

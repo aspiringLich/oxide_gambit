@@ -31,8 +31,7 @@ pub const KING: u8 = 5;
 impl Piece {
     /// make a piece from a character (as you would see in a FEN string)
     pub fn from_char(ch: char) -> Result<Self> {
-        let team: u8 = if ch as u8 >= 'a' as u8 { 0 } else { 6 };
-        let piece: u8 = match ch.to_lowercase().to_string().as_bytes()[0] as char {
+        let mut piece: u8 = match ch.to_lowercase().to_string().as_bytes()[0] as char {
             'p' => PAWN,
             'r' => ROOK,
             'n' => KNIGHT,
@@ -41,21 +40,24 @@ impl Piece {
             'k' => KING,
             _ => return Err(anyhow!("Invalid character")),
         };
+        if ch.is_uppercase() {
+            piece += 6;
+        }
 
         unsafe {
-            num::FromPrimitive::from_u8(team + piece)
+            num::FromPrimitive::from_u8(piece)
                 .ok_or(anyhow!("Failed to convert piece from integer"))
         }
     }
 
     /// return the affilation of the piece
-    pub fn team(&self) -> bool {
-        **self & 0x08 == 0x08
+    pub fn team(self) -> bool {
+        *self >= 6
     }
 
     /// return the type of piece it is (0..=5)
-    pub fn piece(&self) -> u8 {
-        **self & 0x07
+    pub fn piece(self) -> u8 {
+        *self % 6
     }
 }
 

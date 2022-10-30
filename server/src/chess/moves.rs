@@ -1,4 +1,7 @@
-use std::collections::VecDeque;
+use std::{
+    collections::VecDeque,
+    ops::{Deref, DerefMut},
+};
 
 use super::square::Square;
 
@@ -7,6 +10,15 @@ pub struct Moves {
     inner: VecDeque<Square>,
 }
 
-// impl Moves {
-//     pub fn generate()
-// }
+impl Deref for Moves {
+    type Target = VecDeque<Square>;
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl DerefMut for Moves {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
+}
