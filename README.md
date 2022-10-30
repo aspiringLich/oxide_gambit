@@ -2,13 +2,14 @@
 <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/aspiringLich/oxide-gambit">
 # **OXIDE GAMBIT**
 
+<img align = "right" src = "img/example_screenshot.png" width = 40%>
+
 This is a chess engine written in Rust.
 
 It probably will not be very good.
 
-**THIS PROJECT IS CURRENTLY UNDERGOING A MAJOR REWRITE**
 
-<img align = "right" src = "img/example_screenshot.png" width = 40%>
+**THIS PROJECT IS CURRENTLY UNDERGOING A MAJOR REWRITE**
 
 |Icon|Meaning|
 |----------|--------|
@@ -20,12 +21,10 @@ It probably will not be very good.
 ## **Chess Logic** 
 | Feature | Status |
 |-| :-: |
-|Move Generation|🟢|
-|Threatened Square Updating|🟢|
-|Pin Detection|🟢|
-|Constraint Detection|🟢|
-|En Passant, Castling, Promotion, etc.|🟢|
-|Rewrite Most of This (It's Bad)|🔴|
+|Rewrite Most of This (It's Bad)|🟡|
+|Foundational Stuff|🟡|
+|*Fancy* Move Generation|🔴|
+|En Passant, Castling, Promotion, etc.|🔴|
 
 ## **Evaluation Function**
 | Feature | Status |
