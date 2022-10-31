@@ -1,24 +1,26 @@
+use core::slice::Iter;
 use std::{
-    collections::VecDeque,
-    ops::{Deref, DerefMut},
+    collections::BTreeMap,
+    iter::{Chain, Map},
+    ops::{Deref, DerefMut, Index},
 };
 
-use super::square::Square;
+use super::{pieces::Piece, square::Square};
 
 /// a structure for holding the squares a piece can move to
+///  - key: the chess move
+///  -
+#[derive(Default, Clone, Debug)]
 pub struct Moves {
-    inner: VecDeque<Square>,
+    pub priority: Vec<Square>,
+    pub other: Vec<Square>,
 }
 
-impl Deref for Moves {
-    type Target = VecDeque<Square>;
-    fn deref(&self) -> &Self::Target {
-        &self.inner
-    }
-}
+// pub struct MovesIntoIterator {
+//     moves: Moves,
+//     index: usize,
+// }
 
-impl DerefMut for Moves {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.inner
-    }
+impl Moves {
+    pub fn add_move(&mut self, piece: Piece, priority: u8) {}
 }

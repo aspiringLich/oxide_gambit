@@ -1,3 +1,5 @@
+use std::vec::IntoIter;
+
 use super::square::*;
 
 use anyhow::anyhow;
@@ -37,6 +39,7 @@ impl Ray {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Raycast {
     start: Square,
     direction: Ray,
@@ -61,4 +64,16 @@ impl Iterator for Raycast {
             None => None,
         }
     }
+}
+
+#[test]
+fn test_raycast() {
+    let test = |x, y, direction: Ray, expect: Vec<(u8, u8)>| {
+        let rc = Raycast::new(Square::from_xy((x, y)), direction);
+        assert!(rc.into_iter().eq(expect.into_iter().map(|xy| Square::from_xy(xy))));
+    };
+
+    test(1, 1, Ray::UpR, vec![(2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7)]);
+    test(4, 4, Ray::Left, vec![(3, 4), (2, 4), (1, 4), (0, 4)]);
+    test(0, 0, Ray::Down, vec![]);
 }
