@@ -1,14 +1,12 @@
 use std::ops::Deref;
 
-use num::{self, Integer};
-use num_derive::FromPrimitive;
-
+use super::state::Team;
 use anyhow::{anyhow, Result};
 use paste::paste;
+use yauc::prelude::*;
 
-use super::square::Square;
-
-#[derive(Clone, Copy, Debug, FromPrimitive, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, IntoPrimitive, FromPrimitive)]
+#[repr(u8)]
 pub enum PieceType {
     BPawn,
     BRook,
@@ -22,6 +20,7 @@ pub enum PieceType {
     WBishop,
     WQueen,
     WKing,
+    #[default]
     None,
 }
 
@@ -49,15 +48,12 @@ impl PieceType {
             piece += 6;
         }
 
-        unsafe {
-            num::FromPrimitive::from_u8(piece)
-                .ok_or(anyhow!("Failed to convert piece from integer"))
-        }
+        Ok(Self::from(piece))
     }
 
     /// return the affilation of the piece
-    pub fn team(self) -> bool {
-        *self >= *Self::WPawn
+    pub fn team(self) -> Team {
+        Team::from((*self >= *Self::WPawn) as u8)
     }
 
     /// return the type of piece it is (0..=5)
@@ -87,12 +83,13 @@ fn piecetype_basic() {
     assert_eq!(std::mem::size_of::<PieceType>(), 1);
 
     use PieceType::*;
+    use Team::*;
 
     // team
-    assert_eq!(WPawn.team(), true);
-    assert_eq!(WKing.team(), true);
-    assert_eq!(BPawn.team(), false);
-    assert_eq!(BKing.team(), false);
+    assert_eq!(WPawn.team(), White);
+    assert_eq!(WKing.team(), White);
+    assert_eq!(BPawn.team(), Black);
+    assert_eq!(BKing.team(), Black);
 
     // piece type
     assert_eq!(WPawn.piece(), PAWN);
@@ -107,23 +104,35 @@ fn piecetype_basic() {
     assert_eq!(PieceType::from_char('K').unwrap(), WKing);
 }
 
+/// holds information about a piece : namely its id and its type
+///
+/// gotta save those bytes!!!!
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Piece {
     inner: u8,
 }
 
 impl Piece {
+    /// create a new piece from an id (ms 4 bits) and the piece type (ls 4 bits)
     pub fn new(id: u8, r#type: PieceType) -> Self {
         Piece { inner: (id << 4 | r#type as u8) }
     }
 
+    /// get the type of the piece
     pub fn get_type(self) -> PieceType {
         debug_assert!(self.inner & 0xf < 12);
-        num::FromPrimitive::from_u8(self.inner & 0xf).unwrap()
+        PieceType::from(self.inner & 0xf)
     }
 
+    /// get the id of the piece and do some fun indexing stuff
     pub fn get_id(self) -> u8 {
         self.inner >> 4
+    }
+
+    /// create piece from a char
+    pub fn from_char(ch: char, id: u8) -> Result<Self> {
+        let r#type = PieceType::from_char(ch)?;
+        Ok(Self::new(id, r#type))
     }
 }
 

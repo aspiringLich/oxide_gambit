@@ -1,12 +1,14 @@
+use anyhow::anyhow;
+use std::default;
 use std::vec::IntoIter;
 
 use super::square::*;
+use yauc::prelude::*;
 
-use anyhow::anyhow;
-use num_derive::FromPrimitive;
-
-#[derive(Clone, Copy, Debug, FromPrimitive, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, FromPrimitive)]
+#[repr(u8)]
 pub enum Ray {
+    #[default]
     UpL,
     Up,
     UpR,
@@ -20,16 +22,18 @@ pub enum Ray {
 
 impl Ray {
     /// creates a new ray from an x and y value
+    ///
     ///     \  |  /
     ///     -  x  -
     ///     /  |  \
+    ///
     /// the function makes sure it is correct w/ `debug_assert!()`
     pub fn new(x: i8, y: i8) -> Self {
         debug_assert!((-1..=1).contains(&x));
         debug_assert!((-1..=1).contains(&y));
         debug_assert!(!(x == 0 && y == 0));
 
-        unsafe { num::FromPrimitive::from_i8(x + 1 + (y + 1) * 3).unwrap() }
+        Self::from((x + 1 + (y + 1) * 3) as u8)
     }
 
     /// converts self into an xy pair

@@ -1,93 +1,103 @@
 use super::{square::*, state::*};
-use anyhow::Result;
-use std::default::default;
+use yauc::prelude::*;
 
-pub fn std_position_to_pos(file: char, rank: char) -> Square {
-    Square::new(rank as u8 - 'a' as u8 + (file as u8 - '0' as u8) * 8)
+pub fn std_position_to_pos(rank: char, file: char) -> Option<Square> {
+    assert!(file.is_ascii_digit());
+    assert!(rank.is_ascii_alphabetic() && rank.is_ascii_lowercase());
+
+    Some(Square::new(rank as u8 - 'a' as u8 + (file as u8 - '0' as u8) * 8))
 }
 
 impl State {
-    fn FEN_placement(&mut self, ch: char, square: &mut u8) {
-        match ch {
-            // skip <x> squares
-            '1'..='8' => *square += ch as u8 - '0' as u8,
-            // next rank
-            '/' => return,
-            // wow something else
-            _ => {
-                self.add_piece(ch, (*square % 8) + (7 - (*square / 8)) * 8);
-                *square += 1;
-            }
-        }
-    }
-
     /// loads a FEN string into the board state
+    ///
+    /// |#|description|example|
+    /// |---|---|---|
+    /// |0| pieces on the board|rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR|
+    /// |1| turn|w|
+    /// |2| castling rights|KQkq|
+    /// |3| en passant|-|
+    /// |4| halfmove clock|0|
+    /// |5| move counter|1|
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// // returns the standard chess starting position
+    /// from_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ")
+    /// ```
+    ///
+    /// TODO: implement other things
+    #[allow(non_snake_case)]
     pub fn from_FEN(str: &str) -> Result<Self> {
         let mut state: State = default();
-        let mut section = 0; // which section of the FEN string are we on?
+        let mut sections = str.split(" ");
 
-        // 0    => pieces on the board  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
-        // 1    => turn                 "w"
-        // 2    => castling rights      "KQkq"
-        // 3    => en passant?          "-"
-        // 4    => halfmove clock       "0"
-        // 5    => move counter         "1"
-
-        let mut square: u8 = 0; // square number you are on
-        let mut prev_char: char = '`';
-        let mut acc_str: String = default();
-        for ch in str.chars() {
-            if ch == ' ' {
-                match section {
-                    _ => {}
-                    4 => state.halfmove_clock = acc_str.parse::<usize>().unwrap(),
-                    5 => state.fullmoves = acc_str.parse::<usize>().unwrap(),
+        let piece_section = sections.next().expect("piece section exists");
+        let mut square = 0;
+        let mut id = 0;
+        for ch in piece_section.chars() {
+            match ch {
+                // skip <x> squares
+                '1'..='8' => square += ch as u8 - '0' as u8,
+                // next rank
+                '/' => square += 8 - square % 8,
+                // wow something else
+                _ => {
+                    state.add_piece_char(ch, (square % 8) + (7 - (square / 8)) * 8, id);
+                    id += 1;
+                    square += 1;
                 }
-                acc_str = default();
-
-                section += 1;
-                continue;
             }
-
-            let panic = || -> ! { panic!("Invalid FEN String!") };
-
-            match section {
-                // write down the pieces
-                0 => state.FEN_placement(ch, &mut square),
-                // who's g dang turn is it??
-                1 => {
-                    state.turn = match ch {
-                        'b' => false,
-                        'w' => true,
-                        _ => panic(),
-                    }
-                }
-                // castling rights
-                2 => match ch {
-                    'q' => state.castling[0] = true,
-                    'k' => state.castling[1] = true,
-                    'Q' => state.castling[2] = true,
-                    'K' => state.castling[3] = true,
-                    '-' => {}
-                    _ => panic(),
-                },
-                // en passant
-                3 => {
-                    if ch.is_ascii_digit() {
-                        state.en_passant = Some(std_position_to_pos(prev_char, ch));
-                    }
-                }
-                // halfmove clock
-                4 => acc_str.push(ch),
-                // fullmove counter
-                5 => acc_str.push(ch),
-                _ => panic(),
-            }
-            prev_char = ch;
         }
-        state.setup();
-        //dbg!(&state.moves);
+
+        // who's g dang turn is it??
+        let turn_section = sections.next().expect("turn section exists");
+        let ch = turn_section.chars().next().expect("turn section has a char");
+        state.turn = match ch {
+            'b' => Team::Black,
+            'w' => Team::White,
+            _ => bail!("invalid turn section"),
+        };
+
+        // castling rights
+        let castling_section = sections.next().expect("castling section exists");
+        for ch in castling_section.chars() {
+            match ch {
+                // TODO: implement castling
+                // 'q' => state.castling[0] = true,
+                // 'k' => state.castling[1] = true,
+                // 'Q' => state.castling[2] = true,
+                // 'K' => state.castling[3] = true,
+                '-' => {}
+                _ => bail!("invalid castling section"),
+            };
+        }
+
+        // TODO: implement en passant
+        // en passant
+        let en_passant_section = sections.next().expect("en passant section exists");
+        for [rank, file] in en_passant_section.chars().array_chunks() {
+            // state.en_passant = Some(std_position_to_pos(rank, file)?)
+        }
+
+        // TODO: implement halfmove clock
+        // halfmove clock
+        let halfmove_section = sections.next().expect("halfmove section exists");
+        // state.halfmove_clock = halfmove_section.parse::<u32>()?;
+
+        // TODO: implement fullmove counter
+        // fullmove counter
+        let fullmove_section = sections.next().expect("fullmove section exists");
+        // state.fullmove_counter = fullmove_section.parse::<u32>()?;
+
+        if let Some(_) = sections.next() {
+            bail!("encountered too many sections in FEN string")
+        }
+
+        // state.setup();
+        // dbg!(&state.moves);
         dbg!(&state);
-        return Ok(state);
+        Ok(state)
     }
 }

@@ -1,6 +1,8 @@
-use std::ops::{Deref, DerefMut};
-
 use super::raycast::Ray;
+use std::{
+    ops::{Deref, DerefMut},
+    slice::SliceIndex,
+};
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Square {
@@ -18,6 +20,12 @@ impl Deref for Square {
 impl DerefMut for Square {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.square
+    }
+}
+
+impl From<Square> for usize {
+    fn from(square: Square) -> Self {
+        square.square as usize
     }
 }
 
