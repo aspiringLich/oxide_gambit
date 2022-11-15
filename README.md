@@ -9,7 +9,7 @@ This is a chess engine written in Rust.
 It probably will not be very good.
 
 
-**THIS PROJECT IS CURRENTLY UNDERGOING A MAJOR REWRITE**
+# **THIS PROJECT IS CURRENTLY UNDERGOING A MAJOR REWRITE**
 
 |Icon|Meaning|
 |----------|--------|
@@ -22,8 +22,9 @@ It probably will not be very good.
 | Feature | Status |
 |-| :-: |
 |Rewrite Most of This (It's Bad)|🟡|
-|Foundational Stuff|🟡|
-|*Fancy* Move Generation|🔴|
+|Foundational Stuff|🟢|
+|Basic move generation|🟡|
+|why is the king so annoying re|🔴|
 |En Passant, Castling, Promotion, etc.|🔴|
 
 ## **Evaluation Function**
