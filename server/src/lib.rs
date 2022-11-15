@@ -5,8 +5,5 @@
 extern crate test;
 
 // mod ai;
-mod chess;
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+pub mod chess;
+pub mod misc;

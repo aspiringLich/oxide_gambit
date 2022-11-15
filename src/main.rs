@@ -111,4 +111,11 @@
 //         .run();
 // }
 
-fn main() {}
+extern crate server;
+
+fn main() {
+    let state = server::chess::state::State::from_FEN(
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    );
+    // dbg!(state);
+}

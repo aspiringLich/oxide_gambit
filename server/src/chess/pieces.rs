@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 use super::state::Team;
 use anyhow::{anyhow, Result};
@@ -65,6 +65,25 @@ impl PieceType {
     pub fn occupied(self) -> bool {
         self != PieceType::None
     }
+
+    /// turn the piece into a little emoji :)
+    pub fn to_emoji(self) -> char {
+        match self {
+            Self::BPawn => '♟',
+            Self::BRook => '♜',
+            Self::BKnight => '♞',
+            Self::BBishop => '♝',
+            Self::BQueen => '♛',
+            Self::BKing => '♚',
+            Self::WPawn => '♟',
+            Self::WRook => '♜',
+            Self::WKnight => '♞',
+            Self::WBishop => '♝',
+            Self::WQueen => '♛',
+            Self::WKing => '♚',
+            Self::None => '!',
+        }
+    }
 }
 
 impl Deref for PieceType {
@@ -109,30 +128,44 @@ fn piecetype_basic() {
 /// gotta save those bytes!!!!
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Piece {
-    inner: u8,
+    id: u8,
+    r#type: PieceType,
 }
 
 impl Piece {
     /// create a new piece from an id (ms 4 bits) and the piece type (ls 4 bits)
     pub fn new(id: u8, r#type: PieceType) -> Self {
-        Piece { inner: (id << 4 | r#type as u8) }
-    }
-
-    /// get the type of the piece
-    pub fn get_type(self) -> PieceType {
-        debug_assert!(self.inner & 0xf < 12);
-        PieceType::from(self.inner & 0xf)
+        Piece { id, r#type }
     }
 
     /// get the id of the piece and do some fun indexing stuff
     pub fn get_id(self) -> u8 {
-        self.inner >> 4
+        self.id
+    }
+
+    /// get the id of the piece mutably and do some fun indexing stuff
+    pub fn get_id_mut(&mut self) -> &mut u8 {
+        &mut self.id
     }
 
     /// create piece from a char
     pub fn from_char(ch: char, id: u8) -> Result<Self> {
         let r#type = PieceType::from_char(ch)?;
         Ok(Self::new(id, r#type))
+    }
+}
+
+impl Deref for Piece {
+    type Target = PieceType;
+
+    fn deref(&self) -> &Self::Target {
+        &self.r#type
+    }
+}
+
+impl DerefMut for Piece {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.r#type
     }
 }
 

@@ -24,14 +24,14 @@ impl State {
     ///
     /// ```
     /// // returns the standard chess starting position
-    /// from_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ")
+    /// from_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
     /// ```
     ///
     /// TODO: implement other things
     #[allow(non_snake_case)]
     pub fn from_FEN(str: &str) -> Result<Self> {
         let mut state: State = default();
-        let mut sections = str.split(" ");
+        let mut sections = str.split(" ").filter(|s| !s.is_empty());
 
         let piece_section = sections.next().expect("piece section exists");
         let mut square = 0;
@@ -41,9 +41,10 @@ impl State {
                 // skip <x> squares
                 '1'..='8' => square += ch as u8 - '0' as u8,
                 // next rank
-                '/' => square += 8 - square % 8,
+                '/' => {}
                 // wow something else
                 _ => {
+                    // dbg!(ch, square);
                     state.add_piece_char(ch, (square % 8) + (7 - (square / 8)) * 8, id);
                     id += 1;
                     square += 1;
@@ -69,6 +70,7 @@ impl State {
                 // 'k' => state.castling[1] = true,
                 // 'Q' => state.castling[2] = true,
                 // 'K' => state.castling[3] = true,
+                'q' | 'Q' | 'k' | 'K' => {}
                 '-' => {}
                 _ => bail!("invalid castling section"),
             };
@@ -91,12 +93,11 @@ impl State {
         let fullmove_section = sections.next().expect("fullmove section exists");
         // state.fullmove_counter = fullmove_section.parse::<u32>()?;
 
-        if let Some(_) = sections.next() {
+        if let Some(err) = sections.next() {
             bail!("encountered too many sections in FEN string")
         }
 
         // state.setup();
-        // dbg!(&state.moves);
         dbg!(&state);
         Ok(state)
     }

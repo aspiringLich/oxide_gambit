@@ -1,5 +1,6 @@
 use super::raycast::Ray;
 use std::{
+    fmt::{Display, Formatter},
     ops::{Deref, DerefMut},
     slice::SliceIndex,
 };
@@ -14,6 +15,12 @@ impl Deref for Square {
 
     fn deref(&self) -> &Self::Target {
         &self.square
+    }
+}
+
+impl Display for Square {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}{}", (self.x() + 'a' as u8) as char, self.y() + 1)
     }
 }
 
