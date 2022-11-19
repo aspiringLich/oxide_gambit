@@ -22,7 +22,7 @@ impl State {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```no_compile
     /// // returns the standard chess starting position
     /// from_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
     /// ```

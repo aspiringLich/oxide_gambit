@@ -1,7 +1,3 @@
-use std::ops::Rem;
-
-use yauc::prelude::*;
-
 // /// write a ColString to a formatter or whatever idk
 // pub trait WriteColString {
 //     fn write_cstr(&mut self, string: ColString) -> Result<(), std::fmt::Error>;

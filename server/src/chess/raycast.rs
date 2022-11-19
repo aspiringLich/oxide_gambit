@@ -1,7 +1,3 @@
-use anyhow::anyhow;
-use std::default;
-use std::vec::IntoIter;
-
 use super::square::*;
 use yauc::prelude::*;
 
@@ -23,9 +19,11 @@ pub enum Ray {
 impl Ray {
     /// creates a new ray from an x and y value
     ///
+    /// ```compile_fail
     ///     \  |  /
     ///     -  x  -
     ///     /  |  \
+    /// ```
     ///
     /// the function makes sure it is correct w/ `debug_assert!()`
     pub fn new(x: i8, y: i8) -> Self {

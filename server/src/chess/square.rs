@@ -1,8 +1,6 @@
-use super::raycast::Ray;
 use std::{
     fmt::{Display, Formatter},
     ops::{Deref, DerefMut},
-    slice::SliceIndex,
 };
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]

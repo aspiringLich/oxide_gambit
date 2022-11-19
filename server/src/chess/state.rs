@@ -1,10 +1,5 @@
-use crate::misc::format_base64;
-
 use super::{moves::Moves, pieces::Piece, square::Square};
-use std::{
-    fmt::{Debug, Display},
-    sync::Arc,
-};
+use std::fmt::Debug;
 use yauc::{prelude::*, wyz::FmtForward};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Derivative, FromPrimitive)]
