@@ -1,8 +1,11 @@
 use crate::misc::format_base64;
 
-use super::{moves::Moves, pieces::Piece};
-use std::fmt::{Debug, Display};
-use yauc::{colorful::core::StrMarker, prelude::*, wyz::FmtForward};
+use super::{moves::Moves, pieces::Piece, square::Square};
+use std::{
+    fmt::{Debug, Display},
+    sync::Arc,
+};
+use yauc::{prelude::*, wyz::FmtForward};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Derivative, FromPrimitive)]
 #[repr(u8)]
@@ -56,33 +59,36 @@ impl State {
 
 impl Debug for State {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let square_col = Color256::LightGray;
-        let mut out: Vec<String> = vec![format!("{}", "\nBoard: 0 ".bold().blue())];
+        let mut out: Vec<String> = vec![style!("\nBoard: 0 ", bold, blue)];
         out.extend(vec!["       ".to_string(); 7].iter().enumerate().map(|(i, s)| {
-            format!("{}{} ", s, ((i as u8 + '1' as u8) as char).to_string().bold().blue())
+            style!(("{}{} ", s, char::from_digit(i as u32 + 1, 8).unwrap()), bold, blue)
         }));
-        out.push(format!("{}", "          A  B  C  D  E  F  G  H\nMoves:".bold().blue()));
+        out.push(style!("          A  B  C  D  E  F  G  H\nMoves:", bold, blue));
         for pos in 0..64 {
             let piece = self.get_board((7 - pos / 8) * 8 + pos % 8);
             // if theres a piece on this square
             let write = if let Some(piece) = piece {
                 let ret = format!("{}{:2}", piece.to_emoji(), piece.get_id());
                 let ret = match piece.team() {
-                    Team::Black => ret.red(),
-                    Team::White => ret.blue(),
+                    Team::Black => style!(ret, red),
+                    Team::White => style!(ret, blue),
                 };
                 let moves = self.moves[piece.get_id() as usize].as_ref().unwrap();
-                out.push(format!(
-                    "{}: !{} {}",
-                    ret,
-                    moves.priority.clone().fmt_list(),
-                    moves.other.clone().fmt_list()
-                ));
+                let cls = |s, v: &Vec<Square>| {
+                    if v.is_empty() {
+                        format!("")
+                    } else {
+                        format!("{}{}", s, v.clone().fmt_list())
+                    }
+                };
+                let mstr =
+                    format!("{} {} {}", ret, cls("p:", &moves.priority), cls("n:", &moves.other));
+                out.push(mstr);
                 ret
             } else {
-                " ⛶ ".dark_gray()
+                style!("⛶  ", dark_gray)
             };
-            out[pos / 8] += &format!("{}", write);
+            out[pos / 8] += &write;
         }
 
         f.write_str(&out.join("\n"))
