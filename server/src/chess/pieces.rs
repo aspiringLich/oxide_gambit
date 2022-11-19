@@ -8,6 +8,8 @@ use yauc::prelude::*;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, IntoPrimitive, FromPrimitive)]
 #[repr(u8)]
 pub enum PieceType {
+    #[default]
+    None,
     BPawn,
     BRook,
     BKnight,
@@ -20,8 +22,6 @@ pub enum PieceType {
     WBishop,
     WQueen,
     WKing,
-    #[default]
-    None,
 }
 
 pub const PAWN: u8 = 0;
@@ -48,7 +48,7 @@ impl PieceType {
             piece += 6;
         }
 
-        Ok(Self::from(piece))
+        Ok(Self::from(1 + piece))
     }
 
     /// return the affilation of the piece
@@ -58,7 +58,7 @@ impl PieceType {
 
     /// return the type of piece it is (0..=5)
     pub fn piece(self) -> u8 {
-        *self % PIECE_NUM
+        (*self - 1) % PIECE_NUM
     }
 
     /// is a piece
@@ -69,6 +69,7 @@ impl PieceType {
     /// turn the piece into a little emoji :)
     pub fn to_emoji(self) -> char {
         match self {
+            Self::None => '!',
             Self::BPawn => '♟',
             Self::BRook => '♜',
             Self::BKnight => '♞',
@@ -81,7 +82,6 @@ impl PieceType {
             Self::WBishop => '♝',
             Self::WQueen => '♛',
             Self::WKing => '♚',
-            Self::None => '!',
         }
     }
 }
