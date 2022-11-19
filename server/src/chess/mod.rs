@@ -1,5 +1,6 @@
 // mod fen_string;
 
+pub mod board;
 pub mod fen_string;
 pub mod move_gen;
 pub mod moves;

@@ -24,12 +24,12 @@ pub enum PieceType {
     WKing,
 }
 
-pub const PAWN: u8 = 0;
-pub const ROOK: u8 = 1;
-pub const KNIGHT: u8 = 2;
-pub const BISHOP: u8 = 3;
-pub const QUEEN: u8 = 4;
-pub const KING: u8 = 5;
+pub const PAWN: u8 = 1;
+pub const ROOK: u8 = 2;
+pub const KNIGHT: u8 = 3;
+pub const BISHOP: u8 = 4;
+pub const QUEEN: u8 = 5;
+pub const KING: u8 = 6;
 pub const PIECE_NUM: u8 = 6;
 
 impl PieceType {
@@ -48,7 +48,7 @@ impl PieceType {
             piece += 6;
         }
 
-        Ok(Self::from(1 + piece))
+        Ok(Self::from(piece))
     }
 
     /// return the affilation of the piece
@@ -56,9 +56,12 @@ impl PieceType {
         Team::from((*self >= *Self::WPawn) as u8)
     }
 
-    /// return the type of piece it is (0..=5)
+    /// return the type of piece it is (1..=6)
     pub fn piece(self) -> u8 {
-        (*self - 1) % PIECE_NUM
+        if self.is_none() {
+            return 0;
+        }
+        ((*self - 1) % PIECE_NUM) + 1
     }
 
     /// is a piece
@@ -83,6 +86,46 @@ impl PieceType {
             Self::WQueen => '♛',
             Self::WKing => '♚',
         }
+    }
+
+    pub fn is_none(self) -> bool {
+        self == Self::None
+    }
+
+    pub fn is_some(self) -> bool {
+        self != Self::None
+    }
+
+    pub fn is_pawn(self) -> bool {
+        self.piece() == PAWN
+    }
+
+    pub fn is_rook(self) -> bool {
+        self.piece() == ROOK
+    }
+
+    pub fn is_knight(self) -> bool {
+        self.piece() == KNIGHT
+    }
+
+    pub fn is_bishop(self) -> bool {
+        self.piece() == BISHOP
+    }
+
+    pub fn is_queen(self) -> bool {
+        self.piece() == QUEEN
+    }
+
+    pub fn is_king(self) -> bool {
+        self.piece() == KING
+    }
+
+    pub fn is_white(self) -> bool {
+        self.team() == Team::White
+    }
+
+    pub fn is_black(self) -> bool {
+        self.team() == Team::Black
     }
 }
 
@@ -126,9 +169,12 @@ fn piecetype_basic() {
 /// holds information about a piece : namely its id and its type
 ///
 /// gotta save those bytes!!!!
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Derivative)]
+#[derivative(Default)]
 pub struct Piece {
+    #[derivative(Default(value = "0"))]
     id: u8,
+    #[derivative(Default(value = "PieceType::None"))]
     r#type: PieceType,
 }
 

@@ -1,6 +1,7 @@
 use std::{
     fmt::{Display, Formatter},
     ops::{Deref, DerefMut},
+    slice::SliceIndex,
 };
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
@@ -35,6 +36,10 @@ impl From<Square> for usize {
 }
 
 impl Square {
+    pub fn idx(self) -> usize {
+        self.square as usize
+    }
+
     /// Creates a new square
     pub fn new(square: u8) -> Self {
         Square { square }

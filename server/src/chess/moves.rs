@@ -37,7 +37,7 @@ impl Moves {
         None
     }
 
-    /// adds a move, and
+    /// adds a move.
     pub fn add_move(&mut self, square: Square, priority: Priority) {
         let ret = self.contains_move(square);
         match ret {

@@ -97,7 +97,7 @@ impl State {
             bail!("encountered too many sections in FEN string")
         }
 
-        // state.setup();
+        state.regenerate_moves();
         dbg!(&state);
         Ok(state)
     }
