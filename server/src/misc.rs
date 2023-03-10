@@ -1,13 +1,3 @@
-// /// write a ColString to a formatter or whatever idk
-// pub trait WriteColString {
-//     fn write_cstr(&mut self, string: ColString) -> Result<(), std::fmt::Error>;
-// }
-
-// impl WriteColString for std::fmt::Formatter<'_> {
-//     fn write_cstr(&mut self, string: ColString) -> std::result::Result<(), std::fmt::Error> {
-//         self.write_str(&string.to_string())
-//     }
-// }
 
 /// this isnt actually base 64 its my own bad version
 pub fn base64<T>(digit: T) -> char
