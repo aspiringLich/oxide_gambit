@@ -1,17 +1,9 @@
 [package]
-name = "oxide-gambit"
+name = "oxide_gambit"
 version = "0.1.0"
 edition = "2021"
-resolver = "2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.69"
-
-server = { path = "server" }
-
-[workspace]
-members = [
-    "server",
-]
+derive_more = "0.99.17"
