@@ -1,4 +1,4 @@
 use crate::*;
 
 #[derive(Deref, DerefMut)]
-pub struct Square(u8);
+pub struct Square(pub u8);
