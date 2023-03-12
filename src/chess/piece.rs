@@ -40,11 +40,7 @@ impl PieceInfo {
         PieceInfo { name: "DEFAULT".to_string(), ch: '?', ..default() }
     }
     
-    /// Set the name of the piece
-    pub fn name(mut self, name: &str) -> PieceInfo {
-        self.name = name.to_string();
-        self
-    }
+    // builder!(pub fn name(&str => name.to_string()));
     
     /// Set the character used to represent the piece
     pub fn ch(mut self, ch: char) -> PieceInfo {

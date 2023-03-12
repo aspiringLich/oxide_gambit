@@ -7,3 +7,9 @@ edition = "2021"
 
 [dependencies]
 derive_more = "0.99.17"
+proc_macros = { path = "proc_macros" }
+
+[workspace]
+members = [
+    "proc_macros",
+]
