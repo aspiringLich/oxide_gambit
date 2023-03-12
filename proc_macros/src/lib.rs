@@ -3,8 +3,7 @@
 
 use std::default::default;
 
-use proc_macro::{ TokenStream };
-use proc_macro2::TokenTree;
+use proc_macro::TokenStream;
 use syn::{
     parse::Parse,
     Visibility,
@@ -57,25 +56,6 @@ impl Parse for BuilderImpl {
         let content;
         let _ = syn::parenthesized!(content in input);
 
-        let fn_arg = |ty| {
-            FnArg::Typed(syn::PatType {
-                attrs: vec![],
-                pat: Box::new(
-                    syn::Pat::Ident(syn::PatIdent {
-                        attrs: vec![],
-                        by_ref: None,
-                        mutability: None,
-                        ident: field.clone(),
-                        subpat: None,
-                    })
-                ),
-                colon_token: Default::default(),
-                ty: Box::new(ty),
-            })
-        };
-
-        // panic!("{:?}", content);
-
         while !content.is_empty() {
             // content.parse::<Ident>()?;
             if let Ok(arg) = content.parse::<FnArg>() {
@@ -122,15 +102,9 @@ impl Parse for BuilderImpl {
             output: ReturnType::Default,
         };
 
-        // panic!("{:#?}", signature);
-
         Ok(BuilderImpl { attrs, vis, signature, expr, field })
     }
 }
-
-// fn error<T>(span: proc_macro2::Span, msg: &str) -> syn::Result<T> {
-//     Err(syn::Error::new(span, msg))
-// }
 struct BuilderImpls {
     impls: Punctuated<BuilderImpl, Token![;]>,
 }
@@ -162,12 +136,9 @@ pub fn builder_impl(input: TokenStream) -> TokenStream {
             #vis #signature -> Self {
                 self.#field = #expr;
                 self
-            }
-        }
+            }}
         );
     }
-
-    // panic!("{:#?}", out);
 
     out.into()
 }
