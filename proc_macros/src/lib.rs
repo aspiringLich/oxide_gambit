@@ -1,4 +1,7 @@
 #![feature(proc_macro_diagnostic)]
+#![feature(default_free_fn)]
+
+use std::default::default;
 
 use proc_macro::{ TokenStream, TokenTree, Delimiter };
 use proc_macro2::Group;
@@ -14,6 +17,10 @@ use syn::{
     punctuated::Punctuated,
     Attribute,
     Block,
+    token::{ Const, Async, Unsafe, Comma, FatArrow },
+    Abi,
+    Generics,
+    Variadic, Signature, ReturnType,
 };
 use quote::quote;
 
@@ -31,15 +38,54 @@ impl Parse for BuilderImpl {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         let attrs = input.call(Attribute::parse_outer)?;
         let vis: Visibility = input.parse()?;
-        let mut signature = input.parse::<syn::Signature>()?;
-        let ident = signature.ident.to_string();
-        let field = ident.rsplit("_").next().unwrap();
+        let constness: Option<Const> = input.parse()?;
+        let asyncness: Option<Async> = input.parse()?;
+        let unsafety: Option<Unsafe> = input.parse()?;
+        let _: Token![fn] = input.parse()?;
+        let ident: Ident = input.parse()?;
 
+        let ident_str = ident.to_string();
+        let field = ident_str.rsplit("_").next().unwrap();
+        let field: Ident = syn::parse_str(field)?;
+
+        let generics: Generics = input.parse()?;
+        let mut inputs: Punctuated<FnArg, Comma> = default();
+        inputs.push(syn::parse_str("mut self")?);
+
+        let content;
+        let _ = syn::parenthesized!(content in input);
+
+        while !content.is_empty() {
+            if let Ok(arg) = content.parse::<FnArg>() {
+                inputs.push(arg);
+            } else if let Ok(ty) = content.parse::<syn::Type>() {
+                inputs.push(
+                    FnArg::Typed(syn::PatType {
+                        attrs: vec![],
+                        pat: Box::new(
+                            syn::Pat::Ident(syn::PatIdent {
+                                attrs: vec![],
+                                by_ref: None,
+                                mutability: None,
+                                ident: field.clone(),
+                                subpat: None,
+                            })
+                        ),
+                        colon_token: Default::default(),
+                        ty: Box::new(ty),
+                    })
+                );
+            } else {
+                panic!("Expected argument or type");
+            }
+        }
+        
+        // set the expr used to set the field
         let expr;
         // fn set_bar(bar: u32);
         if input.parse::<Token![;]>().is_ok() {
-            let arg = signature.inputs.first().expect("Expected at least one argument");
-            assert!(signature.inputs.len() == 1);
+            let arg = &inputs[1];
+            assert!(inputs.len() == 2);
 
             match arg {
                 FnArg::Typed(arg) => {
@@ -47,20 +93,33 @@ impl Parse for BuilderImpl {
                         syn::Pat::Ident(ident) => &ident.ident,
                         _ => panic!("Expected identifier for the name of the argument"),
                     };
-                    expr = syn::parse2(quote! { self.#ident = #ident; })?;
+                    expr = syn::parse2(quote! { #ident })?;
                 }
                 _ => panic!("Expected typed arg, including `self` is unecessary!"),
             }
         } else {
             // fn set_bar(bar: u32) => bar + 1;
-            input.parse::<Token!(=>)>()?;
+            input.parse::<FatArrow>()?;
             expr = input.parse::<syn::Expr>()?;
         }
-
-        signature.inputs.insert(0, syn::parse_str("mut self")?);
-        signature.output = syn::parse_str("Self")?;
-
-        Ok(BuilderImpl { attrs, vis, signature, expr, field: syn::parse_str(field)? })
+        
+        let signature = Signature {
+            constness,
+            asyncness,
+            unsafety,
+            abi: None,
+            fn_token: default(),
+            ident,
+            generics,
+            paren_token: default(),
+            inputs,
+            variadic: None,
+            output: ReturnType::Default,
+        };
+        
+        // panic!("{:#?}", signature);
+                
+        Ok(BuilderImpl { attrs, vis, signature, expr, field })
     }
 }
 
@@ -113,13 +172,15 @@ pub fn builder_impl(_attr: TokenStream, item: TokenStream) -> TokenStream {
         out.extend(
             quote! {
             #(#attrs)*
-            #vis #signature {
-                self.#field = #expr
+            #vis #signature -> Self {
+                self.#field = #expr;
                 self
             }
         }
         );
     }
+
+    // panic!("{:#?}", out);
 
     (quote! {
         impl #name {
