@@ -1,40 +1,21 @@
-use crate::*;
+use super::square::Square;
 
-use super::{direction::Direction, board::Board};
 
-/// Stores the directions that this square is being attacked from by sliding pieces.
-/// 
-/// Indexed with a [Direction]
-#[derive(Deref, DerefMut, Default, Clone, Copy, Debug, PartialEq, Eq)]
-pub struct SlidingAttacks(u8);
-
-impl SlidingAttacks {
-    pub fn get(&self, dir: Direction) -> bool {
-        self.0 & (1 << dir as u8) != 0
-    }
-    
-    pub fn set(&mut self, dir: Direction, b: bool) {
-        self.0 |= (b as u8) << dir as u8;
-    }
+pub struct Move {
+    pub from: Square,
+    pub to: Square,
 }
 
-/// Stores the squares that are being attacked by all pieces
-/// 
-/// Used to determine if a move is legal
-pub struct AttackedSquares {
-    sliding: Board<SlidingAttacks>,
-    non_sliding: Board<u8>
+pub struct Moves {
+    moves: Vec<Move>
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
-    
-    #[test]
-    fn test_attacking() {
-        let mut attacking = SlidingAttacks(0);
-        attacking.set(Direction::N, true);
-        assert_eq!(attacking.get(Direction::N), true);
-        assert_eq!(*attacking, 0b0000_0100);
+impl Moves {
+    pub fn new() -> Moves {
+        Moves { moves: Vec::new() }
+    }
+
+    pub fn add(&mut self, from: Square, to: Square) {
+        self.moves.push(Move { from, to });
     }
 }

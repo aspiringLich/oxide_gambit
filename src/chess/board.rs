@@ -27,6 +27,7 @@ impl<T: BoardType> Board<T> {
     }
 }
 
+/// Types that can be used to index a board
 pub trait BoardIndex {
     fn get(&self) -> usize;
 }
