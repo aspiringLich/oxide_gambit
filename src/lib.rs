@@ -13,5 +13,5 @@ struct e {
 
 #[proc_macros::builder_impl]
 impl e {
-    pub fn f(i32);
+    pub fn f(f: i32);
 }
