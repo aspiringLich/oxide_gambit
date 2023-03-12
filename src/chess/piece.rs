@@ -39,44 +39,23 @@ impl PieceInfo {
     pub fn new() -> PieceInfo {
         PieceInfo { name: "DEFAULT".to_string(), ch: '?', ..default() }
     }
-    
-    // builder!(pub fn name(&str => name.to_string()));
-    
-    /// Set the character used to represent the piece
-    pub fn ch(mut self, ch: char) -> PieceInfo {
-        self.ch = ch;
-        self
-    }
-    
-    /// Set the value of the piece
-    pub fn value(mut self, value: u8) -> PieceInfo {
-        self.value = value;
-        self
-    }
-    
-    /// Set the moves that the piece can make
-    pub fn moves(mut self, moves: &[(i8, i8)]) -> PieceInfo {
-        self.moves = moves.to_vec();
-        self
-    }
-    
-    /// Set the directions that the piece can attack in
-    pub fn attacks(mut self, attacks: &[Direction]) -> PieceInfo {
-        self.attacks = attacks.to_vec();
-        self
-    }
-    
-    /// Set the special move generation function
-    pub fn special_move_gen(mut self, f: SpecialMoveGenFn) -> PieceInfo {
-        self.move_gen = Some(f);
-        self
-    }
-    
-    /// Set the special behavior function
-    pub fn special_behavior(mut self, f: SpecialBehaviorFn) -> PieceInfo {
-        self.special_behavior = Some(f);
-        self
-    }
+
+    proc_macros::builder_impl!(
+        /// Set the name of the piece
+        pub fn name(name: String);
+        /// Set the character that represents the piece
+        pub fn ch(ch: char);
+        /// Set the value of the piece
+        pub fn value(value: u8);
+        /// Set the moves that the piece can make
+        pub fn moves(moves: &[(i8, i8)]) => moves.to_vec();
+        /// Set the directions that the piece can attack in
+        pub fn attacks(attacks: &[Direction]) => attacks.to_vec();
+        /// Set the special cases for moves
+        pub fn move_gen(move_gen: SpecialMoveGenFn) => Some(move_gen);
+        /// Set the special behavior after moving
+        pub fn special_behavior(special_behavior: SpecialBehaviorFn) => Some(special_behavior);
+    );
 }
 
 #[derive(Clone, Copy, Debug)]
