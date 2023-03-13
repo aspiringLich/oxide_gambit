@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 derive_more = "0.99.17"
 proc_macros = { path = "proc_macros" }
+rustc-hash = "1.1.0"
 
 [workspace]
 members = [

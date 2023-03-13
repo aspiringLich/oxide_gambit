@@ -1,15 +1,14 @@
 
+pub mod board;
+pub mod square;
+pub mod move_gen;
+pub mod direction;
+pub mod attack;
+pub mod state;
 
-mod piece;
-mod board;
-mod square;
-mod move_gen;
-mod direction;
-mod attack;
-mod state;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Team {
-    White,
+    #[default]
     Black,
+    White,
 }

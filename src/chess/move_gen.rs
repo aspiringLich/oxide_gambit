@@ -1,21 +1,17 @@
+use std::collections::VecDeque;
+
+use rustc_hash::FxHashSet;
+
 use super::square::Square;
 
-
+/// A move from one square to another
 pub struct Move {
     pub from: Square,
     pub to: Square,
 }
 
+/// Stores the list of moves that can be made
 pub struct Moves {
-    moves: Vec<Move>
-}
-
-impl Moves {
-    pub fn new() -> Moves {
-        Moves { moves: Vec::new() }
-    }
-
-    pub fn add(&mut self, from: Square, to: Square) {
-        self.moves.push(Move { from, to });
-    }
+    sliding: FxHashSet<Move>,
+    
 }

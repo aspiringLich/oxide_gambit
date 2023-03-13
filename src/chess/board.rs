@@ -4,7 +4,7 @@ use crate::*;
 
 use super::{ square::Square, direction::Direction };
 
-pub trait BoardType = Default + Copy;
+pub trait BoardType = Copy;
 
 #[derive(Deref, DerefMut, Clone, Debug)]
 pub struct Board<T: BoardType> {
@@ -12,7 +12,7 @@ pub struct Board<T: BoardType> {
 }
 
 impl<T: BoardType> Board<T> {
-    pub fn new() -> Board<T> {
+    pub fn new() -> Board<T> where T: Default {
         Board { squares: [default(); 64] }
     }
 }

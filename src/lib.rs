@@ -4,6 +4,7 @@
 
 use derive_more::{Deref, DerefMut};
 
-mod chess;
+pub mod rules;
+pub mod chess;
 
 
