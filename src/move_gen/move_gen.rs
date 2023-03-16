@@ -14,5 +14,6 @@ pub struct Move {
 
 /// Stores the list of moves that can be made
 pub struct Moves {
-    sliding: FxHashSet<Move>,
+    pub sliding: FxHashSet<Move>,
+    pub normal: FxHashSet<Move>,
 }

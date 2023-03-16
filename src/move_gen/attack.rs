@@ -1,6 +1,6 @@
 use crate::*;
 
-use super::{direction::Direction, board::Board};
+use crate::chess::{direction::Direction, board::Board};
 
 /// Stores the directions that this square is being attacked from by sliding pieces.
 /// 

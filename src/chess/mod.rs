@@ -2,7 +2,6 @@
 pub mod board;
 pub mod square;
 pub mod direction;
-pub mod attack;
 pub mod state;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
