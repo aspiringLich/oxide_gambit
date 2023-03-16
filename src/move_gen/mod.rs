@@ -4,7 +4,7 @@ use crate::{
         state::{Index, State, StateIndex},
         Team,
     },
-    rules::piece::PieceInfo,
+    rules::piece_info::PieceInfo,
 };
 
 use self::move_gen::Moves;

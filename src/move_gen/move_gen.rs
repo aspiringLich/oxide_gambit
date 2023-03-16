@@ -3,7 +3,7 @@ use std::default::default;
 
 use rustc_hash::FxHashSet;
 
-use crate::rules::piece::PieceInfo;
+use crate::rules::piece_info::PieceInfo;
 
 use crate::chess::{square::Square, state::Index};
 

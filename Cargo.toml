@@ -6,9 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.69"
 derive_more = "0.99.17"
 proc_macros = { path = "proc_macros" }
 rustc-hash = "1.1.0"
+strum = "0.24.1"
+strum_macros = "0.24.3"
 
 [workspace]
 members = [

@@ -1,6 +1,6 @@
 use std::hash::Hash;
 
-use crate::rules::{piece::PieceInfo, Rules};
+use crate::rules::{piece_info::PieceInfo, Rules};
 
 use super::{
     board::{Board, BoardIndex},
@@ -42,6 +42,10 @@ impl<T> Default for Index<T> {
 impl<T> Index<T> {
     pub fn get(self, arr: &[T]) -> &T {
         &arr[self.0 as usize]
+    }
+    
+    pub fn new(idx: u8) -> Self {
+        Self(idx, std::marker::PhantomData)
     }
 }
 

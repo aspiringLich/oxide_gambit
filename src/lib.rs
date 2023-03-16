@@ -3,6 +3,7 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
 #![feature(adt_const_params)]
+#![feature(iter_array_chunks)]
 
 use derive_more::{Deref, DerefMut};
 
