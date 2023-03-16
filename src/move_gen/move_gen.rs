@@ -2,16 +2,17 @@ use std::collections::VecDeque;
 
 use rustc_hash::FxHashSet;
 
-use super::square::Square;
+use crate::rules::piece::PieceInfo;
+
+use crate::chess::{square::Square, state::Index};
 
 /// A move from one square to another
 pub struct Move {
-    pub from: Square,
+    pub piece: Index<PieceInfo>,
     pub to: Square,
 }
 
 /// Stores the list of moves that can be made
 pub struct Moves {
     sliding: FxHashSet<Move>,
-    
 }

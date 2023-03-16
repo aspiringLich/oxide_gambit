@@ -36,8 +36,8 @@ pub struct State<'a> {
     pub rules: &'a Rules,
     /// The team whose turn it is
     pub turn: Team,
-    /// The board: the pieces are indexes into `rules.`
-    pub pieces: Board<Index<PieceInfo>>,
+    /// The board: the pieces are indexes into `rules.piece_info`
+    pub board: Board<Index<PieceInfo>>,
 }
 
 impl<'a> State<'a> {
@@ -45,11 +45,11 @@ impl<'a> State<'a> {
         Self {
             rules,
             turn: Team::White,
-            pieces: Board::new(),
+            board: Board::new(),
         }
     }
 
     pub fn piece_at<T: BoardIndex>(&self, square: T) -> &PieceInfo {
-        self.pieces[square].get(&self.rules.piece_info)
+        self.board[square].get(&self.rules.piece_info)
     }
 }

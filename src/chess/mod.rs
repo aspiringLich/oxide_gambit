@@ -1,7 +1,6 @@
 
 pub mod board;
 pub mod square;
-pub mod move_gen;
 pub mod direction;
 pub mod attack;
 pub mod state;

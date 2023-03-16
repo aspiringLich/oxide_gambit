@@ -1,4 +1,5 @@
 pub mod piece;
+pub mod defs;
 
 use self::piece::PieceInfo;
 pub struct Rules {
