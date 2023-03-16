@@ -18,12 +18,15 @@ impl<T: BoardType> Board<T> {
 }
 
 impl<T: BoardType> Board<T> {
-    pub fn get<I: BoardIndex>(&self, square: I) -> Option<&T> {
-        self.squares.get(square.get())
-    }
-
-    pub fn get_mut<I: BoardIndex>(&mut self, square: I) -> Option<&mut T> {
-        self.squares.get_mut(square.get())
+    /// Returns the value at the given square if the square is valid
+    pub fn get_move(&self, square: Square, x: i8, y: i8) -> Option<&T> {
+        let (_x, _y) = square.to_xy();
+        let (x, y) = (_x as i8 + x, _y as i8 + y);
+        if let Some(square) = Square::from_xy(x, y) {
+            Some(&self[square])
+        } else {
+            None
+        }
     }
 }
 
@@ -66,7 +69,6 @@ mod test {
         let mut board = Board::new();
         board[Square(0)] = 1;
         assert_eq!(board[Square(0)], 1);
-        assert_eq!(board.get(Square(255)), None);
-        assert_eq!(board.get(Square(0)), Some(&1));
+        assert_eq!(board[Square(1)], 0);
     }
 }
