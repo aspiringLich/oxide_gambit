@@ -2,7 +2,7 @@ use std::default::default;
 
 use crate::*;
 
-use super::{ square::Square, direction::Direction };
+use super::square::Square;
 
 pub trait BoardType = Copy;
 

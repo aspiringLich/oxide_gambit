@@ -6,5 +6,3 @@ use derive_more::{Deref, DerefMut};
 
 pub mod rules;
 pub mod chess;
-
-

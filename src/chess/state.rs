@@ -1,8 +1,9 @@
-use std::default::default;
+use crate::rules::{piece::PieceInfo, Rules};
 
-use crate::rules::{ Rules, piece::PieceInfo };
-
-use super::{ board::{ Board, BoardIndex }, Team };
+use super::{
+    board::{Board, BoardIndex},
+    Team,
+};
 
 /// A u8 that serves as an index into a list of `T`
 #[derive(Debug, PartialEq, Eq)]
