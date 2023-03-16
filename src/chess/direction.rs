@@ -15,9 +15,9 @@ use Direction::*;
 
 use super::board::{ Board, self };
 impl Direction {
-    const ORTHOGONAL: [Direction; 4] = [E, N, W, S];
-    const DIAGONAL: [Direction; 4] = [NE, NW, SW, SE];
-    const ALL: [Direction; 8] = [E, NE, N, NW, W, SW, S, SE];
+    pub const ORTHOGONAL: [Direction; 4] = [E, N, W, S];
+    pub const DIAGONAL: [Direction; 4] = [NE, NW, SW, SE];
+    pub const ALL: [Direction; 8] = [E, NE, N, NW, W, SW, S, SE];
 
     pub fn xy(self) -> (i8, i8) {
         match self {

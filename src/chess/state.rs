@@ -62,7 +62,7 @@ pub struct State<'a> {
     pub board: Board<Index<PieceInfo>>,
 }
 
-pub trait StateIndex<T>{
+pub trait StateIndex<T> {
     fn get<'a>(&'a self, idx: Index<T>) -> &'a T;
 }
 
@@ -71,7 +71,6 @@ impl<'s> StateIndex<PieceInfo> for State<'s> {
         idx.get(&self.rules.piece_info)
     }
 }
-
 
 impl<'a> State<'a> {
     pub fn new(rules: &'a Rules) -> Self {

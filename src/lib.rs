@@ -2,6 +2,7 @@
 #![feature(trait_alias)]
 #![feature(decl_macro)]
 #![feature(let_chains)]
+#![feature(adt_const_params)]
 
 use derive_more::{Deref, DerefMut};
 
