@@ -10,7 +10,7 @@ fn main() {
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ",
         &rules,
     ).unwrap();
-    // dbg!(&state);
+    dbg!(&state);
     println!("{}", state);
-    dbg!(state.board_state);
+    // dbg!(state.board_state);
 }
