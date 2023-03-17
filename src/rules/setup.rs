@@ -1,9 +1,9 @@
-use super::piece_info::PieceInfo;
-use super::*;
+
+
 use crate::chess::board::Board;
-use crate::chess::state::{Index, State};
-use crate::chess::Team::{*, self};
-use crate::rules::piece::Piece;
+use crate::chess::state::{State};
+use crate::{rules::piece::Piece};
+use crate::chess::Team;
 use anyhow::{bail, Context, Result};
 
 impl<'a> State<'a> {

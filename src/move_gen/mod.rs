@@ -1,10 +1,10 @@
 use crate::{
     chess::{
         square::Square,
-        state::{Index, State, StateIndex},
+        state::{Index, State, StateGet},
         Team,
     },
-    rules::piece_info::PieceInfo,
+    rules::{piece_info::PieceInfo, piece::Piece},
 };
 
 use self::move_gen::Moves;
@@ -12,24 +12,25 @@ use self::move_gen::Moves;
 pub mod attack;
 pub mod move_gen;
 
-pub fn get_piece(state: &State, pos: Square, x: i8, y: i8) -> Option<(Index<PieceInfo>, Square)> {
+#[inline(always)]
+pub fn get_piece<'a>(state: &State, pos: Square, x: i8, y: i8) -> Option<(Index<Piece>, Square)> {
     let square = pos.try_move(x, y)?;
-    let piece = state.board[square];
-    Some((piece, square))
+    let idx = state.board[square];
+    Some((idx, square))
 }
 
-pub fn white_pawn(state: &State, moves: &mut Moves, pos: Square) {
-    pawn::<1, { Team::White }>(state, moves, pos);
-}
-
-pub fn black_pawn(state: &State, moves: &mut Moves, pos: Square) {
-    pawn::<-1, { Team::Black }>(state, moves, pos);
-}
-
-pub fn knight(state: &State, moves: &mut Moves, pos: Square) {
+#[inline(always)]
+pub fn knight(state: &State, moves: &mut Moves, pos: Square, team: Team) {
     let mut add_move = |x, y| {
-        if let Some((piece, square)) = get_piece(state, pos, x, y) {
-            moves.insert(piece, square);
+        if let Some((idx, square)) = get_piece(state, pos, x, y) {
+            let piece = state.get_piece(idx);
+            if let Some(piece) = piece {
+                if piece.team != team {
+                    moves.insert(idx, square);
+                }
+            } else {
+                moves.insert(idx, square )
+            }
         }
     };
 
@@ -43,10 +44,18 @@ pub fn knight(state: &State, moves: &mut Moves, pos: Square) {
     add_move(-1, 2);
 }
 
-pub fn king(state: &State, moves: &mut Moves, pos: Square) {
+#[inline(always)]
+pub fn king(state: &State, moves: &mut Moves, pos: Square, team: Team) {
     let mut add_move = |x, y| {
-        if let Some((piece, square)) = get_piece(state, pos, x, y) {
-            moves.insert(piece, square);
+        if let Some((idx, square)) = get_piece(state, pos, x, y) {
+            let piece = state.get_piece(idx);
+            if let Some(piece) = piece {
+                if piece.team != team {
+                    moves.insert(idx, square);
+                }
+            } else {
+                moves.insert(idx, square)
+            }
         }
     };
 
@@ -60,28 +69,33 @@ pub fn king(state: &State, moves: &mut Moves, pos: Square) {
     add_move(1, -1);
 }
 
-fn pawn<const DIR: i8, const TEAM: Team>(state: &State, moves: &mut Moves, pos: Square) {
+#[inline(always)]
+pub fn pawn(state: &State, moves: &mut Moves, pos: Square, team: Team) {
     let (_, y) = pos.to_xy();
+    let dir = match team {
+        Team::White => 1,
+        Team::Black => -1,
+    };
 
     // move forward
-    if let Some((piece, square)) = get_piece(state, pos, 0, 1) {
+    if let Some((piece, square)) = get_piece(state, pos, 0, 1 * dir) {
         moves.insert(piece, square);
 
         // move forward 2 squares
-        if y == 1 && let Some((piece, square)) = get_piece(state, pos, 0, 2) {
+        if y == [6, 1][team as usize] && let Some((piece, square)) = get_piece(state, pos, 0, 2 * dir) {
             moves.insert_good(piece, square);
         }
     }
 
     // capture
-    if let Some((piece, square)) = get_piece(state, pos, 1, 1) {
-        if state.get(piece).team != Team::White {
-            moves.insert_good(piece, square);
+    if let Some((idx, square)) = get_piece(state, pos, 1, 1 * dir) {
+        if let Some(piece) = state.get_piece(idx) && piece.team != team {
+            moves.insert_good(idx, square);
         }
     }
-    if let Some((piece, square)) = get_piece(state, pos, -1, 1) {
-        if state.get(piece).team != Team::White {
-            moves.insert_good(piece, square);
+    if let Some((idx, square)) = get_piece(state, pos, -1, 1 * dir) {
+        if let Some(piece) = state.get_piece(idx) && piece.team != team {
+            moves.insert_good(idx, square);
         }
     }
 }

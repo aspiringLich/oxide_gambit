@@ -1,16 +1,17 @@
-use std::collections::VecDeque;
+
 use std::default::default;
 
 use rustc_hash::FxHashSet;
 
-use crate::rules::piece_info::PieceInfo;
+use crate::chess::state::Index;
+use crate::rules::piece::Piece;
 
-use crate::chess::{square::Square, state::Index};
+use crate::chess::square::Square;
 
 /// A move from one square to another
 #[derive(Hash, PartialEq, Eq)]
 pub struct Move {
-    pub piece: Index<PieceInfo>,
+    pub piece: Index<Piece>,
     pub to: Square,
 }
 
@@ -27,13 +28,13 @@ impl Moves {
     }
     
     /// Inserts a move into the list of moves
-    pub fn insert(&mut self, piece: Index<PieceInfo>, to: Square) {
+    pub fn insert(&mut self, piece: Index<Piece>, to: Square) {
         self.moves.insert(Move { piece, to });
     }
     
     
     /// Inserts a *good* move into the list of moves
-    pub fn insert_good(&mut self, piece: Index<PieceInfo>, to: Square) {
+    pub fn insert_good(&mut self, piece: Index<Piece>, to: Square) {
         self.moves.insert(Move { piece, to });
     }
 }

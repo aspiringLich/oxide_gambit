@@ -7,7 +7,7 @@ use crate::chess::state::State;
 use crate::move_gen::move_gen::Moves;
 
 pub type Piece<'a> = &'a PieceInfo;
-pub type MoveGenFn = &'static dyn Fn(&State, &mut Moves, Square) -> ();
+pub trait MoveGenFn = Fn(&State, &mut Moves, Square, Team) -> ();
 // pub type SpecialBehaviorFn = &'static dyn Fn(&State, Move) -> ();
 
 /// Information describing a piece
@@ -28,7 +28,7 @@ pub struct PieceInfo {
     /// Directions that the piece can attack in
     pub attacks: Vec<Direction>,
     /// Generate moves initially
-    pub move_gen: Option<MoveGenFn>,
+    pub move_gen: Option<&'static dyn MoveGenFn>,
 }
 
 impl std::fmt::Debug for PieceInfo {
@@ -67,7 +67,7 @@ impl PieceInfo {
         /// Set the directions that the piece can attack in
         pub fn attacks(attacks: &[Direction]) => attacks.to_vec();
         /// Set the special cases for moves
-        pub fn move_gen(move_gen: MoveGenFn) => Some(move_gen);
+        pub fn move_gen<T: MoveGenFn>(move_gen: &'static T) => Some(move_gen);
         // /// Set the special behavior after moving
         // pub fn special_behavior(special_behavior: SpecialBehaviorFn) => Some(special_behavior);
     );

@@ -50,7 +50,7 @@ impl Piece {
     }
 }
 
-#[derive(Deref, Debug)]
+#[derive(Deref, Debug, Clone)]
 pub struct PieceInfoTable(Vec<Option<PieceInfo>>);
 
 impl PieceInfoTable {
@@ -64,16 +64,13 @@ impl PieceInfoTable {
 }
 
 fn pawn(team: Team) -> PieceInfo {
-    let out = PieceInfo::new()
+    PieceInfo::new()
         .ch("♟︎")
         .fen_ch(['p', 'P'][team as usize])
         .name("Pawn")
         .value(1)
-        .team(team);
-    match team {
-        Team::Black => out.move_gen(&move_gen::black_pawn),
-        Team::White => out.move_gen(&move_gen::white_pawn),
-    }
+        .team(team)
+        .move_gen(&move_gen::pawn)
 }
 
 fn rook(team: Team) -> PieceInfo {
@@ -95,7 +92,6 @@ fn knight(team: Team) -> PieceInfo {
         .team(team)
         .move_gen(&move_gen::knight)
 }
-
 fn bishop(team: Team) -> PieceInfo {
     PieceInfo::new()
         .ch("♝")

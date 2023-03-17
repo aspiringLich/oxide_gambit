@@ -1,6 +1,9 @@
+use crate::rules::{
+    piece::{Piece, PieceInfoTable},
+    piece_info::PieceInfo,
+    Rules,
+};
 use std::hash::Hash;
-
-use crate::rules::{piece_info::PieceInfo, Rules};
 
 use super::{
     board::{Board, BoardIndex},
@@ -43,7 +46,7 @@ impl<T> Index<T> {
     pub fn get(self, arr: &[T]) -> &T {
         &arr[self.0 as usize]
     }
-    
+
     pub fn new(idx: u8) -> Self {
         Self(idx, std::marker::PhantomData)
     }
@@ -58,34 +61,35 @@ impl Index<PieceInfo> {
 /// A struct representing the state of a chess game
 #[derive(Clone)]
 pub struct State<'a> {
+    /// Stores all the pieces
+    pub piece_info: PieceInfoTable,
     /// The rules of the game
     pub rules: &'a Rules,
     /// The team whose turn it is
     pub turn: Team,
     /// The board: the pieces are indexes into `rules.piece_info`
-    pub board: Board<Index<PieceInfo>>,
-}
-
-pub trait StateIndex<T> {
-    fn get<'a>(&'a self, idx: Index<T>) -> &'a T;
-}
-
-impl<'s> StateIndex<PieceInfo> for State<'s> {
-    fn get<'a>(&'a self, idx: Index<PieceInfo>) -> &'a PieceInfo {
-        idx.get(&self.rules.piece_info)
-    }
+    pub board: Board<Index<Piece>>,
 }
 
 impl<'a> State<'a> {
     pub fn new(rules: &'a Rules) -> Self {
         Self {
+            piece_info: PieceInfoTable::init(),
             rules,
             turn: Team::White,
             board: Board::new(),
         }
     }
 
-    pub fn piece_at<T: BoardIndex>(&self, square: T) -> &PieceInfo {
-        self.board[square].get(&self.rules.piece_info)
+    pub fn piece_at<T: BoardIndex>(&self, square: T) -> &Option<PieceInfo> {
+        &self.piece_info[*self.board[square].get(&*self.rules.pieces) as usize]
     }
+    
+    pub fn get_piece(&self, idx: Index<Piece>) -> &Option<PieceInfo> {
+        &self.piece_info[idx.0 as usize]
+    }
+}
+
+pub trait StateGet<T> {
+    fn get(&self, idx: Index<T>) -> &T;
 }
