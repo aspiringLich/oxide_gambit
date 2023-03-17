@@ -1,9 +1,5 @@
 use crate::{
-    chess::{
-        square::Square,
-        state::{Index, State },
-        Team,
-    },
+    chess::{square::Square, state::State, Team, index::Index},
     rules::piece::Piece,
 };
 
