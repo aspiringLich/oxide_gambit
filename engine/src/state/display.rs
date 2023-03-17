@@ -2,9 +2,8 @@ use std::fmt::Display;
 
 use crossterm::style::Stylize;
 
-use crate::chess::Team;
+use crate::{chess::Team, state::state::State};
 
-use super::state::State;
 
 impl Display for State<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

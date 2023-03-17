@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use engine::{chess::state::State, rules::Rules};
+use engine::{rules::Rules, state::state::State};
 
 fn main() {
     let rules = RefCell::new(Rules::standard());

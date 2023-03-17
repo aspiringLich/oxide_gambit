@@ -1,6 +1,6 @@
 use crate::{
-    chess::{square::Square, state::State, Team, index::Index},
-    rules::piece::Piece,
+    chess::{square::Square, Team, index::Index},
+    rules::piece::Piece, state::state::State,
 };
 
 use self::move_gen::Moves;

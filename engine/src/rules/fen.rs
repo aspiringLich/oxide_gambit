@@ -1,9 +1,9 @@
 use std::cell::RefCell;
 
 use crate::chess::{board::Board, index::Index};
-use crate::chess::state::State;
 use crate::chess::Team;
 use crate::rules::piece::Piece;
+use crate::state::state::State;
 use anyhow::{bail, Context, Result};
 
 use super::Rules;

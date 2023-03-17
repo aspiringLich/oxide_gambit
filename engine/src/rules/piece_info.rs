@@ -3,8 +3,8 @@ use std::default::default;
 use crate::chess::Team;
 use crate::chess::direction::Direction;
 use crate::chess::square::Square;
-use crate::chess::state::State;
 use crate::move_gen::move_gen::Moves;
+use crate::state::state::State;
 
 pub type Piece<'a> = &'a PieceInfo;
 pub trait MoveGenFn = Fn(&State, &mut Moves, Square, Team) -> ();
