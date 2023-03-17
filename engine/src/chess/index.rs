@@ -36,6 +36,10 @@ impl<T> Index<T> {
     pub fn get(self, arr: &[T]) -> &T {
         &arr[self.0 as usize]
     }
+    
+    pub fn get_mut(self, arr: &mut [T]) -> &mut T {
+        &mut arr[self.0 as usize]
+    }
 
     pub fn new(idx: u8) -> Self {
         Self(idx, std::marker::PhantomData)

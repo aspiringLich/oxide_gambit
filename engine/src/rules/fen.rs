@@ -3,6 +3,7 @@ use std::cell::RefCell;
 use crate::chess::Team;
 use crate::chess::{board::Board, index::Index};
 use crate::rules::piece::Piece;
+use crate::state::board_state::{self, BoardState};
 use crate::state::state::State;
 use anyhow::{bail, Context, Result};
 
@@ -22,17 +23,20 @@ impl<'a> State<'a> {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```no_run
+    /// # use engine::state::state::State;
+    /// # use std::cell::RefCell;
+    /// # use engine::rules::Rules;
     /// // returns the standard chess starting position
-    /// from_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ")
+    /// let rules = RefCell::new(Rules::standard());
+    /// State::from_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ", &rules);
     /// ```
     ///
     /// TODO: implement other things
     #[allow(non_snake_case)]
     pub fn from_FEN(str: &str, rules: &'a RefCell<Rules>) -> Result<Self> {
-        let mut pieces = Vec::new();
-        let mut board: Board<Index<Piece>> = Board::new();
-
+        let mut board_state = BoardState::new();
+        
         let mut sections = str.split(" ");
 
         let mut add_piece_char = |ch: char, square: u8| {
@@ -51,8 +55,7 @@ impl<'a> State<'a> {
                 'K' => Piece::WhiteKing,
                 _ => bail!("invalid piece character encountered"),
             };
-            pieces.push(piece);
-            board[square as usize] = Index::new(pieces.len() as u8 - 1);
+            board_state.add_piece(piece, square as usize);
             Ok(())
         };
 
@@ -122,8 +125,7 @@ impl<'a> State<'a> {
         // Ok(state)
         // todo!()
         let mut out = State::new(rules);
-        out.pieces = pieces;
-        out.board = board;
+        out.board_state = board_state;
         out.turn = turn;
         Ok(out)
     }

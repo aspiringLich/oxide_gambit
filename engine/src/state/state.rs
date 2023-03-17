@@ -1,19 +1,10 @@
 use crate::{
-    chess::{
-        board::{Board, BoardIndex},
-        index::Index,
-        Team,
-    },
-    rules::{
-        piece::{Piece, PieceInfoTable},
-        piece_info::PieceInfo,
-        Rules,
-    },
+    chess::{index::Index, Team},
+    rules::{piece_info::PieceInfo, Rules},
 };
-use std::{
-    cell::{Cell, RefCell},
-    hash::Hash,
-};
+use std::cell::RefCell;
+
+use super::board_state::BoardState;
 
 impl Index<PieceInfo> {
     pub fn is_empty(self) -> bool {
@@ -24,40 +15,21 @@ impl Index<PieceInfo> {
 /// A struct representing the state of a chess game
 #[derive(Clone, Debug)]
 pub struct State<'a> {
-    /// Stores all the pieces
-    pub piece_info: &'a PieceInfoTable,
-    /// Stores all the pieces
-    pub pieces: Vec<Piece>,
     /// The rules of the game
     pub rules: &'a RefCell<Rules>,
     /// The team whose turn it is
     pub turn: Team,
-    /// The board: the pieces are indexes into `rules.piece_info`
-    pub board: Board<Index<Piece>>,
+    /// The state of the board
+    pub board_state: BoardState,
 }
-
-static mut PIECE_INFO: PieceInfoTable = PieceInfoTable(vec![]);
 
 impl<'a> State<'a> {
     pub fn new(rules: &'a RefCell<Rules>) -> Self {
-        unsafe {
-            PIECE_INFO = PieceInfoTable::init();
-            Self {
-                piece_info: &PIECE_INFO,
-                rules,
-                pieces: vec![],
-                turn: Team::White,
-                board: Board::new(),
-            }
+        Self {
+            rules,
+            turn: Team::White,
+            board_state: BoardState::new(),
         }
-    }
-
-    pub fn piece_at<T: BoardIndex>(&self, square: T) -> &Option<PieceInfo> {
-        &self.piece_info[*self.board[square].get(&*self.pieces) as usize]
-    }
-
-    pub fn get_piece(&self, idx: Index<Piece>) -> &Option<PieceInfo> {
-        &self.piece_info[*idx.get(&self.pieces) as usize]
     }
 }
 

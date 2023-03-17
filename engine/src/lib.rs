@@ -10,3 +10,4 @@ pub mod chess;
 pub mod move_gen;
 pub mod rules;
 pub mod state;
+pub mod misc;

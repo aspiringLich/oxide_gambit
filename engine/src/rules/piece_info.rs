@@ -4,10 +4,10 @@ use crate::chess::direction::Direction;
 use crate::chess::square::Square;
 use crate::chess::Team;
 use crate::move_gen::move_gen::Moves;
-use crate::state::state::State;
+use crate::state::board_state::BoardState;
 
 pub type Piece<'a> = &'a PieceInfo;
-pub trait MoveGenFn = Fn(&State, &mut Moves, Square, Team) -> ();
+pub trait MoveGenFn = Fn(&BoardState, &mut Moves, Square, Team) -> ();
 // pub type SpecialBehaviorFn = &'static dyn Fn(&State, Move) -> ();
 
 /// Information describing a piece

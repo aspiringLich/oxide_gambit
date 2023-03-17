@@ -94,6 +94,7 @@ fn bishop(team: Team) -> PieceInfo {
         .fen_ch(['b', 'B'][team as usize])
         .name("Bishop")
         .value(3)
+        .team(team)
         .attacks(&Direction::DIAGONAL)
 }
 
@@ -103,6 +104,7 @@ fn queen(team: Team) -> PieceInfo {
         .fen_ch(['q', 'Q'][team as usize])
         .name("Queen")
         .value(9)
+        .team(team)
         .attacks(&Direction::ALL)
 }
 
@@ -112,5 +114,6 @@ fn king(team: Team) -> PieceInfo {
         .fen_ch(['k', 'K'][team as usize])
         .name("King")
         .value(0)
+        .team(team)
         .move_gen(&move_gen::king)
 }

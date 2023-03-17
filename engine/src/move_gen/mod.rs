@@ -1,7 +1,7 @@
 use crate::{
     chess::{index::Index, square::Square, Team},
     rules::piece::Piece,
-    state::state::State,
+    state::board_state::BoardState,
 };
 
 use self::move_gen::Moves;
@@ -10,17 +10,17 @@ pub mod attack;
 pub mod move_gen;
 
 #[inline(always)]
-pub fn get_piece<'a>(state: &State, pos: Square, x: i8, y: i8) -> Option<(Index<Piece>, Square)> {
+pub fn get_idx<'a>(state: &BoardState, pos: Square, x: i8, y: i8) -> Option<(Index<Piece>, Square)> {
     let square = pos.try_move(x, y)?;
-    let idx = state.board[square];
+    let idx = state.board()[square];
     Some((idx, square))
 }
 
 #[inline(always)]
-pub fn knight(state: &State, moves: &mut Moves, pos: Square, team: Team) {
+pub fn knight(state: &BoardState, moves: &mut Moves, pos: Square, team: Team) {
     let mut add_move = |x, y| {
-        if let Some((idx, square)) = get_piece(state, pos, x, y) {
-            let piece = state.get_piece(idx);
+        if let Some((idx, square)) = get_idx(state, pos, x, y) {
+            let piece = state.get_idx(idx);
             if let Some(piece) = piece {
                 if piece.team != team {
                     moves.insert(idx, square);
@@ -42,10 +42,10 @@ pub fn knight(state: &State, moves: &mut Moves, pos: Square, team: Team) {
 }
 
 #[inline(always)]
-pub fn king(state: &State, moves: &mut Moves, pos: Square, team: Team) {
+pub fn king(state: &BoardState, moves: &mut Moves, pos: Square, team: Team) {
     let mut add_move = |x, y| {
-        if let Some((idx, square)) = get_piece(state, pos, x, y) {
-            let piece = state.get_piece(idx);
+        if let Some((idx, square)) = get_idx(state, pos, x, y) {
+            let piece = state.get_idx(idx);
             if let Some(piece) = piece {
                 if piece.team != team {
                     moves.insert(idx, square);
@@ -67,7 +67,7 @@ pub fn king(state: &State, moves: &mut Moves, pos: Square, team: Team) {
 }
 
 #[inline(always)]
-pub fn pawn(state: &State, moves: &mut Moves, pos: Square, team: Team) {
+pub fn pawn(state: &BoardState, moves: &mut Moves, pos: Square, team: Team) {
     let (_, y) = pos.to_xy();
     let dir = match team {
         Team::White => 1,
@@ -75,23 +75,23 @@ pub fn pawn(state: &State, moves: &mut Moves, pos: Square, team: Team) {
     };
 
     // move forward
-    if let Some((piece, square)) = get_piece(state, pos, 0, 1 * dir) {
+    if let Some((piece, square)) = get_idx(state, pos, 0, 1 * dir) {
         moves.insert(piece, square);
 
         // move forward 2 squares
-        if y == [6, 1][team as usize] && let Some((piece, square)) = get_piece(state, pos, 0, 2 * dir) {
+        if y == [6, 1][team as usize] && let Some((piece, square)) = get_idx(state, pos, 0, 2 * dir) {
             moves.insert_good(piece, square);
         }
     }
 
     // capture
-    if let Some((idx, square)) = get_piece(state, pos, 1, 1 * dir) {
-        if let Some(piece) = state.get_piece(idx) && piece.team != team {
+    if let Some((idx, square)) = get_idx(state, pos, 1, 1 * dir) {
+        if let Some(piece) = state.get_idx(idx) && piece.team != team {
             moves.insert_good(idx, square);
         }
     }
-    if let Some((idx, square)) = get_piece(state, pos, -1, 1 * dir) {
-        if let Some(piece) = state.get_piece(idx) && piece.team != team {
+    if let Some((idx, square)) = get_idx(state, pos, -1, 1 * dir) {
+        if let Some(piece) = state.get_idx(idx) && piece.team != team {
             moves.insert_good(idx, square);
         }
     }
