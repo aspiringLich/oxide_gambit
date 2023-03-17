@@ -1,10 +1,10 @@
 use crate::{
     chess::{
         square::Square,
-        state::{Index, State, StateGet},
+        state::{Index, State },
         Team,
     },
-    rules::{piece_info::PieceInfo, piece::Piece},
+    rules::piece::Piece,
 };
 
 use self::move_gen::Moves;
@@ -29,7 +29,7 @@ pub fn knight(state: &State, moves: &mut Moves, pos: Square, team: Team) {
                     moves.insert(idx, square);
                 }
             } else {
-                moves.insert(idx, square )
+                moves.insert(idx, square)
             }
         }
     };
