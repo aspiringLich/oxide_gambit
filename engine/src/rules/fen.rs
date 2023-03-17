@@ -1,10 +1,12 @@
-
+use std::cell::RefCell;
 
 use crate::chess::board::Board;
-use crate::chess::state::{State};
-use crate::{rules::piece::Piece};
+use crate::chess::state::{Index, State};
 use crate::chess::Team;
+use crate::rules::piece::Piece;
 use anyhow::{bail, Context, Result};
+
+use super::Rules;
 
 impl<'a> State<'a> {
     /// loads a FEN string into the board state
@@ -27,11 +29,12 @@ impl<'a> State<'a> {
     ///
     /// TODO: implement other things
     #[allow(non_snake_case)]
-    pub fn from_FEN(str: &str) -> Result<Self> {
-        let mut board: Board<Piece> = Board::new();
+    pub fn from_FEN(str: &str, rules: &'a RefCell<Rules>) -> Result<Self> {
+        let mut pieces = Vec::new();
+        let mut board: Board<Index<Piece>> = Board::new();
 
         let mut sections = str.split(" ");
-        
+
         let mut add_piece_char = |ch: char, square: u8| {
             let piece = match ch {
                 'p' => Piece::BlackPawn,
@@ -48,10 +51,11 @@ impl<'a> State<'a> {
                 'K' => Piece::WhiteKing,
                 _ => bail!("invalid piece character encountered"),
             };
-            board[square as usize] = piece;
+            pieces.push(piece);
+            board[square as usize] = Index::new(pieces.len() as u8 - 1);
             Ok(())
         };
-        
+
         let piece_section = sections.next().expect("piece section exists");
         let mut square = 0;
         for ch in piece_section.chars() {
@@ -59,7 +63,7 @@ impl<'a> State<'a> {
                 // skip <x> squares
                 '1'..='8' => square += ch as u8 - '0' as u8,
                 // next rank
-                '/' => square += 8 - square % 8,
+                '/' => square += if square % 8 == 0 { 0 } else { 8 - square % 8 },
                 // wow something else
                 _ => {
                     add_piece_char(ch, (square % 8) + (7 - (square / 8)) * 8)?;
@@ -85,10 +89,10 @@ impl<'a> State<'a> {
         for ch in castling_section.chars() {
             match ch {
                 // TODO: implement castling
-                // 'q' => state.castling[0] = true,
-                // 'k' => state.castling[1] = true,
-                // 'Q' => state.castling[2] = true,
-                // 'K' => state.castling[3] = true,
+                'q' => {} // state.castling[0] = true,
+                'k' => {} // state.castling[1] = true,
+                'Q' => {} // state.castling[2] = true,
+                'K' => {} // state.castling[3] = true,
                 '-' => {}
                 _ => bail!("invalid castling section"),
             };
@@ -114,8 +118,13 @@ impl<'a> State<'a> {
         if let Some(_) = sections.next() {
             bail!("encountered too many sections in FEN string")
         }
-        
+
         // Ok(state)
-        todo!()
+        // todo!()
+        let mut out = State::new(rules);
+        out.pieces = pieces;
+        out.board = board;
+        out.turn = turn;
+        Ok(out)
     }
 }

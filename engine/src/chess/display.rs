@@ -11,17 +11,17 @@ impl Display for State<'_> {
         let mut white_pieces = String::new();
         let mut black_pieces = String::new();
 
-        for idx in self.rules.pieces.iter().skip(1) {
-            let piece = self.piece_info[*idx as usize]
+        for idx in self.pieces.iter().skip(1) {
+            let Some(piece) = self.piece_info[*idx as usize]
                 .as_ref()
-                .expect("The only `None` piece is the first one");
+                else { continue };
             let push_to = match piece.team {
                 Team::White => &mut white_pieces,
                 Team::Black => &mut black_pieces,
             };
             *push_to += piece.ch;
         }
-        
+
         let pieces = format!(
             "{} {}\n{} {}",
             "White pieces".blue(),

@@ -51,7 +51,7 @@ impl Piece {
 }
 
 #[derive(Deref, Debug, Clone)]
-pub struct PieceInfoTable(Vec<Option<PieceInfo>>);
+pub struct PieceInfoTable(pub Vec<Option<PieceInfo>>);
 
 impl PieceInfoTable {
     pub fn init() -> Self {
