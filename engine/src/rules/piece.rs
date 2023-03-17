@@ -12,6 +12,7 @@ use super::piece_info::PieceInfo;
 pub enum Piece {
     #[default]
     Empty,
+    Captured,
     WhitePawn,
     WhiteRook,
     WhiteKnight,
@@ -29,11 +30,12 @@ pub enum Piece {
 impl Piece {
     pub fn info(&self) -> Option<PieceInfo> {
         use Piece::*;
-        if self == &Empty {
+        if matches!(self, Empty | Captured) {
             return None;
         }
         Some(match self {
             Empty => unreachable!(),
+            Captured => unreachable!(),
             WhitePawn => pawn(Team::White),
             WhiteRook => rook(Team::White),
             WhiteKnight => knight(Team::White),

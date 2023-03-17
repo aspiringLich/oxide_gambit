@@ -10,7 +10,12 @@ pub mod attack;
 pub mod move_gen;
 
 #[inline(always)]
-pub fn get_idx<'a>(state: &BoardState, pos: Square, x: i8, y: i8) -> Option<(Index<Piece>, Square)> {
+pub fn get_idx<'a>(
+    state: &BoardState,
+    pos: Square,
+    x: i8,
+    y: i8,
+) -> Option<(Index<Piece>, Square)> {
     let square = pos.try_move(x, y)?;
     let idx = state.board()[square];
     Some((idx, square))

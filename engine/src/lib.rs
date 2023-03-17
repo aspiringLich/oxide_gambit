@@ -7,7 +7,7 @@
 use derive_more::{Deref, DerefMut};
 
 pub mod chess;
+pub mod misc;
 pub mod move_gen;
 pub mod rules;
 pub mod state;
-pub mod misc;

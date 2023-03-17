@@ -1,8 +1,16 @@
-use std::hash::Hash;
+use std::{fmt::Write, hash::Hash};
+
+use crate::misc::u8_to_char;
 
 /// A u8 that serves as an index into a list of `T`
 #[derive(Debug)]
 pub struct Index<T>(u8, std::marker::PhantomData<T>);
+
+impl<T> std::fmt::Display for Index<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_char(u8_to_char(self.0))
+    }
+}
 
 impl<T> Hash for Index<T> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
@@ -36,7 +44,7 @@ impl<T> Index<T> {
     pub fn get(self, arr: &[T]) -> &T {
         &arr[self.0 as usize]
     }
-    
+
     pub fn get_mut(self, arr: &mut [T]) -> &mut T {
         &mut arr[self.0 as usize]
     }

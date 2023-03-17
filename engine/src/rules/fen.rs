@@ -36,7 +36,7 @@ impl<'a> State<'a> {
     #[allow(non_snake_case)]
     pub fn from_FEN(str: &str, rules: &'a RefCell<Rules>) -> Result<Self> {
         let mut board_state = BoardState::new();
-        
+
         let mut sections = str.split(" ");
 
         let mut add_piece_char = |ch: char, square: u8| {
