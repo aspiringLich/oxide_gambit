@@ -4,20 +4,13 @@
 use std::default::default;
 
 use proc_macro::TokenStream;
+use quote::quote;
 use syn::{
     parse::Parse,
-    Visibility,
-    Ident,
-    Token,
-    FnArg,
     punctuated::Punctuated,
-    Attribute,
-    token::{ Const, Async, Unsafe, Comma, FatArrow },
-    Generics,
-    Signature,
-    ReturnType,
+    token::{Async, Comma, Const, FatArrow, Unsafe},
+    Attribute, FnArg, Generics, Ident, ReturnType, Signature, Token, Visibility,
 };
-use quote::quote;
 
 extern crate proc_macro;
 
@@ -40,10 +33,7 @@ impl Parse for BuilderImpl {
         let ident: Ident = input.parse()?;
 
         let ident_str = ident.to_string();
-        let mut field = ident_str
-            .split_once("_")
-            .map(|s| s.1)
-            .unwrap_or(&ident_str);
+        let mut field = ident_str.split_once("_").map(|s| s.1).unwrap_or(&ident_str);
         if field != "with" || field != "set" {
             field = &ident_str;
         }
@@ -102,7 +92,13 @@ impl Parse for BuilderImpl {
             output: ReturnType::Default,
         };
 
-        Ok(BuilderImpl { attrs, vis, signature, expr, field })
+        Ok(BuilderImpl {
+            attrs,
+            vis,
+            signature,
+            expr,
+            field,
+        })
     }
 }
 struct BuilderImpls {
@@ -129,15 +125,19 @@ pub fn builder_impl(input: TokenStream) -> TokenStream {
     let mut out = proc_macro2::TokenStream::new();
 
     for builder_impl in builder_impls.impls {
-        let BuilderImpl { attrs, vis, signature, expr, field } = builder_impl;
-        out.extend(
-            quote! {
-            #(#attrs)*
-            #vis #signature -> Self {
-                self.#field = #expr;
-                self
-            }}
-        );
+        let BuilderImpl {
+            attrs,
+            vis,
+            signature,
+            expr,
+            field,
+        } = builder_impl;
+        out.extend(quote! {
+        #(#attrs)*
+        #vis #signature -> Self {
+            self.#field = #expr;
+            self
+        }});
     }
 
     out.into()

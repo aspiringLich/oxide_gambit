@@ -1,8 +1,8 @@
 use std::default::default;
 
-use crate::chess::Team;
 use crate::chess::direction::Direction;
 use crate::chess::square::Square;
+use crate::chess::Team;
 use crate::move_gen::move_gen::Moves;
 use crate::state::state::State;
 
@@ -40,7 +40,14 @@ impl std::fmt::Debug for PieceInfo {
             .field("value", &self.value)
             // .field("moves", &self.moves)
             .field("attacks", &self.attacks)
-            .field("move_gen", if self.move_gen.is_some() { &"yes" } else { &"no" })
+            .field(
+                "move_gen",
+                if self.move_gen.is_some() {
+                    &"yes"
+                } else {
+                    &"no"
+                },
+            )
             // .field("special_behavior", if self.special_behavior.is_some() { &"yes" } else { &"no" })
             .finish()
     }
@@ -48,7 +55,11 @@ impl std::fmt::Debug for PieceInfo {
 
 impl PieceInfo {
     pub fn new() -> PieceInfo {
-        PieceInfo { name: "NOT SET".to_string(), ch: "?", ..default() }
+        PieceInfo {
+            name: "NOT SET".to_string(),
+            ch: "?",
+            ..default()
+        }
     }
 
     proc_macros::builder_impl!(

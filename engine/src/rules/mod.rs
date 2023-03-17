@@ -1,15 +1,13 @@
-pub mod piece_info;
 pub mod fen;
 pub mod piece;
+pub mod piece_info;
 
-
-use self::{piece_info::PieceInfo, piece::Piece};
+use self::{piece::Piece, piece_info::PieceInfo};
 #[derive(Debug)]
-pub struct Rules {
-}
+pub struct Rules {}
 
 impl Rules {
     pub fn standard() -> Self {
-        Self { }
+        Self {}
     }
 }

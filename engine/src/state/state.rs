@@ -1,8 +1,15 @@
-use crate::{rules::{
-    piece::{Piece, PieceInfoTable},
-    piece_info::PieceInfo,
-    Rules,
-}, chess::{index::Index, Team, board::{Board, BoardIndex}}};
+use crate::{
+    chess::{
+        board::{Board, BoardIndex},
+        index::Index,
+        Team,
+    },
+    rules::{
+        piece::{Piece, PieceInfoTable},
+        piece_info::PieceInfo,
+        Rules,
+    },
+};
 use std::{
     cell::{Cell, RefCell},
     hash::Hash,

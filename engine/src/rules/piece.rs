@@ -55,11 +55,7 @@ pub struct PieceInfoTable(pub Vec<Option<PieceInfo>>);
 
 impl PieceInfoTable {
     pub fn init() -> Self {
-        Self(
-            Piece::iter()
-                .map(|p| p.info())
-                .collect(),
-        )
+        Self(Piece::iter().map(|p| p.info()).collect())
     }
 }
 

@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 
-use crate::chess::{board::Board, index::Index};
 use crate::chess::Team;
+use crate::chess::{board::Board, index::Index};
 use crate::rules::piece::Piece;
 use crate::state::state::State;
 use anyhow::{bail, Context, Result};

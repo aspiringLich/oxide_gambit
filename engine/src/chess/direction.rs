@@ -13,7 +13,7 @@ pub enum Direction {
 
 use Direction::*;
 
-use super::board::{ Board, self };
+use super::board::{self, Board};
 impl Direction {
     pub const ORTHOGONAL: [Direction; 4] = [E, N, W, S];
     pub const DIAGONAL: [Direction; 4] = [NE, NW, SW, SE];
@@ -91,7 +91,7 @@ impl<T: board::BoardType> Board<T> {
     pub fn iter_direction<'a, I: board::BoardIndex>(
         &'a self,
         dir: Direction,
-        start: I
+        start: I,
     ) -> DirectionIter<'a, T> {
         DirectionIter {
             board: self,
@@ -101,11 +101,11 @@ impl<T: board::BoardType> Board<T> {
             y: (start.get() / 8) as i8,
         }
     }
-    
+
     pub fn iter_direction_mut<'a, I: board::BoardIndex>(
         &'a mut self,
         dir: Direction,
-        start: I
+        start: I,
     ) -> DirectionIterMut<'a, T> {
         DirectionIterMut {
             board: self,
@@ -119,7 +119,7 @@ impl<T: board::BoardType> Board<T> {
 
 #[cfg(test)]
 mod test {
-    use crate::chess::{ board::Board, direction::Direction };
+    use crate::chess::{board::Board, direction::Direction};
 
     #[test]
     fn test_direction_iter() {
@@ -131,11 +131,17 @@ mod test {
         });
 
         assert_eq!(
-            board.iter_direction(Direction::NE, 0).copied().collect::<Vec<_>>(),
+            board
+                .iter_direction(Direction::NE, 0)
+                .copied()
+                .collect::<Vec<_>>(),
             [0, 9, 18, 27, 36, 45, 54, 63]
         );
         assert_eq!(
-            board.iter_direction_mut(Direction::NE, 0).map(|x| *x).collect::<Vec<_>>(),
+            board
+                .iter_direction_mut(Direction::NE, 0)
+                .map(|x| *x)
+                .collect::<Vec<_>>(),
             [0, 9, 18, 27, 36, 45, 54, 63]
         );
     }

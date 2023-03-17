@@ -4,7 +4,6 @@ use crossterm::style::Stylize;
 
 use crate::{chess::Team, state::state::State};
 
-
 impl Display for State<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut white_pieces = String::new();
