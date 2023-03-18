@@ -1,4 +1,5 @@
 use crate::*;
+use crate::move_gen::attack::SlidingAttacks;
 use std::default::default;
 use std::fmt::Debug;
 
@@ -12,6 +13,12 @@ pub struct Board<T: BoardType> {
     pub squares: [T; 64],
 }
 
+impl<T: BoardType + Default> Default for Board<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 trait BoardDebug: BoardType {
     fn debug(self) -> String;
 }
@@ -19,6 +26,19 @@ trait BoardDebug: BoardType {
 impl<T: Debug> BoardDebug for Index<T> {
     fn debug(self) -> String {
         unsafe { format!("{:?}", *(&self as *const Index<T> as *const u8)) }
+    }
+}
+
+impl BoardDebug for SlidingAttacks {
+    fn debug(self) -> String {
+        unsafe { format!("{:?}", self.0 ) }
+    }
+}
+
+
+impl <T: Into<usize> + BoardType> BoardDebug for T {
+    fn debug(self) -> String {
+        format!("{:?}", self.into())
     }
 }
 

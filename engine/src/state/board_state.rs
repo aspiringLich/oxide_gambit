@@ -49,6 +49,11 @@ impl BoardState {
     pub fn get_piece(&self, piece: Piece) -> Option<&PieceInfo> {
         unsafe { PIECE_INFO[piece as usize].as_ref() }
     }
+    
+    pub fn piece_at(&self, pos: Square) -> Option<&PieceInfo> {
+        let idx = self.board[pos];
+        self.get_idx(idx)
+    }
 
     /// adds a piece to the board
     pub fn add_piece<I: BoardIndex>(&mut self, piece: Piece, pos: I) {

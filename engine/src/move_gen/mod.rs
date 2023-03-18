@@ -4,10 +4,10 @@ use crate::{
     state::board_state::BoardState,
 };
 
-use self::move_gen::Moves;
+use self::moves::Moves;
 
 pub mod attack;
-pub mod move_gen;
+pub mod moves;
 
 #[inline(always)]
 pub fn get_idx<'a>(

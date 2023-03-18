@@ -3,7 +3,7 @@ use std::default::default;
 use crate::chess::direction::Direction;
 use crate::chess::square::Square;
 use crate::chess::Team;
-use crate::move_gen::move_gen::Moves;
+use crate::move_gen::moves::Moves;
 use crate::state::board_state::BoardState;
 
 pub type Piece<'a> = &'a PieceInfo;
