@@ -1,6 +1,6 @@
 use crate::{
     chess::{index::Index, Team},
-    rules::{piece_info::PieceInfo, Rules},
+    rules::{piece_info::PieceInfo, Rules}, move_gen::moves::Moves,
 };
 use std::cell::RefCell;
 
@@ -21,6 +21,8 @@ pub struct State<'a> {
     pub turn: Team,
     /// The state of the board
     pub board_state: BoardState,
+    /// The list of moves that can be made
+    pub moves: Moves,
 }
 
 impl<'a> State<'a> {
@@ -29,6 +31,7 @@ impl<'a> State<'a> {
             rules,
             turn: Team::White,
             board_state: BoardState::new(),
+            moves: Moves::new(),
         }
     }
 }

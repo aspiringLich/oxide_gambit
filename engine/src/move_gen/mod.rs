@@ -23,15 +23,16 @@ pub fn get_idx<'a>(
 
 #[inline(always)]
 pub fn knight(state: &BoardState, moves: &mut Moves, pos: Square, team: Team) {
+    let piece = state.board()[pos];
     let mut add_move = |x, y| {
         if let Some((idx, square)) = get_idx(state, pos, x, y) {
-            let piece = state.get_idx(idx);
-            if let Some(piece) = piece {
-                if piece.team != team {
-                    moves.insert(idx, square);
+            let p = state.get_idx(idx);
+            if let Some(p) = p {
+                if p.team != team {
+                    moves.insert(piece, square);
                 }
             } else {
-                moves.insert(idx, square)
+                moves.insert(piece, square)
             }
         }
     };
@@ -48,15 +49,16 @@ pub fn knight(state: &BoardState, moves: &mut Moves, pos: Square, team: Team) {
 
 #[inline(always)]
 pub fn king(state: &BoardState, moves: &mut Moves, pos: Square, team: Team) {
+    let piece = state.board()[pos];
     let mut add_move = |x, y| {
         if let Some((idx, square)) = get_idx(state, pos, x, y) {
-            let piece = state.get_idx(idx);
-            if let Some(piece) = piece {
-                if piece.team != team {
-                    moves.insert(idx, square);
+            let p = state.get_idx(idx);
+            if let Some(p) = p {
+                if p.team != team {
+                    moves.insert(piece, square);
                 }
             } else {
-                moves.insert(idx, square)
+                moves.insert(piece, square)
             }
         }
     };

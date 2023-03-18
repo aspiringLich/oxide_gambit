@@ -2,6 +2,7 @@ use std::cell::RefCell;
 
 use crate::chess::Team;
 use crate::chess::{board::Board, index::Index};
+use crate::move_gen::moves::Moves;
 use crate::rules::piece::Piece;
 use crate::state::board_state::{self, BoardState};
 use crate::state::state::State;
@@ -127,6 +128,7 @@ impl<'a> State<'a> {
         let mut out = State::new(rules);
         out.board_state = board_state;
         out.turn = turn;
+        out.moves = Moves::generate(&out.board_state);
         Ok(out)
     }
 }

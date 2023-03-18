@@ -37,9 +37,15 @@ impl Display for State<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         fmt_pieces(self, f)?;
         allocate_space();
+        
         fmt_board("Board", self, self.board_state.board(), fmt_piece, f)?;
         reset(f)?;
-        fmt_board("Indeces", self, self.board_state.board(), fmt_index, f)?;
+        
+        fmt_board("Indices", self, self.board_state.board(), fmt_index, f)?;
+        
+        write!(f, "\n\n{}", "Moves".red())?;
+        self.moves.fmt(&self.board_state, f)?;
+        
         Ok(())
     }
 }
