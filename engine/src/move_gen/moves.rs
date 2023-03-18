@@ -277,17 +277,18 @@ impl Moves {
         let diff = generate_diff(&self.moves, &Moves::generate(state).moves, state);
 
         for (idx, diff) in diff {
-            let piece = state.get_idx(idx).unwrap();
+            // let piece = state.get_idx(idx).expect("Only valid pieces have moves");
+            let Some(piece) = state.get_idx(idx) else { continue };
             let mut extra = String::new();
             let mut missing = String::new();
             let mut proper = String::new();
 
             for item in diff.items() {
-                extra += " ";
+                let c = |s: Square| (String::from(" ") + &s.to_string());
                 match item {
-                    DiffItem::Extra(s) => extra += &s.to_string(),
-                    DiffItem::Missing(s) => missing += &s.to_string(),
-                    DiffItem::Proper(s) => proper += &s.to_string(),
+                    DiffItem::Extra(s) => extra += &c(s),
+                    DiffItem::Missing(s) => missing += &c(s),
+                    DiffItem::Proper(s) => proper += &c(s),
                 }
             }
             let add_line = |s: &mut String, prefix: &str| {
@@ -295,10 +296,10 @@ impl Moves {
                     *s = format!("{prefix}{s}{}", '\n')
                 }
             };
-            add_line(&mut extra, "   + ");
-            add_line(&mut missing, "   - ");
-            add_line(&mut proper, &format!(" {} {}:", idx, piece.ch));
-
+            add_line(&mut extra, "  + ");
+            add_line(&mut missing, "  - ");
+            add_line(&mut proper, &format!(" {}{}:", idx, piece.ch));
+            
             match piece.team {
                 Team::Black => write!(f, "{}", proper.green())?,
                 Team::White => write!(f, "{}", proper.blue())?,

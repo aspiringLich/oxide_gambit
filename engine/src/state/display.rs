@@ -33,7 +33,7 @@ impl Display for State<'_> {
 
         fmt_board("Indices", self, self.board_state.board(), fmt_index, f)?;
 
-        write!(f, "\n\n{}", "Moves".red())?;
+        write!(f, "\n\n{}", "Moves (List)\n".red())?;
         self.moves.fmt(&self.board_state, f)?;
 
         Ok(())

@@ -80,13 +80,14 @@ pub fn pawn(state: &BoardState, moves: &mut Moves, pos: Square, team: Team) {
         Team::White => 1,
         Team::Black => -1,
     };
+    let piece = state.board()[pos];
 
     // move forward
-    if let Some((piece, square)) = get_idx(state, pos, 0, 1 * dir) {
+    if let Some((_, square)) = get_idx(state, pos, 0, 1 * dir) {
         moves.insert(piece, square);
 
         // move forward 2 squares
-        if y == [6, 1][team as usize] && let Some((piece, square)) = get_idx(state, pos, 0, 2 * dir) {
+        if y == [6, 1][team as usize] && let Some((_, square)) = get_idx(state, pos, 0, 2 * dir) {
             moves.insert_good(piece, square);
         }
     }
