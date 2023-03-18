@@ -26,6 +26,18 @@ impl<T> PartialEq for Index<T> {
 
 impl<T> Eq for Index<T> {}
 
+impl<T> PartialOrd for Index<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl<T> Ord for Index<T> {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.0.cmp(&other.0)
+    }
+}
+
 impl<T> Clone for Index<T> {
     fn clone(&self) -> Self {
         *self

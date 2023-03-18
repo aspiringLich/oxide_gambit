@@ -1,9 +1,18 @@
+use std::fmt::Display;
+
 use crate::*;
 
 use super::direction::Direction;
 
-#[derive(Deref, DerefMut, Hash, PartialEq, Eq, Debug, Clone, Copy)]
+#[derive(Deref, DerefMut, Hash, PartialEq, Eq, Debug, Clone, Copy, PartialOrd, Ord)]
 pub struct Square(pub u8);
+
+impl Display for Square {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let (x, y) = self.to_xy();
+        write!(f, "{}{}", (x as u8 + b'a') as char, y + 1)
+    }
+}
 
 impl Square {
     pub fn from_xy<T: TryInto<u8>>(x: T, y: T) -> Option<Square> {

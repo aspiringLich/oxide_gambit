@@ -27,7 +27,7 @@ pub struct PieceInfo {
     // pub moves: Vec<(i8, i8)>,
     /// Directions that the piece can attack in
     pub attacks: Vec<Direction>,
-    /// Generate moves initially
+    /// Function that generates the moves for the piece initially
     pub move_gen: Option<&'static dyn MoveGenFn>,
 }
 
