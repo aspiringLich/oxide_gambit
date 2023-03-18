@@ -1,13 +1,7 @@
-use crossterm::{
-    cursor::{MoveDown, RestorePosition, SavePosition},
-    execute,
-    style::{SetBackgroundColor, Stylize},
-    ExecutableCommand,
-};
+use crossterm::style::Stylize;
 use std::{
     default::default,
     fmt::{Display, Formatter},
-    io::stdout,
 };
 
 use crate::{
@@ -21,10 +15,6 @@ use crate::{
     state::state::State,
 };
 
-fn write<T: Display>(s: T, f: &mut Formatter) -> std::fmt::Result {
-    f.write_str(&format!("{}", s))
-}
-
 fn allocate_space() {
     print!("{}\x1b[9A", "\n".repeat(9));
 }
@@ -37,15 +27,15 @@ impl Display for State<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         fmt_pieces(self, f)?;
         allocate_space();
-        
+
         fmt_board("Board", self, self.board_state.board(), fmt_piece, f)?;
         reset(f)?;
-        
+
         fmt_board("Indices", self, self.board_state.board(), fmt_index, f)?;
-        
+
         write!(f, "\n\n{}", "Moves".red())?;
         self.moves.fmt(&self.board_state, f)?;
-        
+
         Ok(())
     }
 }

@@ -1,6 +1,7 @@
 use crate::{
     chess::{index::Index, Team},
-    rules::{piece_info::PieceInfo, Rules}, move_gen::moves::Moves,
+    move_gen::moves::Moves,
+    rules::{piece_info::PieceInfo, Rules},
 };
 use std::cell::RefCell;
 

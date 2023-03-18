@@ -1,16 +1,13 @@
 use std::collections::BTreeMap;
 use std::default::default;
-use std::fmt::Display;
-use std::io::stdout;
 
 use crossterm::style::Stylize;
 use rustc_hash::{FxHashMap, FxHashSet};
 
-use crate::chess::board::Board;
 use crate::chess::direction::Direction;
 use crate::chess::index::Index;
 use crate::chess::Team;
-use crate::misc;
+
 use crate::rules::piece::Piece;
 
 use crate::chess::square::Square;
@@ -28,7 +25,7 @@ pub struct Move {
 }
 
 /// Stores the list of moves that can be made
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Moves {
     moves: FxHashSet<Move>,
     callbacks: FxHashMap<Square, Vec<Index<Piece>>>,
@@ -37,13 +34,17 @@ pub struct Moves {
 
 impl Moves {
     pub fn new() -> Self {
-        Self {
-            ..default()
-        }
+        Self { ..default() }
     }
 
     /// Adds a piece's moves to itself
-    pub fn add_piece(&mut self, idx: Index<Piece>, piece: &PieceInfo, board: &BoardState, pos: Square) {
+    pub fn add_piece(
+        &mut self,
+        idx: Index<Piece>,
+        piece: &PieceInfo,
+        board: &BoardState,
+        pos: Square,
+    ) {
         if let Some(moves) = piece.move_gen {
             moves(board, self, pos, piece.team);
         }

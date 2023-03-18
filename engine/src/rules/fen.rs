@@ -1,10 +1,10 @@
 use std::cell::RefCell;
 
 use crate::chess::Team;
-use crate::chess::{board::Board, index::Index};
+
 use crate::move_gen::moves::Moves;
 use crate::rules::piece::Piece;
-use crate::state::board_state::{self, BoardState};
+use crate::state::board_state::BoardState;
 use crate::state::state::State;
 use anyhow::{bail, Context, Result};
 
@@ -105,18 +105,18 @@ impl<'a> State<'a> {
         // TODO: implement en passant
         // en passant
         let en_passant_section = sections.next().context("en passant section exists")?;
-        for [rank, file] in en_passant_section.chars().array_chunks() {
+        for [_rank, _file] in en_passant_section.chars().array_chunks() {
             // state.en_passant = Some(std_position_to_pos(rank, file)?)
         }
 
         // TODO: implement halfmove clock
         // halfmove clock
-        let halfmove_section = sections.next().context("halfmove section exists")?;
+        let _halfmove_section = sections.next().context("halfmove section exists")?;
         // state.halfmove_clock = halfmove_section.parse::<u32>()?;
 
         // TODO: implement fullmove counter
         // fullmove counter
-        let fullmove_section = sections.next().context("fullmove section exists")?;
+        let _fullmove_section = sections.next().context("fullmove section exists")?;
         // state.fullmove_counter = fullmove_section.parse::<u32>()?;
 
         if let Some(_) = sections.next() {

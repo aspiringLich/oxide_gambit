@@ -1,5 +1,5 @@
-use crate::*;
 use crate::move_gen::attack::SlidingAttacks;
+use crate::*;
 use std::default::default;
 use std::fmt::Debug;
 
@@ -31,12 +31,11 @@ impl<T: Debug> BoardDebug for Index<T> {
 
 impl BoardDebug for SlidingAttacks {
     fn debug(self) -> String {
-        unsafe { format!("{:?}", self.0 ) }
+        format!("{:?}", self.0)
     }
 }
 
-
-impl <T: Into<usize> + BoardType> BoardDebug for T {
+impl<T: Into<usize> + BoardType> BoardDebug for T {
     fn debug(self) -> String {
         format!("{:?}", self.into())
     }

@@ -1,5 +1,3 @@
-use crate::*;
-
 use crate::chess::square::Square;
 use crate::chess::{board::Board, direction::Direction};
 
@@ -34,22 +32,22 @@ impl AttackedSquares {
     pub fn inc(&mut self, square: Square) {
         self.non_sliding[square] += 1;
     }
-    
+
     /// Signals that a piece is no longer attacking this square
     pub fn dec(&mut self, square: Square) {
         self.non_sliding[square] -= 1;
     }
-    
+
     /// Signals that a sliding piece is attacking this square
     pub fn add_sliding(&mut self, square: Square, dir: Direction) {
         self.sliding[square].set(dir, true);
     }
-    
+
     /// Signals that a sliding piece is no longer attacking this square
     pub fn remove_sliding(&mut self, square: Square, dir: Direction) {
         self.sliding[square].set(dir, false);
     }
-    
+
     /// Returns true if this square is being attacked by any piece
     pub fn is_attacked(&self, square: Square) -> bool {
         self.non_sliding[square] != 0 || self.sliding[square].0 != 0
