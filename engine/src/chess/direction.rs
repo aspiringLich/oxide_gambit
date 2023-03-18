@@ -39,6 +39,19 @@ impl Direction {
     pub fn y(self) -> i8 {
         self.xy().1
     }
+    
+    pub fn flip_y(self) -> Self {
+        match self {
+            E => E,
+            NE => SE,
+            N => S,
+            NW => SW,
+            W => W,
+            SW => NW,
+            S => N,
+            SE => NE,
+        }
+    }
 }
 
 /// An iterator over a given direction in a board

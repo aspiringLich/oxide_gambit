@@ -1,6 +1,6 @@
 use crate::{
-    chess::{direction::Direction, Team},
-    move_gen,
+    chess::{direction::Direction, Team, square::Square},
+    move_gen::{self, moves::Moves}, state::state::State,
 };
 use derive_more::Deref;
 use strum::IntoEnumIterator;
@@ -27,95 +27,59 @@ pub enum Piece {
     BlackKing,
 }
 
+pub trait PieceTrait<const T: Team> {
+    /// Get the name of the piece
+    fn name(&self) -> &str {
+        &self.info().name
+    }
+    /// Get the character used to represent the piece
+    fn ch(&self) -> &'static str {
+        self.info().ch
+    }
+    /// Get the character used to represent the piece in a FEN string
+    fn fen_ch(&self) -> Option<char> {
+        self.info().fen_ch
+    }
+    /// Get the team that the piece belongs to
+    fn value(&self) -> u8 {
+        self.info().value
+    }
+    /// Get the callback squares of the piece
+    fn callbacks(&self) -> &[(i8, i8)] {
+        &self.info().callbacks
+    }
+    /// Get the directions that this piece can attack in
+    fn attacks(&self) -> &[Direction] {
+        &self.info().attacks
+    }
+    /// Get information about the piece
+    fn info(&self) -> PieceInfo;
+    /// Generate the moves for the piece initially
+    fn move_gen(&self, state: &State, moves: &mut Moves, square: Square);
+}
+
 impl Piece {
     pub fn info(&self) -> Option<PieceInfo> {
         use Piece::*;
+        use super::def_standard::*;
         if matches!(self, Empty | Captured) {
             return None;
         }
         Some(match self {
             Empty => unreachable!(),
             Captured => unreachable!(),
-            WhitePawn => pawn(Team::White),
-            WhiteRook => rook(Team::White),
-            WhiteKnight => knight(Team::White),
-            WhiteBishop => bishop(Team::White),
-            WhiteQueen => queen(Team::White),
-            WhiteKing => king(Team::White),
-            BlackPawn => pawn(Team::Black),
-            BlackRook => rook(Team::Black),
-            BlackKnight => knight(Team::Black),
-            BlackBishop => bishop(Team::Black),
-            BlackQueen => queen(Team::Black),
-            BlackKing => king(Team::Black),
+            WhitePawn => Pawn::<{Team::White}>.info(),
+            WhiteRook => Rook::<{Team::White}>.info(),
+            WhiteKnight => Knight::<{Team::White}>.info(),
+            WhiteBishop => Bishop::<{Team::White}>.info(),
+            WhiteQueen => Queen::<{Team::White}>.info(),
+            WhiteKing => King::<{Team::White}>.info(),
+            BlackPawn => Pawn::<{Team::Black}>.info(),
+            BlackRook => Rook::<{Team::Black}>.info(),
+            BlackKnight => Knight::<{Team::Black}>.info(),
+            BlackBishop => Bishop::<{Team::Black}>.info(),
+            BlackQueen => Queen::<{Team::Black}>.info(),
+            BlackKing => King::<{Team::Black}>.info(),
         })
     }
-}
-
-#[derive(Deref, Debug, Clone)]
-pub struct PieceInfoTable(pub Vec<Option<PieceInfo>>);
-
-impl PieceInfoTable {
-    pub fn init() -> Self {
-        Self(Piece::iter().map(|p| p.info()).collect())
-    }
-}
-
-fn pawn(team: Team) -> PieceInfo {
-    PieceInfo::new()
-        .ch("♟︎")
-        .fen_ch(['p', 'P'][team as usize])
-        .name("Pawn")
-        .value(1)
-        .team(team)
-        .move_gen(&move_gen::pawn)
-}
-
-fn rook(team: Team) -> PieceInfo {
-    PieceInfo::new()
-        .ch("♜")
-        .fen_ch(['r', 'R'][team as usize])
-        .name("Rook")
-        .value(5)
-        .team(team)
-        .attacks(&Direction::ORTHOGONAL)
-}
-
-fn knight(team: Team) -> PieceInfo {
-    PieceInfo::new()
-        .ch("♞")
-        .fen_ch(['n', 'N'][team as usize])
-        .name("Knight")
-        .value(3)
-        .team(team)
-        .move_gen(&move_gen::knight)
-}
-fn bishop(team: Team) -> PieceInfo {
-    PieceInfo::new()
-        .ch("♝")
-        .fen_ch(['b', 'B'][team as usize])
-        .name("Bishop")
-        .value(3)
-        .team(team)
-        .attacks(&Direction::DIAGONAL)
-}
-
-fn queen(team: Team) -> PieceInfo {
-    PieceInfo::new()
-        .ch("♛")
-        .fen_ch(['q', 'Q'][team as usize])
-        .name("Queen")
-        .value(9)
-        .team(team)
-        .attacks(&Direction::ALL)
-}
-
-fn king(team: Team) -> PieceInfo {
-    PieceInfo::new()
-        .ch("♚")
-        .fen_ch(['k', 'K'][team as usize])
-        .name("King")
-        .value(0)
-        .team(team)
-        .move_gen(&move_gen::king)
 }

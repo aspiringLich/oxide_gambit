@@ -16,7 +16,9 @@ pub struct BoardState {
     pieces: [Piece; 64],
 }
 
-static mut PIECE_INFO: PieceInfoTable = PieceInfoTable(vec![]);
+static mut PIECE_INFO: Vec<PieceInfo> = vec![];
+
+static mut PIECES: 
 
 /// initializes the piece info table
 pub fn init() {

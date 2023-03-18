@@ -45,9 +45,7 @@ impl Moves {
         board: &BoardState,
         pos: Square,
     ) {
-        if let Some(moves) = piece.move_gen {
-            moves(board, self, pos, piece.team);
-        }
+        piece.move_gen(board, self, pos, piece.team);
         for &dir in &piece.attacks {
             self.insert_sliding(idx, piece.team, pos, dir, board, false);
         }
