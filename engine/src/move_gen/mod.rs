@@ -10,7 +10,7 @@ pub mod attack;
 pub mod moves;
 
 #[inline(always)]
-pub fn get_idx<'a>(
+pub fn try_get_square<'a>(
     state: &BoardState,
     pos: Square,
     x: i8,
@@ -25,8 +25,8 @@ pub fn get_idx<'a>(
 pub fn knight(state: &BoardState, moves: &mut Moves, pos: Square, team: Team) {
     let piece = state.board()[pos];
     let mut add_move = |x, y| {
-        if let Some((idx, square)) = get_idx(state, pos, x, y) {
-            let p = state.get_idx(idx);
+        if let Some((idx, square)) = try_get_square(state, pos, x, y) {
+            let p = state.get_info(idx);
             if let Some(p) = p {
                 if p.team != team {
                     moves.insert(piece, square);
@@ -51,8 +51,8 @@ pub fn knight(state: &BoardState, moves: &mut Moves, pos: Square, team: Team) {
 pub fn king(state: &BoardState, moves: &mut Moves, pos: Square, team: Team) {
     let piece = state.board()[pos];
     let mut add_move = |x, y| {
-        if let Some((idx, square)) = get_idx(state, pos, x, y) {
-            let p = state.get_idx(idx);
+        if let Some((idx, square)) = try_get_square(state, pos, x, y) {
+            let p = state.get_info(idx);
             if let Some(p) = p {
                 if p.team != team {
                     moves.insert(piece, square);
@@ -83,23 +83,23 @@ pub fn pawn(state: &BoardState, moves: &mut Moves, pos: Square, team: Team) {
     let piece = state.board()[pos];
 
     // move forward
-    if let Some((_, square)) = get_idx(state, pos, 0, 1 * dir) {
+    if let Some((piece, square)) = try_get_square(state, pos, 0, 1 * dir) {
         moves.insert(piece, square);
 
         // move forward 2 squares
-        if y == [6, 1][team as usize] && let Some((_, square)) = get_idx(state, pos, 0, 2 * dir) {
+        if y == [6, 1][team as usize] && let Some((_, square)) = try_get_square(state, pos, 0, 2 * dir) {
             moves.insert_good(piece, square);
         }
     }
 
     // capture
-    if let Some((idx, square)) = get_idx(state, pos, 1, 1 * dir) {
-        if let Some(piece) = state.get_idx(idx) && piece.team != team {
+    if let Some((idx, square)) = try_get_square(state, pos, 1, 1 * dir) {
+        if let Some(piece) = state.get_info(idx) && piece.team != team {
             moves.insert_good(idx, square);
         }
     }
-    if let Some((idx, square)) = get_idx(state, pos, -1, 1 * dir) {
-        if let Some(piece) = state.get_idx(idx) && piece.team != team {
+    if let Some((idx, square)) = try_get_square(state, pos, -1, 1 * dir) {
+        if let Some(piece) = state.get_info(idx) && piece.team != team {
             moves.insert_good(idx, square);
         }
     }

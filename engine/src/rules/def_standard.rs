@@ -1,14 +1,26 @@
 use crate::{
-    chess::{square::Square, Team, direction::Direction},
+    chess::{direction::Direction, square::Square, Team},
     move_gen::moves::Moves,
-    state::state::State,
+    state::{board_state::BoardState, state::State},
 };
 
 use super::{piece::PieceTrait, piece_info::PieceInfo};
 
+pub struct Invalid;
+
+impl PieceTrait for Invalid {
+    fn info(&self) -> PieceInfo {
+        panic!("Invalid piece")
+    }
+
+    fn move_gen(&self, state: &BoardState, moves: &mut Moves, square: Square) {
+        panic!("Invalid piece")
+    }
+}
+
 pub struct Pawn<const T: Team>;
 
-impl<const T: Team> PieceTrait<T> for Pawn<T> {
+impl<const T: Team> PieceTrait for Pawn<T> {
     fn info(&self) -> PieceInfo {
         PieceInfo::new()
             .ch("♟︎")
@@ -18,15 +30,15 @@ impl<const T: Team> PieceTrait<T> for Pawn<T> {
             .build(T)
     }
 
-    fn move_gen(&self, state: &State, moves: &mut Moves, square: Square) {}
+    fn move_gen(&self, state: &BoardState, moves: &mut Moves, square: Square) {}
 }
 
 pub struct Rook<const T: Team>;
 
-impl<const T: Team> PieceTrait<T> for Rook<T> {
+impl<const T: Team> PieceTrait for Rook<T> {
     fn info(&self) -> PieceInfo {
         PieceInfo::new()
-        .ch("♜")
+            .ch("♜")
             .fen_ch('r')
             .name("Rook")
             .value(5)
@@ -34,28 +46,37 @@ impl<const T: Team> PieceTrait<T> for Rook<T> {
             .build(T)
     }
 
-    fn move_gen(&self, state: &State, moves: &mut Moves, square: Square) {}
+    fn move_gen(&self, state: &BoardState, moves: &mut Moves, square: Square) {}
 }
 
 pub struct Knight<const T: Team>;
 
-impl<const T: Team> PieceTrait<T> for Knight<T> {
+impl<const T: Team> PieceTrait for Knight<T> {
     fn info(&self) -> PieceInfo {
         PieceInfo::new()
             .ch("♞")
             .fen_ch('n')
             .name("Knight")
             .value(3)
-            .callbacks(&[(1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1), (-1, 2)])
+            .callbacks(&[
+                (1, 2),
+                (2, 1),
+                (2, -1),
+                (1, -2),
+                (-1, -2),
+                (-2, -1),
+                (-2, 1),
+                (-1, 2),
+            ])
             .build(T)
     }
 
-    fn move_gen(&self, state: &State, moves: &mut Moves, square: Square) {}
+    fn move_gen(&self, state: &BoardState, moves: &mut Moves, square: Square) {}
 }
 
 pub struct Bishop<const T: Team>;
 
-impl<const T: Team> PieceTrait<T> for Bishop<T> {
+impl<const T: Team> PieceTrait for Bishop<T> {
     fn info(&self) -> PieceInfo {
         PieceInfo::new()
             .ch("♝")
@@ -66,12 +87,12 @@ impl<const T: Team> PieceTrait<T> for Bishop<T> {
             .build(T)
     }
 
-    fn move_gen(&self, state: &State, moves: &mut Moves, square: Square) {}
+    fn move_gen(&self, state: &BoardState, moves: &mut Moves, square: Square) {}
 }
 
 pub struct Queen<const T: Team>;
 
-impl<const T: Team> PieceTrait<T> for Queen<T> {
+impl<const T: Team> PieceTrait for Queen<T> {
     fn info(&self) -> PieceInfo {
         PieceInfo::new()
             .ch("♛")
@@ -83,21 +104,30 @@ impl<const T: Team> PieceTrait<T> for Queen<T> {
             .build(T)
     }
 
-    fn move_gen(&self, state: &State, moves: &mut Moves, square: Square) {}
+    fn move_gen(&self, state: &BoardState, moves: &mut Moves, square: Square) {}
 }
 
 pub struct King<const T: Team>;
 
-impl<const T: Team> PieceTrait<T> for King<T> {
+impl<const T: Team> PieceTrait for King<T> {
     fn info(&self) -> PieceInfo {
         PieceInfo::new()
             .ch("♚")
             .fen_ch('k')
             .name("King")
             .value(0)
-            .callbacks(&[(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)])
+            .callbacks(&[
+                (1, 0),
+                (1, 1),
+                (0, 1),
+                (-1, 1),
+                (-1, 0),
+                (-1, -1),
+                (0, -1),
+                (1, -1),
+            ])
             .build(T)
     }
 
-    fn move_gen(&self, state: &State, moves: &mut Moves, square: Square) {}
+    fn move_gen(&self, state: &BoardState, moves: &mut Moves, square: Square) {}
 }

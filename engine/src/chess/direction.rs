@@ -39,7 +39,7 @@ impl Direction {
     pub fn y(self) -> i8 {
         self.xy().1
     }
-    
+
     pub fn flip_y(self) -> Self {
         match self {
             E => E,

@@ -4,7 +4,7 @@ use engine::{rules::Rules, state::state::State};
 
 fn main() {
     engine::init();
-    
+
     let rules = RefCell::new(Rules::standard());
     let state = State::from_FEN(
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ",

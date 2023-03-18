@@ -1,3 +1,5 @@
+use strum::IntoEnumIterator;
+
 use crate::{
     chess::{
         board::{Board, BoardIndex},
@@ -5,7 +7,8 @@ use crate::{
         square::Square,
     },
     rules::{
-        piece::{Piece, PieceInfoTable},
+        def_standard::Invalid,
+        piece::{Piece, PieceTrait},
         piece_info::PieceInfo,
     },
 };
@@ -16,14 +19,32 @@ pub struct BoardState {
     pieces: [Piece; 64],
 }
 
-static mut PIECE_INFO: Vec<PieceInfo> = vec![];
-
-static mut PIECES: 
+static mut PIECE_INFO: Vec<Option<PieceInfo>> = vec![];
+static mut PIECES: Vec<Box<dyn PieceTrait>> = vec![];
 
 /// initializes the piece info table
 pub fn init() {
     unsafe {
-        PIECE_INFO = PieceInfoTable::init();
+        PIECE_INFO = Piece::iter().map(|p| p.info()).collect();
+        PIECES = Piece::iter()
+            .map(|p| p.piece().unwrap_or(Box::new(Invalid)))
+            .collect();
+    }
+}
+
+pub trait GetPiece {
+    fn get_piece(&self, state: &BoardState) -> Piece;
+}
+
+impl GetPiece for Piece {
+    fn get_piece(&self, _: &BoardState) -> Piece {
+        *self
+    }
+}
+
+impl GetPiece for Index<Piece> {
+    fn get_piece(&self, state: &BoardState) -> Piece {
+        *self.get(state.pieces())
     }
 }
 
@@ -43,18 +64,17 @@ impl BoardState {
         &self.pieces
     }
 
-    pub fn get_idx(&self, idx: Index<Piece>) -> Option<&PieceInfo> {
-        let &piece = idx.get(self.pieces());
-        self.get_piece(piece)
+    pub fn get_info<T: GetPiece>(&self, piece: T) -> Option<&PieceInfo> {
+        unsafe { PIECE_INFO[piece.get_piece(self) as usize].as_ref() }
     }
 
-    pub fn get_piece(&self, piece: Piece) -> Option<&PieceInfo> {
-        unsafe { PIECE_INFO[piece as usize].as_ref() }
+    pub fn get_piece<T: GetPiece>(&self, piece: T) -> &'static dyn PieceTrait {
+        unsafe { PIECES[piece.get_piece(self) as usize].as_ref() }
     }
 
-    pub fn piece_at(&self, pos: Square) -> Option<&PieceInfo> {
+    pub fn info_at(&self, pos: Square) -> Option<&PieceInfo> {
         let idx = self.board[pos];
-        self.get_idx(idx)
+        self.get_info(idx)
     }
 
     /// adds a piece to the board

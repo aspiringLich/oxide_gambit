@@ -41,7 +41,7 @@ impl Display for State<'_> {
 }
 
 fn fmt_piece(state: &State, idx: &Index<Piece>, s: &mut String) {
-    if let Some(piece) = state.board_state.get_idx(*idx) {
+    if let Some(piece) = state.board_state.get_info(*idx) {
         let out = format!("{} ", piece.ch);
         let styled = match piece.team {
             Team::White => out.blue(),
@@ -98,7 +98,7 @@ fn fmt_pieces(state: &State, f: &mut Formatter<'_>) -> std::fmt::Result {
     let mut strings: [(String, String); 2] = default();
 
     for (i, piece) in state.board_state.pieces().iter().enumerate() {
-        let Some(piece) = state.board_state.get_piece(*piece)
+        let Some(piece) = state.board_state.get_info(*piece)
                 else { continue };
         let (ref mut push_to, ref mut numbers) = &mut strings[piece.team as usize];
         *push_to += &match piece.team {

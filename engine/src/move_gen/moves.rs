@@ -45,7 +45,7 @@ impl Moves {
         board: &BoardState,
         pos: Square,
     ) {
-        piece.move_gen(board, self, pos, piece.team);
+        board.get_piece(idx).move_gen(board, self, pos);
         for &dir in &piece.attacks {
             self.insert_sliding(idx, piece.team, pos, dir, board, false);
         }
@@ -56,7 +56,7 @@ impl Moves {
         let mut moves = Self::new();
 
         for (i, &idx) in board.board().iter().enumerate() {
-            let piece = board.get_idx(idx);
+            let piece = board.get_info(idx);
             if let Some(piece) = piece {
                 moves.add_piece(idx, piece, board, Square(i as u8));
             }
@@ -90,7 +90,7 @@ impl Moves {
             .iter_direction(dir, square)
             .skip((!inclusive) as usize)
         {
-            if let Some(p) = board.get_idx(idx) {
+            if let Some(p) = board.get_info(idx) {
                 // if the piece is on the other team, add it to the list of moves
                 if p.team != team {
                     self.insert_good(piece, square);
@@ -128,7 +128,7 @@ impl Moves {
             .iter_direction(dir, square)
             .skip((!inclusive) as usize)
         {
-            if let Some(p) = board.get_idx(idx) {
+            if let Some(p) = board.get_info(idx) {
                 // if the piece is on the other team, remove it too
                 if p.team != team {
                     debug_assert!(
@@ -276,7 +276,7 @@ impl Moves {
 
         for (idx, diff) in diff {
             // let piece = state.get_idx(idx).expect("Only valid pieces have moves");
-            let Some(piece) = state.get_idx(idx) else { continue };
+            let Some(piece) = state.get_info(idx) else { continue };
             let mut extra = String::new();
             let mut missing = String::new();
             let mut proper = String::new();
@@ -297,7 +297,7 @@ impl Moves {
             add_line(&mut extra, "  + ");
             add_line(&mut missing, "  - ");
             add_line(&mut proper, &format!(" {}{}:", idx, piece.ch));
-            
+
             match piece.team {
                 Team::Black => write!(f, "{}", proper.green())?,
                 Team::White => write!(f, "{}", proper.blue())?,
