@@ -7,8 +7,8 @@ use crate::{
 use self::moves::Moves;
 
 pub mod attack;
-pub mod moves;
 pub mod generator;
+pub mod moves;
 
 #[inline(always)]
 pub fn try_get_square<'a>(
