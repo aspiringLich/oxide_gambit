@@ -1,7 +1,4 @@
-use std::ops::Index;
-
 use crate::*;
-use bevy::prelude::*;
 use engine::state::board_state::PIECE_INFO;
 use rules::piece::Piece;
 
@@ -23,7 +20,7 @@ impl PieceAssets {
 }
 
 /// Initialize piece assets
-pub fn init_piece_assets(
+pub fn init(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,

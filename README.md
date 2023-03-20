@@ -22,8 +22,8 @@ It probably will not be very good.
 | Feature | Status |
 |-| :-: |
 |Rewrite Most of This (It's Bad)|🟡|
-|Foundational Stuff|🟡|
-|Basic move generation|🟡|
+|Foundational Stuff|🟢|
+|Basic move generation|🟢|
 |why is the king so annoying re|🔴|
 |En Passant, Castling, Promotion, etc.|🔴|
 

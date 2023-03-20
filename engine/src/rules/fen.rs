@@ -10,7 +10,7 @@ use anyhow::{bail, Context, Result};
 
 use super::Rules;
 
-impl<'a> State<'a> {
+impl State {
     /// loads a FEN string into the board state
     ///
     /// |#|description|example|
@@ -35,7 +35,7 @@ impl<'a> State<'a> {
     ///
     /// TODO: implement other things
     #[allow(non_snake_case)]
-    pub fn from_FEN(str: &str, rules: &'a RefCell<Rules>) -> Result<Self> {
+    pub fn from_FEN(str: &str, rules: Rules) -> Result<Self> {
         let mut board_state = BoardState::new();
 
         let mut sections = str.split(" ");

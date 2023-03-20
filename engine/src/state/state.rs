@@ -3,7 +3,7 @@ use crate::{
     move_gen::moves::Moves,
     rules::{piece_info::PieceInfo, Rules},
 };
-use std::cell::RefCell;
+use std::{cell::RefCell, sync::Arc};
 
 use super::board_state::BoardState;
 
@@ -15,9 +15,9 @@ impl Index<PieceInfo> {
 
 /// A struct representing the state of a chess game
 #[derive(Clone, Debug)]
-pub struct State<'a> {
+pub struct State {
     /// The rules of the game
-    pub rules: &'a RefCell<Rules>,
+    pub rules: Arc<Rules>,
     /// The team whose turn it is
     pub turn: Team,
     /// The state of the board
@@ -26,10 +26,10 @@ pub struct State<'a> {
     pub moves: Moves,
 }
 
-impl<'a> State<'a> {
-    pub fn new(rules: &'a RefCell<Rules>) -> Self {
+impl State {
+    pub fn new(rules: Rules) -> Self {
         Self {
-            rules,
+            rules: Arc::new(rules),
             turn: Team::White,
             board_state: BoardState::new(),
             moves: Moves::new(),

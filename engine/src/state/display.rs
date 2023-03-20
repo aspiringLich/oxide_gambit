@@ -23,7 +23,7 @@ fn reset(f: &mut Formatter) -> std::fmt::Result {
     f.write_str("\x1b[9A\x1b[2C")
 }
 
-impl Display for State<'_> {
+impl Display for State {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         fmt_pieces(self, f)?;
         allocate_space();
