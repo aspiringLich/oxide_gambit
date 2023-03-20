@@ -23,11 +23,11 @@ impl Square {
     pub fn to_xy(&self) -> (u8, u8) {
         (self.0 % 8, self.0 / 8)
     }
-    
+
     pub fn x(&self) -> u8 {
         self.0 % 8
     }
-    
+
     pub fn y(&self) -> u8 {
         self.0 / 8
     }

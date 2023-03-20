@@ -73,7 +73,11 @@ pub fn spawn_board(
     let xy_to_transform = |x: usize, y: usize, dx: f32, dy: f32, dz: f32| {
         let x = x as f32 - 3.5;
         let _y = y as f32 - 3.5;
-        Transform::from_xyz(x * TILE_SIZE + dx, _y * TILE_SIZE + dy + 1.0, 8.0 - y as f32 + dy + dz)
+        Transform::from_xyz(
+            x * TILE_SIZE + dx,
+            _y * TILE_SIZE + dy + 1.0,
+            8.0 - y as f32 + dy + dz,
+        )
     };
 
     let parent = commands
@@ -128,7 +132,7 @@ pub fn spawn_board(
             commands
                 .entity(c)
                 .insert(TransformBundle::from_transform(xy_to_transform(
-                    x, y, 0.0, 7.0, 1.0
+                    x, y, 0.0, 7.0, 1.0,
                 )));
         }
     }

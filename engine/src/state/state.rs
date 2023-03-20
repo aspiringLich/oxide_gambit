@@ -3,7 +3,7 @@ use crate::{
     move_gen::moves::Moves,
     rules::{piece_info::PieceInfo, Rules},
 };
-use std::{cell::RefCell, sync::Arc};
+use std::{sync::Arc};
 
 use super::board_state::BoardState;
 

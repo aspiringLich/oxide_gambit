@@ -7,8 +7,8 @@ use crate::{
 use self::moves::Moves;
 
 pub mod attack;
-pub mod moves;
 pub mod generator;
+pub mod moves;
 
 #[inline(always)]
 pub fn try_get_square<'a>(
@@ -81,7 +81,7 @@ pub fn pawn(state: &BoardState, moves: &mut Moves, pos: Square, team: Team) {
         Team::White => 1,
         Team::Black => -1,
     };
-    let piece = state.board()[pos];
+    let _piece = state.board()[pos];
 
     // move forward
     if let Some((piece, square)) = try_get_square(state, pos, 0, 1 * dir) {

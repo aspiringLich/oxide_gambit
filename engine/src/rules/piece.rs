@@ -1,10 +1,10 @@
 use crate::{
-    chess::{direction::Direction, square::Square, Team},
-    move_gen::{self, moves::Moves, generator::MoveGenerator},
-    state::{board_state::BoardState, state::State},
+    chess::{square::Square, Team},
+    move_gen::{generator::MoveGenerator, moves::Moves},
+    state::{board_state::BoardState},
 };
-use derive_more::Deref;
-use strum::IntoEnumIterator;
+
+
 use strum_macros::EnumIter;
 
 use super::piece_info::PieceInfo;
@@ -32,7 +32,7 @@ pub trait PieceTrait {
     /// Get information about the piece
     fn info(&self) -> PieceInfo;
     fn move_gen(&self, state: &BoardState, moves: &mut Moves, square: Square) {
-        self.move_gen_internal(MoveGenerator::new(moves, state, square ));
+        self.move_gen_internal(MoveGenerator::new(moves, state, square));
     }
     /// Generate the moves for the piece initially
     #[allow(unused_variables, unused_mut)]

@@ -1,7 +1,7 @@
 use crate::{
     chess::{direction::Direction, index::Index, square::Square, Team},
-    move_gen::{generator::MoveGenerator, moves::Moves},
-    state::{board_state::BoardState, state::State},
+    move_gen::{generator::MoveGenerator},
+    state::{board_state::BoardState},
 };
 
 use super::{
@@ -29,7 +29,7 @@ impl PieceTrait for Invalid {
         panic!("Invalid piece")
     }
 
-    fn move_gen_internal(&self, moves: MoveGenerator) {
+    fn move_gen_internal(&self, _moves: MoveGenerator) {
         panic!("Invalid piece")
     }
 }
