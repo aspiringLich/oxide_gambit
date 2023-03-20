@@ -25,7 +25,7 @@ pub fn init(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
-    let atlas = asset_server.load("assets/pieces.png");
+    let atlas = asset_server.load("pieces.png");
     let texture_atlas = TextureAtlas::from_grid(
         atlas,
         [11.0, 23.0].into(),

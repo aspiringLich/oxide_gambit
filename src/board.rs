@@ -12,7 +12,9 @@ pub struct Board {
 }
 
 pub fn init(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
+    let mut camera = Camera2dBundle::default();
+    camera.projection.scale = 0.2;
+    commands.spawn(camera);
 
     commands.insert_resource(Board {
         active: true,
@@ -36,12 +38,7 @@ impl FromWorld for TileAsset {
         let asset_server = world.get_resource::<AssetServer>().unwrap();
         let mut texture_atlases = world.get_resource_mut::<Assets<TextureAtlas>>().unwrap();
         let img = asset_server.load("tile.png");
-        let mut texture_atlas = TextureAtlas::new_empty(img, TILE_SPRITE_SIZE * (Vec2::X * 2.0));
-        texture_atlas.add_texture(Rect::from_corners(Vec2::ZERO, TILE_SPRITE_SIZE));
-        texture_atlas.add_texture(Rect::from_corners(
-            Vec2::X * TILE_SPRITE_SIZE.x,
-            TILE_SPRITE_SIZE * (Vec2::X * 2.0),
-        ));
+        let texture_atlas = TextureAtlas::from_grid(img, TILE_SPRITE_SIZE, 2, 1, None, None);
 
         let handle = texture_atlases.add(texture_atlas);
 
@@ -60,22 +57,37 @@ pub fn spawn_board(
 ) {
     // if the board is changed we reset it
     if board.is_changed() || theme.is_changed() {
-        for entity in q_entity.iter() {
-            commands.entity(entity).despawn();
+        if let Ok(e) = q_entity.get_single() {
+            commands.entity(e).despawn_recursive();
         }
         *active = board.active;
+    } else {
+        return;
     }
 
     // if the board is not active we don't spawn it
-    if *active {
+    if !*active {
         return;
     }
 
     let xy_to_transform = |x: usize, y: usize, dx: f32, dy: f32| {
-        let x = x as f32;
-        let y = y as f32;
-        Transform::from_xyz(x * TILE_SIZE + dx, y * TILE_SIZE + dy, 8.0 - y + dy)
+        let x = x as f32 - 3.5;
+        let y = y as f32 - 3.5;
+        Transform::from_xyz(x * TILE_SIZE + dx, y * TILE_SIZE + dy + 1.0, 8.0 - y + dy)
     };
+
+    let parent = commands
+        .spawn((
+            BoardEntity,
+            TransformBundle::default(),
+            VisibilityBundle {
+                visibility: Visibility::Visible,
+                ..default()
+            },
+        ))
+        .name("Board Entities")
+        .id();
+    let mut children = vec![];
 
     // spawn the board
     for y in 0..8 {
@@ -83,19 +95,25 @@ pub fn spawn_board(
             let i = (x + y) % 2;
             let color = theme.square[i];
 
-            commands.spawn((
-                SpriteSheetBundle {
-                    sprite: TextureAtlasSprite {
-                        index: i,
-                        color,
-                        ..default()
-                    },
-                    texture_atlas: tile_asset.clone(),
-                    transform: xy_to_transform(x, y, 0.0, 0.0),
+            let sprite_sheet = SpriteSheetBundle {
+                sprite: TextureAtlasSprite {
+                    index: i,
+                    color,
                     ..default()
                 },
-                BoardEntity,
-            ));
+                texture_atlas: tile_asset.clone(),
+                transform: xy_to_transform(x, y, 0.0, 0.0),
+                ..default()
+            };
+
+            let c = commands
+                .spawn((sprite_sheet, BoardEntity))
+                .name(&format!("Tile #{}", y * 8 + x))
+                .id();
+            children.push(c);
         }
     }
+
+    // push the children onto the parent
+    commands.entity(parent).push_children(&children);
 }
