@@ -128,7 +128,7 @@ pub fn spawn_board(
             commands
                 .entity(c)
                 .insert(TransformBundle::from_transform(xy_to_transform(
-                    x, y, 0.0, 6.0, 1.0
+                    x, y, 0.0, 7.0, 1.0
                 )));
         }
     }
