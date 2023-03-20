@@ -3,11 +3,12 @@
 
 mod assets;
 mod board;
+mod drag;
 mod misc;
 mod theme;
 
 use bevy::prelude::*;
-use engine::{chess, move_gen, rules, state};
+use engine::{rules, state};
 use misc::EntityNamer;
 
 fn main() {
@@ -30,8 +31,9 @@ fn main() {
                 }),
         )
         .add_plugin(bevy_inspector_egui::quick::WorldInspectorPlugin::new())
-        .add_startup_systems((assets::init, theme::init, board::init))
-        .add_system(board::spawn_board);
+        .add_startup_systems((assets::init, theme::init, board::init, drag::init))
+        .add_system(board::spawn_board)
+        .add_systems((drag::update_mouse_pos, drag::update_hovered_tile, drag::highlight_square));
 
     app.run()
 }
