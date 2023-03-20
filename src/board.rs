@@ -2,8 +2,8 @@ use engine::rules::Rules;
 
 use crate::{assets::PieceAssets, theme::Theme, *};
 
-pub const TILE_SPRITE_SIZE: Vec2 = Vec2::new(11.0, 13.0);
-pub const TILE_SIZE: f32 = 11.0;
+pub const TILE_SIZE: f32 = 15.0;
+pub const TILE_SPRITE_SIZE: Vec2 = Vec2::new(TILE_SIZE, TILE_SIZE + 2.0);
 
 #[derive(Resource)]
 pub struct Board {
@@ -128,7 +128,7 @@ pub fn spawn_board(
             commands
                 .entity(c)
                 .insert(TransformBundle::from_transform(xy_to_transform(
-                    x, y, 0.0, 10.0, 1.0
+                    x, y, 0.0, 6.0, 1.0
                 )));
         }
     }
