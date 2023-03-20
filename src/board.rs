@@ -70,10 +70,10 @@ pub fn spawn_board(
         return;
     }
 
-    let xy_to_transform = |x: usize, y: usize, dx: f32, dy: f32| {
+    let xy_to_transform = |x: usize, y: usize, dx: f32, dy: f32, dz: f32| {
         let x = x as f32 - 3.5;
-        let y = y as f32 - 3.5;
-        Transform::from_xyz(x * TILE_SIZE + dx, y * TILE_SIZE + dy + 1.0, 8.0 - y + dy)
+        let _y = y as f32 - 3.5;
+        Transform::from_xyz(x * TILE_SIZE + dx, _y * TILE_SIZE + dy + 1.0, 8.0 - y as f32 + dy + dz)
     };
 
     let parent = commands
@@ -102,7 +102,7 @@ pub fn spawn_board(
                     ..default()
                 },
                 texture_atlas: tile_asset.clone(),
-                transform: xy_to_transform(x, y, 0.0, 0.0),
+                transform: xy_to_transform(x, y, 0.0, 0.0, 0.0),
                 ..default()
             };
 
@@ -111,6 +111,25 @@ pub fn spawn_board(
                 .name(&format!("Tile #{}", y * 8 + x))
                 .id();
             children.push(c);
+        }
+    }
+
+    let board_state = &board.state.board_state;
+    for (i, piece) in board_state.board().iter().enumerate() {
+        if let Some(mut sprite) = assets.get_sprite(*piece.get(board_state.pieces())) {
+            sprite.sprite.color = theme.piece[board_state.get_info(*piece).unwrap().team as usize];
+            let x = i % 8;
+            let y = i / 8;
+            let c = commands
+                .spawn((sprite, BoardEntity))
+                .name(&format!("Piece #{}", i))
+                .id();
+            children.push(c);
+            commands
+                .entity(c)
+                .insert(TransformBundle::from_transform(xy_to_transform(
+                    x, y, 0.0, 10.0, 1.0
+                )));
         }
     }
 

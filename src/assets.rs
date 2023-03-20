@@ -32,7 +32,7 @@ pub fn init(
         8,
         2,
         Some([1.0, 1.0].into()),
-        None,
+        Some([0.0, 1.0].into()),
     );
     let handle = texture_atlases.add(texture_atlas);
     commands.insert_resource(PieceAssets(handle))
