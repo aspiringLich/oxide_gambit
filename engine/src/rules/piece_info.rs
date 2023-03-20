@@ -24,6 +24,8 @@ pub struct PieceInfo {
     pub attacks: Vec<Direction>,
     /// Team that the piece belongs to
     pub team: Team,
+    /// Index into the sprite sheet
+    pub sprite_index: usize,
 }
 
 impl PieceInfo {
@@ -48,6 +50,8 @@ impl PieceInfo {
         pub fn callbacks(moves: &[(i8, i8)]) => moves.to_vec();
         /// Set the directions that the piece can attack in
         pub fn attacks(attacks: &[Direction]) => attacks.to_vec();
+        /// Set the index of the piece in the sprite sheet
+        pub fn sprite_index(index: usize);
     );
 
     pub fn build(mut self, team: Team) -> Self {
@@ -55,7 +59,6 @@ impl PieceInfo {
         match team {
             Team::White => {}
             Team::Black => {
-                self.callbacks = self.callbacks.into_iter().map(|(x, y)| (x, -y)).collect();
                 self.attacks = self.attacks.into_iter().map(|d| d.flip_y()).collect();
                 self.fen_ch = self.fen_ch.map(|c| {
                     c.to_uppercase()
@@ -64,7 +67,6 @@ impl PieceInfo {
                 });
             }
         }
-        self.callbacks.sort();
         self.attacks.sort_by_key(|d| *d as u8);
         self
     }

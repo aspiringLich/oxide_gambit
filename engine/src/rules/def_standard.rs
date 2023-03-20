@@ -55,7 +55,13 @@ impl<const T: Team> PieceTrait for Pawn<T> {
             .fen_ch('p')
             .name("Pawn")
             .value(1)
-            .callbacks(&[(0, 1), (0, 2), (1, 1), (-1, 1)])
+            .callbacks(&[
+                (0, Self::DIR),
+                (0, Self::DIR * 2),
+                (1, Self::DIR),
+                (-1, Self::DIR),
+            ])
+            .sprite_index(0)
             .build(T)
     }
 
@@ -66,7 +72,7 @@ impl<const T: Team> PieceTrait for Pawn<T> {
             if moves.square.y() == Self::Y && let Some(square) = moves.try_get_empty(0, Self::DIR * 2) {
                 moves.insert(square);
             }
-            
+
             // capture
             if let Some((square, Some(piece))) = moves.try_get_square(1, Self::DIR) && piece.team != T {
                 moves.insert(square);
@@ -88,6 +94,7 @@ impl<const T: Team> PieceTrait for Rook<T> {
             .name("Rook")
             .value(5)
             .attacks(&Direction::ORTHOGONAL)
+            .sprite_index(1)
             .build(T)
     }
 }
@@ -115,9 +122,10 @@ impl<const T: Team> PieceTrait for Knight<T> {
             .name("Knight")
             .value(3)
             .callbacks(&Self::MOVES)
+            .sprite_index(2)
             .build(T)
     }
-    
+
     fn move_gen_internal(&self, mut moves: MoveGenerator) {
         for &(x, y) in Self::MOVES.iter() {
             moves.try_capture(x, y, T);
@@ -135,6 +143,7 @@ impl<const T: Team> PieceTrait for Bishop<T> {
             .name("Bishop")
             .value(3)
             .attacks(&Direction::DIAGONAL)
+            .sprite_index(3)
             .build(T)
     }
 }
@@ -148,8 +157,8 @@ impl<const T: Team> PieceTrait for Queen<T> {
             .fen_ch('q')
             .name("Queen")
             .value(9)
-            .attacks(&Direction::ORTHOGONAL)
-            .attacks(&Direction::DIAGONAL)
+            .attacks(&Direction::ALL)
+            .sprite_index(4)
             .build(T)
     }
 }
@@ -177,6 +186,7 @@ impl<const T: Team> PieceTrait for King<T> {
             .name("King")
             .value(0)
             .callbacks(&Self::MOVES)
+            .sprite_index(5)
             .build(T)
     }
 
