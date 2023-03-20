@@ -4,6 +4,9 @@
 #![feature(let_chains)]
 #![feature(iter_array_chunks)]
 #![feature(adt_const_params)]
+#![feature(const_trait_impl)]
+#![feature(derive_const)]
+#![feature(const_discriminant)]
 
 use derive_more::{Deref, DerefMut};
 

@@ -8,6 +8,7 @@ use self::moves::Moves;
 
 pub mod attack;
 pub mod moves;
+pub mod generator;
 
 #[inline(always)]
 pub fn try_get_square<'a>(

@@ -1,6 +1,6 @@
 use crate::{
     chess::{direction::Direction, square::Square, Team},
-    move_gen::{self, moves::Moves},
+    move_gen::{self, moves::Moves, generator::MoveGenerator},
     state::{board_state::BoardState, state::State},
 };
 use derive_more::Deref;
@@ -31,8 +31,13 @@ pub enum Piece {
 pub trait PieceTrait {
     /// Get information about the piece
     fn info(&self) -> PieceInfo;
+    fn move_gen(&self, state: &BoardState, moves: &mut Moves, square: Square) {
+        self.move_gen_internal(MoveGenerator::new(moves, state, square ));
+    }
     /// Generate the moves for the piece initially
-    fn move_gen(&self, state: &BoardState, moves: &mut Moves, square: Square);
+    #[allow(unused_variables, unused_mut)]
+    #[inline(always)]
+    fn move_gen_internal(&self, mut moves: MoveGenerator) {}
 }
 
 impl Piece {
