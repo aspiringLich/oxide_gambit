@@ -1,4 +1,4 @@
-use engine::rules::Rules;
+use engine::{rules::Rules, chess::square::Square};
 
 use crate::{assets::PieceAssets, theme::Theme, *};
 
@@ -9,6 +9,7 @@ pub const TILE_SPRITE_SIZE: Vec2 = Vec2::new(TILE_SIZE, TILE_SIZE + 2.0);
 pub struct Board {
     pub active: bool,
     pub state: state::State,
+    pub colored_squares: Vec<(Square, Color)>,
 }
 
 pub fn init(mut commands: Commands) {
@@ -23,6 +24,7 @@ pub fn init(mut commands: Commands) {
             Rules::standard(),
         )
         .unwrap(),
+        colored_squares: vec![],
     })
 }
 

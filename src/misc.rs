@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use bevy::{ecs::system::EntityCommands, prelude::Name};
 
 pub trait EntityNamer<'w, 's, 'a> {
