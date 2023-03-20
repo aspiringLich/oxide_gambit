@@ -1,5 +1,4 @@
 
-
 use crate::{
     chess::{index::Index, square::Square, Team},
     rules::{piece::Piece, piece_info::PieceInfo},

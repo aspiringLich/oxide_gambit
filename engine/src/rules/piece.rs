@@ -1,9 +1,8 @@
 use crate::{
     chess::{square::Square, Team},
     move_gen::{generator::MoveGenerator, moves::Moves},
-    state::{board_state::BoardState},
+    state::board_state::BoardState,
 };
-
 
 use strum_macros::EnumIter;
 
