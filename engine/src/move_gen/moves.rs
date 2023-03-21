@@ -64,12 +64,10 @@ impl Moves {
 
         moves
     }
-    
+
     /// Gets all the moves for a particular piece
     pub fn filter(&self, piece: Index<Piece>) -> impl Iterator<Item = &Move> {
-        self.moves
-            .iter()
-            .filter(move |m| m.piece == piece)
+        self.moves.iter().filter(move |m| m.piece == piece)
     }
 
     /// Inserts a sliding move into the list of moves

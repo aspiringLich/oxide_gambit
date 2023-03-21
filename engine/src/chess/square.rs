@@ -4,7 +4,7 @@ use crate::*;
 
 use super::direction::Direction;
 
-#[derive(Deref, DerefMut, Hash, PartialEq, Eq, Debug, Clone, Copy, PartialOrd, Ord)]
+#[derive(Deref, DerefMut, Hash, PartialEq, Eq, Debug, Clone, Copy, PartialOrd, Ord, Default)]
 pub struct Square(pub u8);
 
 impl Display for Square {

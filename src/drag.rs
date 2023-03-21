@@ -1,4 +1,7 @@
-use engine::chess::square::Square;
+use engine::{
+    chess::{index::Index, square::Square},
+    rules::piece::Piece,
+};
 
 use crate::{
     board::{Board, ColoredSquares, SquareColor},
@@ -151,104 +154,60 @@ pub fn drag_event_sender(
     }
 }
 
+#[derive(Debug)]
 pub enum MoveEvent {
     Select(Square),
-    StartDrag(Square),
-    DragTo(Vec2),
-    EndDrag,
+    Move(Square, Square),
 }
 
 /// Moves a piece around
-pub fn move_piece(
+pub fn move_event_sender(
     mut click_events: EventReader<ClickEvent>,
-    mut drag_events: EventReader<DragEvent>,
     mut move_events: EventWriter<MoveEvent>,
+    board: Res<Board>,
+    mut selected: Local<Option<Square>>,
 ) {
-    macro update_squares() {
-        colored_squares.clear();
-        // spawn colored square
-        if let Some(square) = *selected {
-            let piece = board.state.board_state.board()[square];
-            let moves = board.state.moves.filter(piece).cloned().collect::<Vec<_>>();
-            // dbg!(&moves);
+    // click events
+    if let Some(ClickEvent(pos)) = click_events.iter().next() && let Some(square) = pos.square {
+        let piece = board.board()[square];
 
-            if !moves.is_empty() {
-                colored_squares.push((square, SquareColor::Highlight));
-                colored_squares.extend(moves.iter().map(|m| (m.to, SquareColor::Move)));
-            }
-        }
-        // otherwise everything is despawned woo
-        // return moves
-    }
-    
-    let mut iter = drag_events.iter();
-    let mut drag_event = iter.next();
-
-    // select smth
-    if selected.is_none() {
-        // select piece with click
-        if let Some(ClickEvent(pos)) = click_events.iter().next() {
-            if let Some(square) = pos.square {
-                *selected = Some(square);
-                update_squares!();
-            }
-        }
-
-        // start dragging
-        if let Some(DragEvent::Start(pos)) = drag_event {
-            if let Some(square) = pos.square {
-                *selected = Some(square);
-                *drag = true;
-                drag_event = iter.next();
-                update_squares!();
-            }
-        }
-    }
-    // else try and unselect something
-    else {
-        macro try_make_move($square:ident) {
-            if let Some(from) = *selected
-                && let piece = board.state.board_state.board()[from]
-                && board.state.moves.filter(piece).find(|m| m.to == $square).is_some() 
-            {
-                board.state.make_move(from, $square);
+        match *selected  {
+            Some(_selected) => {
                 *selected = None;
-                *drag = false;
-                true
-            } else {
-                false
-            }
-        }
-
-        // unselect piece with click
-        if let Some(ClickEvent(pos)) = click_events.iter().next() {
-            if let Some(square) = pos.square {
-                if try_make_move!(square) {
-                    update_squares!();
-                    println!("{}", &board.state);
+                move_events.send(MoveEvent::Move(_selected, square));
+                if board.get_info(piece).is_some() {
+                    *selected = Some(square);
+                    move_events.send(MoveEvent::Select(square))
+                }
+            },
+            None => {
+                if board.get_info(piece).is_some() {
+                    *selected = Some(square);
+                    move_events.send(MoveEvent::Select(square))
                 }
             }
-        }
-
-        // end dragging
-        if let Some(DragEvent::End(pos)) = drag_event {
-            if let Some(square) = pos.square {
-                if try_make_move!(square) {
-                    update_squares!();
-                }
-            }
-        }
-    }
-    
-    if *drag {
-        match drag_event {
-            Some(DragEvent::To(pos)) => {
-                *starting_pos = pos.pos;
-            },
-            Some(DragEvent::End(pos)) => {
-                *drag = false;
-            },
-            _ => {}
         }
     }
 }
+
+pub fn click_move(
+    mut move_events: EventReader<MoveEvent>,
+    // mut selected: Local<Option<Square>>,
+    // mut moves: Local<Vec<Square>>,
+    mut board: ResMut<Board>,
+) {
+    for event in move_events.iter() {
+        // dbg!(&event);
+        match event {
+            MoveEvent::Move(from, to) => {
+                let Some(f) = board.get_info(*from) else { error!("tried to move square that is not a piece"); return};
+                let t = board.get_info(*to);
+                
+                if t.is_none() || t.is_some_and(|t| t.team != f.team) {
+                    board.state.make_move(*from, *to);
+                }
+            },
+            _ => {},
+        }
+    }
+} 

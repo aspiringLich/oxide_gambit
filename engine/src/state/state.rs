@@ -1,9 +1,9 @@
 use crate::{
-    chess::{index::Index, Team, square::Square},
+    chess::{index::Index, square::Square, Team},
     move_gen::moves::Moves,
     rules::{piece_info::PieceInfo, Rules},
 };
-use std::{sync::Arc};
+use std::sync::Arc;
 
 use super::board_state::BoardState;
 
@@ -35,7 +35,7 @@ impl State {
             moves: Moves::new(),
         }
     }
-    
+
     /// Makes a move on the board
     pub fn make_move(&mut self, from: Square, to: Square) {
         self.board_state.move_piece(from, to);

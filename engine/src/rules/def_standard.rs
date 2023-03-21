@@ -1,7 +1,7 @@
 use crate::{
     chess::{direction::Direction, index::Index, square::Square, Team},
-    move_gen::{generator::MoveGenerator},
-    state::{board_state::BoardState},
+    move_gen::generator::MoveGenerator,
+    state::board_state::BoardState,
 };
 
 use super::{

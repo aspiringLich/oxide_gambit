@@ -1,5 +1,3 @@
-
-
 use crate::chess::Team;
 
 use crate::move_gen::moves::Moves;

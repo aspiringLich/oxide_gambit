@@ -1,4 +1,4 @@
-use engine::{chess::square::Square, rules::Rules};
+use engine::{chess::square::Square, rules::Rules, state::board_state::BoardState};
 
 use crate::{assets::PieceAssets, theme::Theme, *};
 
@@ -9,6 +9,14 @@ pub const TILE_SPRITE_SIZE: Vec2 = Vec2::new(TILE_SIZE, TILE_SIZE + 2.0);
 pub struct Board {
     pub active: bool,
     pub state: state::State,
+}
+
+impl std::ops::Deref for Board {
+    type Target = BoardState;
+
+    fn deref(&self) -> &Self::Target {
+        &self.state.board_state
+    }
 }
 
 #[derive(Default, Clone, Copy)]
@@ -136,10 +144,7 @@ pub fn spawn_board(
             sprite.sprite.color = theme.piece[board_state.get_info(*piece).unwrap().team as usize];
             let x = i % 8;
             let y = i / 8;
-            let c = commands
-                .spawn(sprite)
-                .name(&format!("Piece #{}", i))
-                .id();
+            let c = commands.spawn(sprite).name(&format!("Piece #{}", i)).id();
             children.push(c);
             commands
                 .entity(c)

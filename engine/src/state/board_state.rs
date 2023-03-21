@@ -48,6 +48,12 @@ impl GetPiece for Index<Piece> {
     }
 }
 
+impl GetPiece for Square {
+    fn get_piece(&self, state: &BoardState) -> Piece {
+        *state.board()[*self].get(state.pieces())
+    }
+}
+
 impl BoardState {
     pub fn new() -> Self {
         Self {
