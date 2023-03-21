@@ -1,5 +1,6 @@
 #![feature(const_fn_floating_point_arithmetic)]
 #![feature(decl_macro)]
+#![feature(let_chains)]
 
 mod assets;
 mod board;
@@ -31,9 +32,17 @@ fn main() {
                 }),
         )
         .add_plugin(bevy_inspector_egui::quick::WorldInspectorPlugin::new())
+        .add_event::<drag::ClickEvent>()
+        .add_event::<drag::DragEvent>()
         .add_startup_systems((assets::init, theme::init, board::init, drag::init))
         .add_system(board::spawn_board)
-        .add_systems((drag::update_mouse_pos, drag::update_hovered_tile, drag::highlight_square));
+        .add_systems((
+            drag::update_mouse_pos,
+            drag::update_hovered_tile.after(drag::update_mouse_pos),
+            drag::click_event_sender.after(drag::update_hovered_tile),
+            drag::drag_event_sender.after(drag::update_hovered_tile),
+            
+        ));
 
     app.run()
 }

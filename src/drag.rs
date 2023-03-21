@@ -34,9 +34,11 @@ pub fn update_mouse_pos(
     }
 }
 
+/// The tile the mouse is currently hovered over
 #[derive(Resource, Deref, DerefMut, Default, Debug)]
 pub struct HoveredTile(Option<Square>);
 
+/// Updates the tile the mouse is currently hovered over
 pub fn update_hovered_tile(mut hovered: ResMut<HoveredTile>, mouse_pos: Res<MousePos>) {
     if !mouse_pos.is_changed() {
         return;
@@ -60,6 +62,85 @@ pub fn update_hovered_tile(mut hovered: ResMut<HoveredTile>, mouse_pos: Res<Mous
     }
 }
 
-pub fn highlight_square(mut commands: Commands, hovered: Res<HoveredTile>, board: Res<Board>) {
+pub struct HoverPos {
+    pub pos: Vec2,
+    pub square: Option<Square>,
+}
+
+impl HoverPos {
+    pub fn new(pos: &Res<MousePos>, hovered: &Res<HoveredTile>) -> Self {
+        Self { pos: ***pos, square: ***hovered }
+    }
+}
+
+#[derive(Deref, DerefMut)]
+pub struct ClickEvent(HoverPos);
+
+pub enum DragEvent {
+    Start(HoverPos),
+    To(HoverPos),
+    End(HoverPos),
+}
+
+const DRAG_THRESHOLD: f32 = 1.0;
+
+/// Click events are sent when the mouse is pressed and released without moving too much
+pub fn click_event_sender(
+    mut click_events: EventWriter<ClickEvent>,
+    mouse_button: Res<Input<MouseButton>>,
+    mouse_pos: Res<MousePos>,
+    hovered: Res<HoveredTile>,
+    mut start: Local<Option<HoverPos>>,
+) {
+    if mouse_button.just_pressed(MouseButton::Left)  {
+        *start = Some(HoverPos::new(&mouse_pos, &hovered));
+    }
+    // check for click
+    else if mouse_button.just_released(MouseButton::Left) && let Some(pos) = &*start {
+        if (pos.pos - **mouse_pos).length() < DRAG_THRESHOLD {
+            click_events.send(ClickEvent(HoverPos::new(&mouse_pos, &hovered)));
+            dbg!("click!");
+        }
+    }
     
+    // reset start when cursor moves too far
+    if mouse_button.pressed(MouseButton::Left) && let Some(pos) = &*start {
+        if (pos.pos - **mouse_pos).length() > DRAG_THRESHOLD {
+            *start = None;
+        }
+    } 
+}
+
+/// Drag events are sent when the mouse is pressed and moved.
+pub fn drag_event_sender(
+    mut drag_events: EventWriter<DragEvent>,
+    mouse_button: Res<Input<MouseButton>>,
+    mouse_pos: Res<MousePos>,
+    hovered: Res<HoveredTile>,
+    mut start: Local<Option<HoverPos>>,
+    mut drag: Local<bool>,
+) {
+    // start tracking mouse
+    if mouse_button.just_pressed(MouseButton::Left)  {
+        *start = Some(HoverPos::new(&mouse_pos, &hovered));
+    }
+    // stop drag
+    else if mouse_button.just_released(MouseButton::Left) && *drag {
+        drag_events.send(DragEvent::End(HoverPos::new(&mouse_pos, &hovered)));
+        dbg!("drag end!");
+    }
+    // update drag
+    else if mouse_button.pressed(MouseButton::Left) && *drag && mouse_pos.is_changed() {
+        drag_events.send(DragEvent::To(HoverPos::new(&mouse_pos, &hovered)));
+        dbg!("drag!!");
+    }
+    // check for drag
+    else if mouse_button.pressed(MouseButton::Left) && let Some(pos) = &*start {
+        if (pos.pos - **mouse_pos).length() > DRAG_THRESHOLD {
+            drag_events.send(DragEvent::Start(HoverPos::new(&mouse_pos, &hovered)));
+            drag_events.send(DragEvent::To(HoverPos::new(&mouse_pos, &hovered)));
+            *drag = true;
+            dbg!("drag start!");
+        }
+    }
 }
