@@ -47,7 +47,7 @@ impl Moves {
     ) {
         board.get_piece(idx).move_gen(board, self, pos);
         for &dir in &piece.attacks {
-            self.insert_sliding(idx, piece.team, pos, dir, board, false);
+            // self.insert_sliding(idx, piece.team, pos, dir, board, false);
         }
     }
 
@@ -63,6 +63,13 @@ impl Moves {
         }
 
         moves
+    }
+    
+    /// Gets all the moves for a particular piece
+    pub fn filter(&self, piece: Index<Piece>) -> impl Iterator<Item = &Move> {
+        self.moves
+            .iter()
+            .filter(move |m| m.piece == piece)
     }
 
     /// Inserts a sliding move into the list of moves

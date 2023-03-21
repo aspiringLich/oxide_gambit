@@ -12,8 +12,9 @@ use bevy::prelude::*;
 use engine::{rules, state};
 use misc::EntityNamer;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     engine::init();
+    std::env::set_current_dir(std::env::current_exe()?.parent().unwrap().parent().unwrap())?;
 
     // let rules = std::cell::RefCell::new(rules::Rules::standard());
     // let state =
@@ -41,8 +42,10 @@ fn main() {
             drag::update_hovered_tile.after(drag::update_mouse_pos),
             drag::click_event_sender.after(drag::update_hovered_tile),
             drag::drag_event_sender.after(drag::update_hovered_tile),
-            
+            drag::move_piece.after(drag::drag_event_sender)
+                .after(drag::click_event_sender),
         ));
 
-    app.run()
+    app.run();
+    Ok(())
 }

@@ -1,6 +1,9 @@
 use engine::chess::square::Square;
 
-use crate::{board::Board, *};
+use crate::{
+    board::{Board, ColoredSquares, SquareColor},
+    *,
+};
 
 #[derive(Resource, Deref, DerefMut, Default)]
 pub struct MousePos(Vec2);
@@ -69,7 +72,10 @@ pub struct HoverPos {
 
 impl HoverPos {
     pub fn new(pos: &Res<MousePos>, hovered: &Res<HoveredTile>) -> Self {
-        Self { pos: ***pos, square: ***hovered }
+        Self {
+            pos: ***pos,
+            square: ***hovered,
+        }
     }
 }
 
@@ -99,16 +105,16 @@ pub fn click_event_sender(
     else if mouse_button.just_released(MouseButton::Left) && let Some(pos) = &*start {
         if (pos.pos - **mouse_pos).length() < DRAG_THRESHOLD {
             click_events.send(ClickEvent(HoverPos::new(&mouse_pos, &hovered)));
-            dbg!("click!");
+            // dbg!("click!");
         }
     }
-    
+
     // reset start when cursor moves too far
     if mouse_button.pressed(MouseButton::Left) && let Some(pos) = &*start {
         if (pos.pos - **mouse_pos).length() > DRAG_THRESHOLD {
             *start = None;
         }
-    } 
+    }
 }
 
 /// Drag events are sent when the mouse is pressed and moved.
@@ -127,12 +133,12 @@ pub fn drag_event_sender(
     // stop drag
     else if mouse_button.just_released(MouseButton::Left) && *drag {
         drag_events.send(DragEvent::End(HoverPos::new(&mouse_pos, &hovered)));
-        dbg!("drag end!");
+        // dbg!("drag end!");
     }
     // update drag
     else if mouse_button.pressed(MouseButton::Left) && *drag && mouse_pos.is_changed() {
         drag_events.send(DragEvent::To(HoverPos::new(&mouse_pos, &hovered)));
-        dbg!("drag!!");
+        // dbg!("drag!!");
     }
     // check for drag
     else if mouse_button.pressed(MouseButton::Left) && let Some(pos) = &*start {
@@ -140,7 +146,109 @@ pub fn drag_event_sender(
             drag_events.send(DragEvent::Start(HoverPos::new(&mouse_pos, &hovered)));
             drag_events.send(DragEvent::To(HoverPos::new(&mouse_pos, &hovered)));
             *drag = true;
-            dbg!("drag start!");
+            // dbg!("drag start!");
+        }
+    }
+}
+
+pub enum MoveEvent {
+    Select(Square),
+    StartDrag(Square),
+    DragTo(Vec2),
+    EndDrag,
+}
+
+/// Moves a piece around
+pub fn move_piece(
+    mut click_events: EventReader<ClickEvent>,
+    mut drag_events: EventReader<DragEvent>,
+    mut move_events: EventWriter<MoveEvent>,
+) {
+    macro update_squares() {
+        colored_squares.clear();
+        // spawn colored square
+        if let Some(square) = *selected {
+            let piece = board.state.board_state.board()[square];
+            let moves = board.state.moves.filter(piece).cloned().collect::<Vec<_>>();
+            // dbg!(&moves);
+
+            if !moves.is_empty() {
+                colored_squares.push((square, SquareColor::Highlight));
+                colored_squares.extend(moves.iter().map(|m| (m.to, SquareColor::Move)));
+            }
+        }
+        // otherwise everything is despawned woo
+        // return moves
+    }
+    
+    let mut iter = drag_events.iter();
+    let mut drag_event = iter.next();
+
+    // select smth
+    if selected.is_none() {
+        // select piece with click
+        if let Some(ClickEvent(pos)) = click_events.iter().next() {
+            if let Some(square) = pos.square {
+                *selected = Some(square);
+                update_squares!();
+            }
+        }
+
+        // start dragging
+        if let Some(DragEvent::Start(pos)) = drag_event {
+            if let Some(square) = pos.square {
+                *selected = Some(square);
+                *drag = true;
+                drag_event = iter.next();
+                update_squares!();
+            }
+        }
+    }
+    // else try and unselect something
+    else {
+        macro try_make_move($square:ident) {
+            if let Some(from) = *selected
+                && let piece = board.state.board_state.board()[from]
+                && board.state.moves.filter(piece).find(|m| m.to == $square).is_some() 
+            {
+                board.state.make_move(from, $square);
+                *selected = None;
+                *drag = false;
+                true
+            } else {
+                false
+            }
+        }
+
+        // unselect piece with click
+        if let Some(ClickEvent(pos)) = click_events.iter().next() {
+            if let Some(square) = pos.square {
+                if try_make_move!(square) {
+                    update_squares!();
+                    println!("{}", &board.state);
+                }
+            }
+        }
+
+        // end dragging
+        if let Some(DragEvent::End(pos)) = drag_event {
+            if let Some(square) = pos.square {
+                if try_make_move!(square) {
+                    update_squares!();
+                }
+            }
+        }
+    }
+    
+    if *drag {
+        match drag_event {
+            Some(DragEvent::To(pos)) => {
+                *starting_pos = pos.pos;
+            },
+            Some(DragEvent::End(pos)) => {
+                *drag = false;
+            },
+            _ => {}
         }
     }
 }

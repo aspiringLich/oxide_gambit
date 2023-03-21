@@ -1,5 +1,5 @@
 use crate::{
-    chess::{index::Index, Team},
+    chess::{index::Index, Team, square::Square},
     move_gen::moves::Moves,
     rules::{piece_info::PieceInfo, Rules},
 };
@@ -34,6 +34,14 @@ impl State {
             board_state: BoardState::new(),
             moves: Moves::new(),
         }
+    }
+    
+    /// Makes a move on the board
+    pub fn make_move(&mut self, from: Square, to: Square) {
+        self.board_state.move_piece(from, to);
+        self.turn = self.turn.switch();
+        self.moves = Moves::generate(&self.board_state);
+        // dbg!(self);
     }
 }
 

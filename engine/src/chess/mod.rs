@@ -10,3 +10,12 @@ pub enum Team {
     Black,
     White,
 }
+
+impl Team {
+    pub const fn switch(self) -> Self {
+        match self {
+            Self::Black => Self::White,
+            Self::White => Self::Black,
+        }
+    }
+}

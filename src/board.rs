@@ -1,4 +1,4 @@
-use engine::{rules::Rules, chess::square::Square};
+use engine::{chess::square::Square, rules::Rules};
 
 use crate::{assets::PieceAssets, theme::Theme, *};
 
@@ -9,8 +9,18 @@ pub const TILE_SPRITE_SIZE: Vec2 = Vec2::new(TILE_SIZE, TILE_SIZE + 2.0);
 pub struct Board {
     pub active: bool,
     pub state: state::State,
-    pub colored_squares: Vec<(Square, Color)>,
 }
+
+#[derive(Default, Clone, Copy)]
+pub enum SquareColor {
+    #[default]
+    Highlight,
+    Move,
+    PreMove,
+}
+
+#[derive(Resource, Default, Deref, DerefMut)]
+pub struct ColoredSquares(Vec<(Square, SquareColor)>);
 
 pub fn init(mut commands: Commands) {
     let mut camera = Camera2dBundle::default();
@@ -24,8 +34,8 @@ pub fn init(mut commands: Commands) {
             Rules::standard(),
         )
         .unwrap(),
-        colored_squares: vec![],
-    })
+    });
+    commands.init_resource::<ColoredSquares>();
 }
 
 #[derive(Component)]
@@ -113,7 +123,7 @@ pub fn spawn_board(
             };
 
             let c = commands
-                .spawn((sprite_sheet, BoardEntity))
+                .spawn(sprite_sheet)
                 .name(&format!("Tile #{}", y * 8 + x))
                 .id();
             children.push(c);
@@ -127,7 +137,7 @@ pub fn spawn_board(
             let x = i % 8;
             let y = i / 8;
             let c = commands
-                .spawn((sprite, BoardEntity))
+                .spawn(sprite)
                 .name(&format!("Piece #{}", i))
                 .id();
             children.push(c);
