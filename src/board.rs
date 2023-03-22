@@ -38,7 +38,7 @@ impl Decoration {
         use Decoration::*;
 
         let (dx, dy, dz) = match self {
-            Highlight(_) => (0.0, 1.0, 1.0),
+            Highlight(_) => (0.0, 0.0, 1.0),
             Move(_) => (0.0, 0.0, 2.0),
             Clear => unreachable!(),
         };
@@ -188,7 +188,7 @@ pub fn spawn_board(
                     ..default()
                 },
                 texture_atlas: tile_asset.clone(),
-                transform: xy_to_transform(x, y, 0.0, 0.0, 0.0),
+                transform: xy_to_transform(x, y, 0.0, -1.0, 0.0),
                 ..default()
             };
 
@@ -211,7 +211,7 @@ pub fn spawn_board(
             commands
                 .entity(c)
                 .insert(TransformBundle::from_transform(xy_to_transform(
-                    x, y, 0.0, 7.0, 1.0,
+                    x, y, 0.0, 6.0, 1.0,
                 )));
         }
     }
