@@ -332,8 +332,9 @@ pub fn drag(
             To(mouse_pos) if let Some(e) = *selected => {
                 let mut q_transform = q.p1();
                 let mut transform = q_transform.get_mut(e).unwrap();
-                let delta = mouse_pos.pos - *start_mouse_pos;
-                transform.translation = *pos + delta.extend(-delta.y / TILE_SIZE);
+                // let delta = mouse_pos.pos - *start_mouse_pos;
+                transform.translation = mouse_pos.pos.extend(16.0);
+                transform.translation.y += 4.0;
             }
             End(mouse_pos) => {
                 let mut q_transform = q.p1();

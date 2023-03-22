@@ -167,6 +167,11 @@ pub fn spawn_board(
     theme: Res<Theme>,
     q_entity: Query<Entity, With<BoardEntity>>,
 ) {
+    // debug
+    if board.is_changed() {
+        let state = &board.state;
+        println!("{state}");
+    }
     // if the board is changed we reset it
     if board.is_changed() || theme.is_changed() {
         if let Ok(e) = q_entity.get_single() {

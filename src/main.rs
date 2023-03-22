@@ -50,7 +50,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .after(drag::click_event_sender)
                 .after(board::update_selectable),
             drag::drag
-                .after(drag::click_event_sender)
+                .after(drag::drag_event_sender)
                 .after(board::update_selectable),
             drag::do_move_events.after(drag::select).after(drag::drag),
             board::spawn_board.after(drag::do_move_events),
