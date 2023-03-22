@@ -1,6 +1,10 @@
 use engine::{chess::square::Square, rules::Rules, state::board_state::BoardState};
 
-use crate::{assets::PieceAssets, theme::Theme, *};
+use crate::{
+    assets::PieceAssets,
+    theme::{rgb_hex, Theme},
+    *,
+};
 
 pub const TILE_SIZE: f32 = 15.0;
 pub const TILE_SPRITE_SIZE: Vec2 = Vec2::new(TILE_SIZE, TILE_SIZE + 2.0);
@@ -19,16 +23,71 @@ impl std::ops::Deref for Board {
     }
 }
 
-#[derive(Default, Clone, Copy)]
-pub enum SquareColor {
-    #[default]
-    Highlight,
-    Move,
-    PreMove,
+#[derive(Component)]
+pub struct DecorationEntity;
+
+#[derive(Clone, Copy)]
+pub enum Decoration {
+    Highlight(Square),
+    Move(Square),
+    Clear,
 }
 
-#[derive(Resource, Default, Deref, DerefMut)]
-pub struct ColoredSquares(Vec<(Square, SquareColor)>);
+impl Decoration {
+    fn info(self) -> SpriteBundle {
+        use Decoration::*;
+
+        let (dx, dy, dz) = match self {
+            Highlight(_) => (0.0, 1.0, 1.0),
+            Move(_) => (0.0, 0.0, 2.0),
+            Clear => unreachable!(),
+        };
+        let (color, size) = match self {
+            Highlight(_) => (Color::rgba_u8(252, 219, 3, 63), Vec2::splat(TILE_SIZE)),
+            Move(_) => (Color::rgba_u8(0, 0, 0, 127), Vec2::splat(4.0)),
+            Clear => unreachable!(),
+        };
+
+        let square = match self {
+            Highlight(square) | Move(square) => square,
+            Clear => unreachable!(),
+        };
+
+        let transform = xy_to_transform(square.x() as usize, square.y() as usize, dx, dy, dz)
+            .with_scale(size.extend(1.0));
+
+        SpriteBundle {
+            sprite: Sprite { color, ..default() },
+            transform,
+            ..default()
+        }
+    }
+}
+
+pub fn draw_decorations(
+    mut commands: Commands,
+    q_decorations: Query<Entity, With<DecorationEntity>>,
+    mut events: EventReader<Decoration>,
+) {
+    use Decoration::*;
+    let mut clear = false;
+
+    for decoration in events.iter() {
+        match decoration {
+            Clear => {
+                if !clear {
+                    for e in q_decorations.iter() {
+                        commands.entity(e).despawn();
+                    }
+                    clear = true;
+                }
+            }
+            _ => {
+                commands.spawn((decoration.info(), DecorationEntity));
+            }
+        }
+    }
+}
 
 pub fn init(mut commands: Commands) {
     let mut camera = Camera2dBundle::default();
@@ -43,7 +102,7 @@ pub fn init(mut commands: Commands) {
         )
         .unwrap(),
     });
-    commands.init_resource::<ColoredSquares>();
+    // commands.init_resource::<Decorations>();
 }
 
 #[derive(Component)]
@@ -66,10 +125,21 @@ impl FromWorld for TileAsset {
     }
 }
 
+fn xy_to_transform(x: usize, y: usize, dx: f32, dy: f32, dz: f32) -> Transform {
+    let x = x as f32 - 3.5;
+    let _y = y as f32 - 3.5;
+    Transform::from_xyz(
+        x * TILE_SIZE + dx,
+        _y * TILE_SIZE + dy + 1.0,
+        8.0 - y as f32 + dz,
+    )
+}
+
 pub fn spawn_board(
     mut commands: Commands,
     board: Res<Board>,
     assets: Res<PieceAssets>,
+    mut decorations: EventWriter<Decoration>,
     mut active: Local<bool>,
     tile_asset: Local<TileAsset>,
     theme: Res<Theme>,
@@ -90,15 +160,7 @@ pub fn spawn_board(
         return;
     }
 
-    let xy_to_transform = |x: usize, y: usize, dx: f32, dy: f32, dz: f32| {
-        let x = x as f32 - 3.5;
-        let _y = y as f32 - 3.5;
-        Transform::from_xyz(
-            x * TILE_SIZE + dx,
-            _y * TILE_SIZE + dy + 1.0,
-            8.0 - y as f32 + dy + dz,
-        )
-    };
+    decorations.send(Decoration::Clear);
 
     let parent = commands
         .spawn((

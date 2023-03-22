@@ -2,6 +2,7 @@
 #![feature(decl_macro)]
 #![feature(let_chains)]
 #![feature(is_some_and)]
+#![feature(if_let_guard)]
 
 mod assets;
 mod board;
@@ -10,7 +11,6 @@ mod misc;
 mod theme;
 
 use bevy::prelude::*;
-use drag::move_event_sender;
 use engine::{rules, state};
 use misc::EntityNamer;
 
@@ -35,20 +35,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }),
         )
         .add_plugin(bevy_inspector_egui::quick::WorldInspectorPlugin::new())
+        .add_event::<board::Decoration>()
         .add_event::<drag::ClickEvent>()
         .add_event::<drag::DragEvent>()
-        .add_event::<drag::MoveEvent>()
+        // .add_event::<drag::MoveEvent>()
         .add_startup_systems((assets::init, theme::init, board::init, drag::init))
-        .add_system(board::spawn_board)
+        .add_systems((board::spawn_board, board::draw_decorations))
         .add_systems((
             drag::update_mouse_pos,
             drag::update_hovered_tile.after(drag::update_mouse_pos),
             drag::click_event_sender.after(drag::update_hovered_tile),
             drag::drag_event_sender.after(drag::update_hovered_tile),
-            drag::move_event_sender
-                .after(drag::drag_event_sender)
+            drag::select
                 .after(drag::click_event_sender),
-            drag::click_move.after(move_event_sender),
+            drag::do_move_events.after(drag::select),
         ));
 
     app.run();

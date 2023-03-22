@@ -1,6 +1,6 @@
 use bevy::prelude::{Color, Commands, Resource};
 
-const fn rgb_hex(color: u32) -> Color {
+pub const fn rgb_hex(color: u32) -> Color {
     let r = (color >> 16) & 0xFF;
     let g = (color >> 8) & 0xFF;
     let b = color & 0xFF;
