@@ -1,10 +1,6 @@
 use engine::{chess::square::Square, rules::Rules, state::board_state::BoardState};
 
-use crate::{
-    assets::PieceAssets,
-    theme::{rgb_hex, Theme},
-    *,
-};
+use crate::{assets::PieceAssets, theme::Theme, *};
 
 pub const TILE_SIZE: f32 = 15.0;
 pub const TILE_SPRITE_SIZE: Vec2 = Vec2::new(TILE_SIZE, TILE_SIZE + 2.0);
@@ -102,11 +98,15 @@ pub fn init(mut commands: Commands) {
         )
         .unwrap(),
     });
+    commands.init_resource::<Selectable>();
     // commands.init_resource::<Decorations>();
 }
 
 #[derive(Component)]
 pub struct BoardEntity;
+
+#[derive(Component, Deref, DerefMut)]
+pub struct PiecePos(pub Square);
 
 #[derive(Resource, Deref)]
 pub struct TileAsset(Handle<TextureAtlas>);
@@ -122,6 +122,28 @@ impl FromWorld for TileAsset {
         let handle = texture_atlases.add(texture_atlas);
 
         Self(handle)
+    }
+}
+
+#[derive(Deref, DerefMut, Resource)]
+pub struct Selectable([bool; 64]);
+
+impl Default for Selectable {
+    fn default() -> Self {
+        Self([false; 64])
+    }
+}
+
+pub fn update_selectable(board: Res<Board>, mut selectable: ResMut<Selectable>) {
+    if board.is_changed() {
+        for (i, &piece) in board.board().iter().enumerate() {
+            let get = || -> Option<bool> {
+                let team = board.get_info(piece)?.team;
+                
+                Some(team == board.state.turn)
+            };
+            selectable[i] = get().unwrap_or(false);
+        }
     }
 }
 
@@ -206,13 +228,12 @@ pub fn spawn_board(
             sprite.sprite.color = theme.piece[board_state.get_info(*piece).unwrap().team as usize];
             let x = i % 8;
             let y = i / 8;
-            let c = commands.spawn(sprite).name(&format!("Piece #{}", i)).id();
+            sprite.transform = xy_to_transform(x, y, 0.0, 6.0, 1.0);
+            let c = commands
+                .spawn((sprite, PiecePos(Square(i as u8))))
+                .name(&format!("Piece #{}", i))
+                .id();
             children.push(c);
-            commands
-                .entity(c)
-                .insert(TransformBundle::from_transform(xy_to_transform(
-                    x, y, 0.0, 6.0, 1.0,
-                )));
         }
     }
 

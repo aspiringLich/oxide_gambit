@@ -38,17 +38,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_event::<board::Decoration>()
         .add_event::<drag::ClickEvent>()
         .add_event::<drag::DragEvent>()
-        // .add_event::<drag::MoveEvent>()
+        .add_event::<drag::MoveEvent>()
         .add_startup_systems((assets::init, theme::init, board::init, drag::init))
-        .add_systems((board::spawn_board, board::draw_decorations))
         .add_systems((
+            board::update_selectable,
             drag::update_mouse_pos,
             drag::update_hovered_tile.after(drag::update_mouse_pos),
             drag::click_event_sender.after(drag::update_hovered_tile),
             drag::drag_event_sender.after(drag::update_hovered_tile),
             drag::select
-                .after(drag::click_event_sender),
-            drag::do_move_events.after(drag::select),
+                .after(drag::click_event_sender)
+                .after(board::update_selectable),
+            drag::drag
+                .after(drag::click_event_sender)
+                .after(board::update_selectable),
+            drag::do_move_events.after(drag::select).after(drag::drag),
+            board::spawn_board.after(drag::do_move_events),
+            board::draw_decorations
         ));
 
     app.run();
