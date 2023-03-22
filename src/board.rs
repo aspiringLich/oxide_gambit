@@ -34,8 +34,8 @@ impl Decoration {
         use Decoration::*;
 
         let (dx, dy, dz) = match self {
-            Highlight(_) => (0.0, 0.0, 1.0),
-            Move(_) => (0.0, 0.0, 2.0),
+            Highlight(_) => (0.0, 0.0, 0.06),
+            Move(_) => (0.0, 0.0, 5.0),
             Clear => unreachable!(),
         };
         let (color, size) = match self {

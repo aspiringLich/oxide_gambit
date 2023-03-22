@@ -4,7 +4,7 @@ use engine::{
 };
 
 use crate::{
-    board::{Board, Decoration, PiecePos, Selectable},
+    board::{Board, Decoration, PiecePos, Selectable, TILE_SIZE},
     *,
 };
 
@@ -203,11 +203,14 @@ pub fn select(
     mut click_events: EventReader<ClickEvent>,
     mut drag_events: EventReader<DragEvent>,
     mut selected: Local<Option<Square>>,
-    mut board: ResMut<Board>,
+    board: Res<Board>,
     mut decorations: EventWriter<Decoration>,
     mut move_events: EventWriter<MoveEvent>,
     selectable: Res<Selectable>,
 ) {
+    if board.is_changed() {
+        *selected = None;
+    }
     macro reset() {
         *selected = None;
         decorations.send(Decoration::Clear);
@@ -235,7 +238,7 @@ pub fn select(
                 }
             }
             End(_) => {
-                *selected = None;
+                // *selected = None;
             }
             _ => {}
         }
@@ -305,13 +308,19 @@ pub fn drag(
         Query<(Entity, &Transform, &PiecePos)>,
         Query<&mut Transform>,
     )>,
+    board: Res<Board>,
+    selectable: Res<Selectable>,
     // mouse_pos: Res<MousePos>,
 ) {
+    if board.is_changed() {
+        *selected = None;
+    }
+
     for drag in drag_events.iter() {
         use DragEvent::*;
         // dbg!(&drag);
         match drag {
-            Start(mouse_pos) => {
+            Start(mouse_pos) if let Some(square) = mouse_pos.square && selectable[*square as usize]=> {
                 let q_piece_pos = q.p0();
                 // dbg!(mouse_pos);
                 let Some((e, transform, p)) = q_piece_pos.iter().find(|(_, _, p)| ***p == mouse_pos.square.unwrap()) else { error!("Could not find dragged piece"); return};
@@ -320,21 +329,22 @@ pub fn drag(
                 *pos = transform.translation;
                 *start_mouse_pos = mouse_pos.pos;
             }
-            To(mouse_pos) => {
+            To(mouse_pos) if let Some(e) = *selected => {
                 let mut q_transform = q.p1();
-                let Some(e) = *selected else { return };
                 let mut transform = q_transform.get_mut(e).unwrap();
                 let delta = mouse_pos.pos - *start_mouse_pos;
-                transform.translation = *pos + delta.extend(0.0);
+                transform.translation = *pos + delta.extend(-delta.y / TILE_SIZE);
             }
             End(mouse_pos) => {
                 let mut q_transform = q.p1();
-                let Some(e) = *selected else { return };
-                let mut transform = q_transform.get_mut(e).unwrap();
-
-                transform.translation = *pos;
-                move_events.send(MoveEvent::new(*from, mouse_pos.square.unwrap(), false));
+                if let Some(e) = *selected {
+                    let mut transform = q_transform.get_mut(e).unwrap();
+                    transform.translation = *pos;
+                    move_events.send(MoveEvent::new(*from, mouse_pos.square.unwrap(), false));
+                }
+                *selected = None;
             }
+            _ => {}
         }
     }
 }
