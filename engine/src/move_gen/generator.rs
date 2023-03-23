@@ -50,23 +50,23 @@ impl<'a> MoveGenerator<'a> {
             // if theres a piece on the square, check if its an enemy
             if let Some(piece) = piece {
                 if piece.team != team {
-                    self.insert_good(square);
+                    self.insert_good(square, team);
                 }
             }
             // else its an empty square
             else {
-                self.insert(square);
+                self.insert(square, team);
             }
         }
     }
 
     /// add a move to the list of moves
-    pub fn insert(&mut self, square: Square) {
-        self.moves.insert(self.piece, square);
+    pub fn insert(&mut self, square: Square, team: Team) {
+        self.moves.insert(self.piece, square, team);
     }
 
     /// add a *good* move to the list of moves
-    pub fn insert_good(&mut self, square: Square) {
-        self.moves.insert_good(self.piece, square);
+    pub fn insert_good(&mut self, square: Square, team: Team) {
+        self.moves.insert_good(self.piece, square, team);
     }
 }

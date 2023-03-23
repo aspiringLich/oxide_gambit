@@ -11,6 +11,21 @@ pub enum Direction {
     SE,
 }
 
+impl std::fmt::Display for Direction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Direction::E => "E",
+            Direction::NE => "NE",
+            Direction::N => "N",
+            Direction::NW => "NW",
+            Direction::W => "W",
+            Direction::SW => "SW",
+            Direction::S => "S",
+            Direction::SE => "SE",
+        })
+    }
+}
+
 use Direction::*;
 
 use super::board::{self, Board};
@@ -163,6 +178,13 @@ mod test {
                 .copied()
                 .collect::<Vec<_>>(),
             [0o03, 0o12, 0o21, 0o30]
+        );
+        assert_eq!(
+            board
+                .iter_direction(Direction::NE, 3)
+                .copied()
+                .collect::<Vec<_>>(),
+            [0o03, 0o14, 0o25, 0o36, 0o47]
         );
     }
 }

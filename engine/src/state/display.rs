@@ -1,4 +1,4 @@
-use crossterm::style::{Stylize, Color};
+use crossterm::style::{Color, Stylize};
 use std::{
     default::default,
     fmt::{Display, Formatter},
@@ -8,7 +8,8 @@ use crate::{
     chess::{
         board::{Board, BoardType},
         index::Index,
-        Team, square::Square,
+        square::Square,
+        Team,
     },
     misc,
     rules::piece::Piece,
@@ -26,16 +27,46 @@ fn reset(f: &mut Formatter) -> std::fmt::Result {
 impl Display for State {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         fmt_pieces(self, f)?;
-        
+
         allocate_space();
         fmt_board("Board", self, self.board_state.board(), fmt_piece, f)?;
         reset(f)?;
         fmt_board("Indices", self, self.board_state.board(), fmt_index, f)?;
-        
+
         println!();
         allocate_space();
-        fmt_board("Threats", self, self.board_state.board(), fmt_threat, f)?;
-        
+        fmt_board(
+            "Threats (Black)",
+            self,
+            self.board_state.board(),
+            |a, b, c, d| fmt_threat(a, b, c, d, Team::Black),
+            f,
+        )?;
+        reset(f)?;
+        fmt_board(
+            "Sliding (Black)",
+            self,
+            self.board_state.board(),
+            |a, b, c, d| fmt_sliding(a, b, c, d, Team::Black),
+            f,
+        )?;
+        reset(f)?;
+        fmt_board(
+            "Threats (White)",
+            self,
+            self.board_state.board(),
+            |a, b, c, d| fmt_threat(a, b, c, d, Team::White),
+            f,
+        )?;
+        reset(f)?;
+        fmt_board(
+            "Sliding (White)",
+            self,
+            self.board_state.board(),
+            |a, b, c, d| fmt_sliding(a, b, c, d, Team::White),
+            f,
+        )?;
+
         write!(f, "\n\n{}", "Moves (List)\n".red())?;
         self.moves.fmt(&self.board_state, f)?;
 
@@ -57,10 +88,38 @@ fn fmt_piece(state: &State, idx: &Index<Piece>, _: Square, s: &mut String) {
     }
 }
 
-fn fmt_threat(state: &State, _: &Index<Piece>, square: Square, s: &mut String) {
-    let threat = state.moves.threat_at(square);
-    let str = if threat == 0 { "  ".to_string() } else { format!("{threat:<2}") }; 
-    *s += &str.on(Color::Rgb { r: 255 / 8 * threat, g: 0, b: 0 }).red().to_string();
+fn fmt_sliding(state: &State, _: &Index<Piece>, square: Square, s: &mut String, team: Team) {
+    let threat = *state.moves.sliding_threat_at(square, team);
+    let str = if threat == 0 {
+        "  ".to_string()
+    } else {
+        format!("{threat:2x}")
+    };
+    *s += &str
+        .on(Color::Rgb {
+            r: (255 / 8_u8).checked_mul(threat.count_ones() as u8).unwrap_or(255),
+            g: 0,
+            b: 0,
+        })
+        .red()
+        .to_string();
+}
+
+fn fmt_threat(state: &State, _: &Index<Piece>, square: Square, s: &mut String, team: Team) {
+    let threat = state.moves.threat_at(square, team);
+    let str = if threat == 0 {
+        "  ".to_string()
+    } else {
+        format!("{threat:2}")
+    };
+    *s += &str
+        .on(Color::Rgb {
+            r: (255 / 8_u8).checked_mul(threat).unwrap_or(255),
+            g: 0,
+            b: 0,
+        })
+        .red()
+        .to_string();
 }
 
 fn fmt_index(_: &State, idx: &Index<Piece>, _: Square, s: &mut String) {

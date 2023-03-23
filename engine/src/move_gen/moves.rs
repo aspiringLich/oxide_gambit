@@ -4,7 +4,7 @@ use std::default::default;
 use crossterm::style::Stylize;
 use rustc_hash::{FxHashMap, FxHashSet};
 
-use crate::chess::direction::Direction;
+use crate::chess::{direction::Direction, board::Board};
 use crate::chess::index::Index;
 use crate::chess::Team;
 
@@ -14,7 +14,7 @@ use crate::chess::square::Square;
 use crate::rules::piece_info::PieceInfo;
 use crate::state::board_state::BoardState;
 
-use super::attack::{AttackedSquares, SlidingAttacks};
+use super::attack::{AttackedSquares, SlidingAttacks, Attacked};
 
 /// A move from one square to another
 #[derive(Hash, PartialEq, Eq, Debug, Clone)]
@@ -27,22 +27,32 @@ pub struct Move {
 /// Stores the list of moves that can be made
 #[derive(Debug, Default, Clone)]
 pub struct Moves {
+    // good_moves: Fx
     moves: FxHashSet<Move>,
     callbacks: FxHashMap<Square, Vec<Index<Piece>>>,
-    attacked: AttackedSquares,
+    attacked: Attacked,
 }
+
+#[ctor::ctor]
+pub static BOARD: Board<Square> = {
+    let mut board = Board::default();
+    for i in 0..64 {
+        board[Square(i)] = Square(i);
+    }
+    board
+};
 
 impl Moves {
     pub fn new() -> Self {
         Self { ..default() }
     }
-    
-    pub fn threat_at(&self, square: Square) -> u8 {
-        self.attacked.non_sliding[square]
+
+    pub fn threat_at(&self, square: Square, team: Team) -> u8 {
+        self.attacked[team].non_sliding[square]
     }
-    
-    pub fn sliding_threat_at(&self, square: Square) -> SlidingAttacks {
-        self.attacked.sliding[square]
+
+    pub fn sliding_threat_at(&self, square: Square, team: Team) -> SlidingAttacks {
+        self.attacked[team].sliding[square]
     }
 
     /// Adds a piece's moves to itself
@@ -55,7 +65,7 @@ impl Moves {
     ) {
         board.get_piece(idx).move_gen(board, self, pos);
         for &dir in &piece.attacks {
-            // self.insert_sliding(idx, piece.team, pos, dir, board, false);
+            self.insert_sliding(idx, piece.team, pos, dir, board, false);
         }
     }
 
@@ -98,25 +108,25 @@ impl Moves {
         inclusive: bool,
     ) {
         // go through the squares in this direction
-        for &idx in board
-            .board()
+        for &square in BOARD
             .iter_direction(dir, square)
             .skip((!inclusive) as usize)
         {
-            // eprintln!("{} {square}", board.get_info(piece).unwrap().ch);
+            let idx = board.board()[square];
             if let Some(p) = board.get_info(idx) {
                 // if the piece is on the other team, add it to the list of moves
                 if p.team != team {
-                    self.insert_good(piece, square);
-                    self.attacked.add_sliding(square, dir);
+                    // eprintln!("{} {square}", board.get_info(piece).unwrap().ch);
+                    self.insert_good(piece, square, team);
+                    self.attacked[team].add_sliding(square, dir);
                 }
                 break;
             } else {
-                self.insert(piece, square);
-                self.attacked.add_sliding(square, dir);
+                // eprintln!("{} {square}", board.get_info(piece).unwrap().ch);
+                self.insert(piece, square, team);
+                self.attacked[team].add_sliding(square, dir);
             }
         }
-        // eprintln!("--");
     }
 
     /// Removes a sliding move from the list of moves
@@ -138,40 +148,40 @@ impl Moves {
         inclusive: bool,
     ) {
         // go through the squares in this direction
-        for &idx in board
-            .board()
+        for &square in BOARD
             .iter_direction(dir, square)
             .skip((!inclusive) as usize)
         {
+            let idx = board.board()[square];
             if let Some(p) = board.get_info(idx) {
                 // if the piece is on the other team, remove it too
                 if p.team != team {
                     debug_assert!(
-                        self.remove(piece, square),
+                        self.remove(piece, square, team),
                         "Expected move to exist {:?} -> {:?}",
                         idx,
                         square
                     );
-                    self.attacked.remove_sliding(square, dir);
+                    self.attacked[team].remove_sliding(square, dir);
                 }
                 break;
             } else {
-                self.remove(piece, square);
-                self.attacked.remove_sliding(square, dir);
+                self.remove(piece, square, team);
+                self.attacked[team].remove_sliding(square, dir);
             }
         }
     }
 
     /// Inserts a move into the list of moves
-    pub fn insert(&mut self, piece: Index<Piece>, to: Square) {
+    pub fn insert(&mut self, piece: Index<Piece>, to: Square, team: Team) {
         let check = self.moves.insert(Move { piece, to });
         debug_assert!(check, "Move already exists: {:?} -> {:?}\n", piece, to);
-        self.attacked.inc(to);
+        self.attacked[team].inc(to);
     }
 
     /// Removes a move from the list of moves, returns whether the move was there to begin with
-    pub fn remove(&mut self, piece: Index<Piece>, to: Square) -> bool {
-        self.attacked.dec(to);
+    pub fn remove(&mut self, piece: Index<Piece>, to: Square, team: Team) -> bool {
+        self.attacked[team].dec(to);
         self.moves.remove(&Move { piece, to })
     }
 
@@ -190,13 +200,13 @@ impl Moves {
     }
 
     /// Inserts a *good* move into the list of moves
-    pub fn insert_good(&mut self, piece: Index<Piece>, to: Square) {
+    pub fn insert_good(&mut self, piece: Index<Piece>, to: Square, team: Team) {
         self.moves.insert(Move {
             piece,
             to,
             // active: true,
         });
-        self.attacked.inc(to);
+        self.attacked[team].inc(to);
     }
 }
 

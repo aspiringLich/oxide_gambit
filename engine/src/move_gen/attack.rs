@@ -1,10 +1,32 @@
+use std::ops::{Index, IndexMut};
+
+use derive_more::Deref;
+
 use crate::chess::square::Square;
+use crate::chess::Team;
 use crate::chess::{board::Board, direction::Direction};
+
+#[derive(Default, Clone, Debug)]
+pub struct Attacked([AttackedSquares; 2]);
+
+impl Index<Team> for Attacked {
+    type Output = AttackedSquares;
+
+    fn index(&self, index: Team) -> &Self::Output {
+        &self.0[index as usize]
+    }
+}
+
+impl IndexMut<Team> for Attacked {
+    fn index_mut(&mut self, index: Team) -> &mut Self::Output {
+        &mut self.0[index as usize]
+    }
+}
 
 /// Stores the directions that this square is being attacked from by sliding pieces.
 ///
 /// Indexed with a [Direction]
-#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq, Deref)]
 pub struct SlidingAttacks(pub u8);
 
 impl SlidingAttacks {
@@ -25,6 +47,7 @@ impl SlidingAttacks {
 pub struct AttackedSquares {
     pub sliding: Board<SlidingAttacks>,
     pub non_sliding: Board<u8>,
+    pub team: Team,
 }
 
 impl AttackedSquares {

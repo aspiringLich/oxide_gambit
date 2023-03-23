@@ -68,17 +68,17 @@ impl<const T: Team> PieceTrait for Pawn<T> {
     fn move_gen_internal(&self, mut moves: MoveGenerator) {
         // forward && forward * 2
         if let Some(square) = moves.try_get_empty(0, Self::DIR) {
-            moves.insert(square);
+            moves.insert(square, T);
             if moves.square.y() == Self::Y && let Some(square) = moves.try_get_empty(0, Self::DIR * 2) {
-                moves.insert(square);
+                moves.insert(square, T);
             }
 
             // capture
             if let Some((square, Some(piece))) = moves.try_get_square(1, Self::DIR) && piece.team != T {
-                moves.insert(square);
+                moves.insert(square, T);
             }
             if let Some((square, Some(piece))) = moves.try_get_square(-1, Self::DIR) && piece.team != T {
-                moves.insert(square);
+                moves.insert(square, T);
             }
         }
     }
