@@ -18,8 +18,6 @@ pub struct PieceInfo {
     pub fen_ch: Option<char>,
     /// Value of the piece
     pub value: u8,
-    /// Moves that the piece can make
-    pub callbacks: Vec<(i8, i8)>,
     /// Directions that the piece can attack in
     pub attacks: Vec<Direction>,
     /// Team that the piece belongs to
@@ -46,8 +44,6 @@ impl PieceInfo {
         pub fn fen_ch(ch: char) => Some(ch);
         /// Set the value of the piece
         pub fn value(value: u8);
-        /// Set the callbacks of the piece
-        pub fn callbacks(moves: &[(i8, i8)]) => moves.to_vec();
         /// Set the directions that the piece can attack in
         pub fn attacks(attacks: &[Direction]) => attacks.to_vec();
         /// Set the index of the piece in the sprite sheet

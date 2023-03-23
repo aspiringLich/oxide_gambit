@@ -1,10 +1,7 @@
-use engine::{
-    chess::{index::Index, square::Square},
-    rules::piece::Piece,
-};
+use engine::chess::square::Square;
 
 use crate::{
-    board::{Board, Decoration, PiecePos, Selectable, TILE_SIZE},
+    board::{Board, Decoration, PiecePos, Selectable},
     *,
 };
 

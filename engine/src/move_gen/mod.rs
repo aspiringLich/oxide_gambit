@@ -1,3 +1,8 @@
+pub mod attack;
+pub mod generator;
+pub mod moves;
+pub mod normal;
+
 use crate::{
     chess::{index::Index, square::Square, Team},
     rules::piece::Piece,
@@ -5,10 +10,6 @@ use crate::{
 };
 
 use self::moves::Moves;
-
-pub mod attack;
-pub mod generator;
-pub mod moves;
 
 #[inline(always)]
 pub fn try_get_square<'a>(

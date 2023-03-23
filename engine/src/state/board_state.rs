@@ -20,7 +20,7 @@ pub struct BoardState {
 }
 
 pub static mut PIECE_INFO: Vec<Option<PieceInfo>> = vec![];
-static mut PIECES: Vec<Box<dyn PieceTrait>> = vec![];
+pub static mut PIECES: Vec<Box<dyn PieceTrait>> = vec![];
 
 /// initializes the piece info table
 pub fn init() {

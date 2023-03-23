@@ -19,4 +19,5 @@ pub mod state;
 /// Initialize some static muts (i know i know)
 pub fn init() {
     state::board_state::init();
+    move_gen::normal::init();
 }

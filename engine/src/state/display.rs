@@ -97,7 +97,9 @@ fn fmt_sliding(state: &State, _: &Index<Piece>, square: Square, s: &mut String, 
     };
     *s += &str
         .on(Color::Rgb {
-            r: (255 / 8_u8).checked_mul(threat.count_ones() as u8).unwrap_or(255),
+            r: (255 / 8_u8)
+                .checked_mul(threat.count_ones() as u8)
+                .unwrap_or(255),
             g: 0,
             b: 0,
         })

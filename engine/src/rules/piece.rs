@@ -1,6 +1,6 @@
 use crate::{
     chess::{square::Square, Team},
-    move_gen::{generator::MoveGenerator, moves::Moves},
+    move_gen::{generator::MoveGenerator, moves::Moves, normal::NormalMoves},
     state::board_state::BoardState,
 };
 
@@ -30,13 +30,22 @@ pub enum Piece {
 pub trait PieceTrait {
     /// Get information about the piece
     fn info(&self) -> PieceInfo;
-    fn move_gen(&self, state: &BoardState, moves: &mut Moves, square: Square) {
-        self.move_gen_internal(MoveGenerator::new(moves, state, square));
+    /// Return a list of moves
+    fn moves(&self) -> NormalMoves {
+        NormalMoves::default()
     }
-    /// Generate the moves for the piece initially
-    #[allow(unused_variables, unused_mut)]
-    #[inline(always)]
-    fn move_gen_internal(&self, mut moves: MoveGenerator) {}
+    /// Special move generation
+    fn special_moves(&self, state: &BoardState, square: Square, moves: &mut Moves) {
+        // pass
+    }
+    /// on move
+    fn on_move(&self, state: &BoardState, from: Square, to: Square, moves: &mut Moves) {
+        // pass
+    }
+    /// Callback
+    fn callback(&self, state: &BoardState, square: Square, moves: &mut Moves) {
+        // pass
+    }
 }
 
 impl Piece {

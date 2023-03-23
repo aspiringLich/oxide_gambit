@@ -139,7 +139,7 @@ pub fn update_selectable(board: Res<Board>, mut selectable: ResMut<Selectable>) 
         for (i, &piece) in board.board().iter().enumerate() {
             let get = || -> Option<bool> {
                 let team = board.get_info(piece)?.team;
-                
+
                 Some(team == board.state.turn)
             };
             selectable[i] = get().unwrap_or(false);

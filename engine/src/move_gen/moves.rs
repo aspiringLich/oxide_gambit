@@ -4,9 +4,9 @@ use std::default::default;
 use crossterm::style::Stylize;
 use rustc_hash::{FxHashMap, FxHashSet};
 
-use crate::chess::{direction::Direction, board::Board};
 use crate::chess::index::Index;
 use crate::chess::Team;
+use crate::chess::{board::Board, direction::Direction};
 
 use crate::rules::piece::Piece;
 
@@ -14,7 +14,7 @@ use crate::chess::square::Square;
 use crate::rules::piece_info::PieceInfo;
 use crate::state::board_state::BoardState;
 
-use super::attack::{AttackedSquares, SlidingAttacks, Attacked};
+use super::attack::{Attacked, SlidingAttacks};
 
 /// A move from one square to another
 #[derive(Hash, PartialEq, Eq, Debug, Clone)]
@@ -29,8 +29,8 @@ pub struct Move {
 pub struct Moves {
     // good_moves: Fx
     moves: FxHashSet<Move>,
-    callbacks: FxHashMap<Square, Vec<Index<Piece>>>,
-    attacked: Attacked,
+    pub(in crate::move_gen) callbacks: FxHashMap<Square, Vec<Index<Piece>>>,
+    pub(in crate::move_gen) attacked: Attacked,
 }
 
 #[ctor::ctor]
@@ -63,7 +63,8 @@ impl Moves {
         board: &BoardState,
         pos: Square,
     ) {
-        board.get_piece(idx).move_gen(board, self, pos);
+        // let piece = board.get_info(idx).unwrap();
+        self.add_normal_moves(board, idx, pos, piece.team);
         for &dir in &piece.attacks {
             self.insert_sliding(idx, piece.team, pos, dir, board, false);
         }
@@ -173,40 +174,65 @@ impl Moves {
     }
 
     /// Inserts a move into the list of moves
-    pub fn insert(&mut self, piece: Index<Piece>, to: Square, team: Team) {
-        let check = self.moves.insert(Move { piece, to });
-        debug_assert!(check, "Move already exists: {:?} -> {:?}\n", piece, to);
-        self.attacked[team].inc(to);
+    pub fn insert(&mut self, idx: Index<Piece>, square: Square, team: Team) {
+        let check = self.moves.insert(Move { piece: idx, to: square });
+        debug_assert!(check, "Move already exists: {:?} -> {:?}\n", idx, square);
+        self.attacked[team].inc(square);
     }
 
     /// Removes a move from the list of moves, returns whether the move was there to begin with
-    pub fn remove(&mut self, piece: Index<Piece>, to: Square, team: Team) -> bool {
-        self.attacked[team].dec(to);
-        self.moves.remove(&Move { piece, to })
-    }
-
-    /// Inserts an inactive move into the list of moves
-    pub fn insert_inactive(&mut self, piece: Index<Piece>, to: Square) {
-        // self.moves.insert(Move {
-        //     piece,
-        //     to,
-        // });
-        match self.callbacks.get_mut(&to) {
-            Some(callbacks) => callbacks.push(piece),
-            None => {
-                self.callbacks.insert(to, vec![piece]);
-            }
-        }
+    pub fn remove(&mut self, idx: Index<Piece>, square: Square, team: Team) -> bool {
+        self.attacked[team].dec(square);
+        self.moves.remove(&Move { piece: idx, to: square })
     }
 
     /// Inserts a *good* move into the list of moves
-    pub fn insert_good(&mut self, piece: Index<Piece>, to: Square, team: Team) {
+    pub fn insert_good(&mut self, idx: Index<Piece>, square: Square, team: Team) {
         self.moves.insert(Move {
-            piece,
-            to,
-            // active: true,
+            piece: idx,
+            to: square,
         });
-        self.attacked[team].inc(to);
+        self.attacked[team].inc(square);
+    }
+    
+    /// Removes a *good* move from the list of moves, returns whether the move was there to begin with
+    pub fn remove_good(&mut self, idx: Index<Piece>, square: Square, team: Team) -> bool {
+        self.attacked[team].dec(square);
+        self.moves.remove(&Move {
+            piece: idx,
+            to: square,
+        })
+    }
+    
+    pub fn insert_threat(&mut self, idx: Index<Piece>, square: Square, team: Team) {
+        self.attacked[team].inc(square);
+    }
+    
+    pub fn remove_threat(&mut self, idx: Index<Piece>, square: Square, team: Team) {
+        self.attacked[team].dec(square);
+    }
+    
+    /// Inserts a callback
+    pub fn insert_callback(&mut self, square: Square, idx: Index<Piece>) {
+        match self.callbacks.get_mut(&square) {
+            Some(callbacks) => callbacks.push(idx),
+            None => {
+                self.callbacks.insert(square, vec![idx]);
+            }
+        }
+    }
+    
+    /// Removes a callback
+    pub fn remove_callback(&mut self, square: Square, idx: Index<Piece>) {
+        match self.callbacks.get_mut(&square) {
+            Some(callbacks) => {
+                let idx = callbacks.iter().position(|&x| x == idx).unwrap();
+                callbacks.remove(idx);
+            }
+            None => {
+                panic!("Callback does not exist");
+            }
+        }
     }
 }
 

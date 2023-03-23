@@ -64,4 +64,8 @@ impl<T> Index<T> {
     pub fn new(idx: u8) -> Self {
         Self(idx, std::marker::PhantomData)
     }
+
+    pub fn usize(self) -> usize {
+        self.0 as usize
+    }
 }

@@ -1,6 +1,6 @@
 use crate::{
     chess::{direction::Direction, index::Index, square::Square, Team},
-    move_gen::generator::MoveGenerator,
+    move_gen::{generator::MoveGenerator, normal::NormalMoves},
     state::board_state::BoardState,
 };
 
@@ -28,10 +28,6 @@ impl PieceTrait for Invalid {
     fn info(&self) -> PieceInfo {
         panic!("Invalid piece")
     }
-
-    fn move_gen_internal(&self, _moves: MoveGenerator) {
-        panic!("Invalid piece")
-    }
 }
 
 pub struct Pawn<const T: Team>;
@@ -55,32 +51,15 @@ impl<const T: Team> PieceTrait for Pawn<T> {
             .fen_ch('p')
             .name("Pawn")
             .value(1)
-            .callbacks(&[
-                (0, Self::DIR),
-                (0, Self::DIR * 2),
-                (1, Self::DIR),
-                (-1, Self::DIR),
-            ])
             .sprite_index(0)
             .build(T)
     }
 
-    fn move_gen_internal(&self, mut moves: MoveGenerator) {
-        // forward && forward * 2
-        if let Some(square) = moves.try_get_empty(0, Self::DIR) {
-            moves.insert(square, T);
-            if moves.square.y() == Self::Y && let Some(square) = moves.try_get_empty(0, Self::DIR * 2) {
-                moves.insert(square, T);
-            }
-
-            // capture
-            if let Some((square, Some(piece))) = moves.try_get_square(1, Self::DIR) && piece.team != T {
-                moves.insert(square, T);
-            }
-            if let Some((square, Some(piece))) = moves.try_get_square(-1, Self::DIR) && piece.team != T {
-                moves.insert(square, T);
-            }
-        }
+    fn moves(&self) -> NormalMoves {
+        NormalMoves::new()
+            .add_move(0, Self::DIR)
+            .add_attack(1, Self::DIR)
+            .add_attack(1, Self::DIR)
     }
 }
 
@@ -101,19 +80,6 @@ impl<const T: Team> PieceTrait for Rook<T> {
 
 pub struct Knight<const T: Team>;
 
-impl<const T: Team> Knight<T> {
-    const MOVES: [(i8, i8); 8] = [
-        (1, 2),
-        (2, 1),
-        (2, -1),
-        (1, -2),
-        (-1, -2),
-        (-2, -1),
-        (-2, 1),
-        (-1, 2),
-    ];
-}
-
 impl<const T: Team> PieceTrait for Knight<T> {
     fn info(&self) -> PieceInfo {
         PieceInfo::new()
@@ -121,15 +87,8 @@ impl<const T: Team> PieceTrait for Knight<T> {
             .fen_ch('n')
             .name("Knight")
             .value(3)
-            .callbacks(&Self::MOVES)
             .sprite_index(2)
             .build(T)
-    }
-
-    fn move_gen_internal(&self, mut moves: MoveGenerator) {
-        for &(x, y) in Self::MOVES.iter() {
-            moves.try_capture(x, y, T);
-        }
     }
 }
 
@@ -165,19 +124,6 @@ impl<const T: Team> PieceTrait for Queen<T> {
 
 pub struct King<const T: Team>;
 
-impl<const T: Team> King<T> {
-    const MOVES: [(i8, i8); 8] = [
-        (1, 0),
-        (1, 1),
-        (0, 1),
-        (-1, 1),
-        (-1, 0),
-        (-1, -1),
-        (0, -1),
-        (1, -1),
-    ];
-}
-
 impl<const T: Team> PieceTrait for King<T> {
     fn info(&self) -> PieceInfo {
         PieceInfo::new()
@@ -185,14 +131,7 @@ impl<const T: Team> PieceTrait for King<T> {
             .fen_ch('k')
             .name("King")
             .value(0)
-            .callbacks(&Self::MOVES)
             .sprite_index(5)
             .build(T)
-    }
-
-    fn move_gen_internal(&self, mut moves: MoveGenerator) {
-        for &(x, y) in Self::MOVES.iter() {
-            moves.try_capture(x, y, T)
-        }
     }
 }
