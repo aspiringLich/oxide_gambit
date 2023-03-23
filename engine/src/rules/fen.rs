@@ -24,11 +24,10 @@ impl State {
     ///
     /// ```no_run
     /// # use engine::state::state::State;
-    /// # use std::cell::RefCell;
     /// # use engine::rules::Rules;
     /// // returns the standard chess starting position
-    /// let rules = RefCell::new(Rules::standard());
-    /// State::from_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ", &rules);
+    /// let rules = Rules::standard();
+    /// State::from_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ", rules);
     /// ```
     ///
     /// TODO: implement other things

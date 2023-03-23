@@ -157,5 +157,12 @@ mod test {
                 .collect::<Vec<_>>(),
             [0, 9, 18, 27, 36, 45, 54, 63]
         );
+        assert_eq!(
+            board
+                .iter_direction(Direction::NW, 3)
+                .copied()
+                .collect::<Vec<_>>(),
+            [0o03, 0o12, 0o21, 0o30]
+        );
     }
 }

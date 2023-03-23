@@ -1,4 +1,4 @@
-use crossterm::style::Stylize;
+use crossterm::style::{Stylize, Color};
 use std::{
     default::default,
     fmt::{Display, Formatter},
@@ -8,7 +8,7 @@ use crate::{
     chess::{
         board::{Board, BoardType},
         index::Index,
-        Team,
+        Team, square::Square,
     },
     misc,
     rules::piece::Piece,
@@ -20,19 +20,22 @@ fn allocate_space() {
 }
 
 fn reset(f: &mut Formatter) -> std::fmt::Result {
-    f.write_str("\x1b[9A\x1b[2C")
+    f.write_str("\x1b[9A\x1b[1C")
 }
 
 impl Display for State {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         fmt_pieces(self, f)?;
+        
         allocate_space();
-
         fmt_board("Board", self, self.board_state.board(), fmt_piece, f)?;
         reset(f)?;
-
         fmt_board("Indices", self, self.board_state.board(), fmt_index, f)?;
-
+        
+        println!();
+        allocate_space();
+        fmt_board("Threats", self, self.board_state.board(), fmt_threat, f)?;
+        
         write!(f, "\n\n{}", "Moves (List)\n".red())?;
         self.moves.fmt(&self.board_state, f)?;
 
@@ -40,7 +43,7 @@ impl Display for State {
     }
 }
 
-fn fmt_piece(state: &State, idx: &Index<Piece>, s: &mut String) {
+fn fmt_piece(state: &State, idx: &Index<Piece>, _: Square, s: &mut String) {
     if let Some(piece) = state.board_state.get_info(*idx) {
         let out = format!("{} ", piece.ch);
         let styled = match piece.team {
@@ -54,7 +57,13 @@ fn fmt_piece(state: &State, idx: &Index<Piece>, s: &mut String) {
     }
 }
 
-fn fmt_index(_: &State, idx: &Index<Piece>, s: &mut String) {
+fn fmt_threat(state: &State, _: &Index<Piece>, square: Square, s: &mut String) {
+    let threat = state.moves.threat_at(square);
+    let str = if threat == 0 { "  ".to_string() } else { format!("{threat:<2}") }; 
+    *s += &str.on(Color::Rgb { r: 255 / 8 * threat, g: 0, b: 0 }).red().to_string();
+}
+
+fn fmt_index(_: &State, idx: &Index<Piece>, _: Square, s: &mut String) {
     let str = idx.to_string();
     if str == "0" {
         *s += "  ";
@@ -72,7 +81,7 @@ fn fmt_board<T, F>(
 ) -> std::fmt::Result
 where
     T: BoardType,
-    F: Fn(&State, &T, &mut String),
+    F: Fn(&State, &T, Square, &mut String),
 {
     let mut board_str = String::new();
     board_str += &format!("{}\x1b[{}D\x1b[1B", title.red(), title.len());
@@ -81,7 +90,7 @@ where
         for x in 0..8 {
             let item = board.get(x + y * 8).unwrap();
             let mut s = String::new();
-            dbg_fn(state, item, &mut s);
+            dbg_fn(state, item, Square((y * 8 + x) as u8), &mut s);
             if (x + y) % 2 == 0 {
                 s = s.on_black().to_string();
             }
@@ -91,7 +100,7 @@ where
         board_str += "\x1b[1B\x1b[18D";
     }
 
-    f.write_str(&format!("{}  a b c d e f g h", board_str))
+    f.write_str(&format!("{}  a b c d e f g h ", board_str))
 }
 
 fn fmt_pieces(state: &State, f: &mut Formatter<'_>) -> std::fmt::Result {

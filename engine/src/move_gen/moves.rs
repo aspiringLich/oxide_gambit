@@ -14,7 +14,7 @@ use crate::chess::square::Square;
 use crate::rules::piece_info::PieceInfo;
 use crate::state::board_state::BoardState;
 
-use super::attack::AttackedSquares;
+use super::attack::{AttackedSquares, SlidingAttacks};
 
 /// A move from one square to another
 #[derive(Hash, PartialEq, Eq, Debug, Clone)]
@@ -35,6 +35,14 @@ pub struct Moves {
 impl Moves {
     pub fn new() -> Self {
         Self { ..default() }
+    }
+    
+    pub fn threat_at(&self, square: Square) -> u8 {
+        self.attacked.non_sliding[square]
+    }
+    
+    pub fn sliding_threat_at(&self, square: Square) -> SlidingAttacks {
+        self.attacked.sliding[square]
     }
 
     /// Adds a piece's moves to itself
@@ -95,6 +103,7 @@ impl Moves {
             .iter_direction(dir, square)
             .skip((!inclusive) as usize)
         {
+            // eprintln!("{} {square}", board.get_info(piece).unwrap().ch);
             if let Some(p) = board.get_info(idx) {
                 // if the piece is on the other team, add it to the list of moves
                 if p.team != team {
@@ -107,6 +116,7 @@ impl Moves {
                 self.attacked.add_sliding(square, dir);
             }
         }
+        // eprintln!("--");
     }
 
     /// Removes a sliding move from the list of moves

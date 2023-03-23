@@ -341,7 +341,9 @@ pub fn drag(
                 if let Some(e) = *selected {
                     let mut transform = q_transform.get_mut(e).unwrap();
                     transform.translation = *pos;
-                    move_events.send(MoveEvent::new(*from, mouse_pos.square.unwrap(), false));
+                    if let Some(sq) = mouse_pos.square {
+                        move_events.send(MoveEvent::new(*from, sq, false));
+                    }
                 }
                 *selected = None;
             }
