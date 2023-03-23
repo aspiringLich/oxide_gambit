@@ -1,57 +1,39 @@
 [![wakatime](https://wakatime.com/badge/user/4b6581a3-5d2c-4e5d-9be1-63e7bb07270d/project/c1aed1d2-5def-458d-82c7-449b42f15502.svg)](https://wakatime.com/badge/user/4b6581a3-5d2c-4e5d-9be1-63e7bb07270d/project/c1aed1d2-5def-458d-82c7-449b42f15502)
-<img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/aspiringLich/oxide-gambit">
+>
+
 # **OXIDE GAMBIT**
 
-<img align = "right" src = "img/example_screenshot.png" width = 40%>
 
-This is a chess engine written in Rust.
+I'm not sure I like this name but Connor is *very* attached to it so I'm going with it.
 
-It probably will not be very good.
+## **What is this?**
 
+This is a home-grown chess engine written in rust. I started writing this as a way to learn rust, then I learned rust, realised how bad all my code was, and am now in the throes of a rewrite.
 
-# **THIS PROJECT IS CURRENTLY UNDERGOING A MAJOR REWRITE**
+## **"Features"**
 
-|Icon|Meaning|
-|----------|--------|
-|🟢|Complete|
-|🟡|In Progress|
-|🔴|Planned|
-|🔵|Maybe?|
+<img src="https://user-images.githubusercontent.com/48413902/227213707-37b493e8-59a7-4612-8c85-0ad6226fad3f.png" width="50%" align="right">
 
-## **Chess Logic** 
-| Feature | Status |
-|-| :-: |
-|Rewrite Most of This (It's Bad)|🟡|
-|Foundational Stuff|🟢|
-|Basic move generation|🟢|
-|why is the king so annoying re|🔴|
-|En Passant, Castling, Promotion, etc.|🔴|
+### Move Generation
+ - [x] Foundation
+ - [x] Basic Move Generation
+ - [ ] Iterative Move Generation
+ - [ ] Iterative Sliding Move Generation
+ - [ ] Move Ordering
 
-## **Evaluation Function**
-| Feature | Status |
-|-| :-: |
-|Piece Counting|🟢|
-|Board Mask|🟢|
-|Threatened Squares|🟢|
-|Pawn Structure|🔴|
-|Gradient Descent Constant Tweaker|🔵|
+### Algorithm
+ - [x] Minimax
+ - [x] Alpha-Beta Pruning
+ - [ ] Iterative Deepening
+ - [ ] Quiessence Search
+ - [ ] Transposition Table
+ - [ ] Nullmove Pruning
+ - [ ] Late-Move Reduction
 
-## **Search Algorithm**
-| Feature  | Status |
-|-| :-: |
-|Minimax|🟢|
-|Alpha Beta Pruning|🟢|
-|Move Ordering|🟢|
-|Transposition Table|🟡|
-|Iterative Deepenning|🔴|
-|Nullmove pruning|🔴|
-|Opening Book|🔴|
-|Late-Move Reduction|🔵|
-|Quiessence Search|🔵|
-
-## **To-Do:**
-| Feature  | Status |
-|-| :-: |
-|Make It Good|🔴|
-
-`..default()`
+### App
+ - [x] Pieces
+ - [x] Click to move
+ - [x] Drag to move
+ - [ ] Fancy intro animation
+ - [ ] Board setup mode
+ - [ ] Configuration UI
