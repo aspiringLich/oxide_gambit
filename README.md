@@ -20,6 +20,10 @@ This is a home-grown chess engine written in rust. I started writing this as a w
  - [ ] Iterative Move Generation
  - [ ] Iterative Sliding Move Generation
  - [ ] Move Ordering
+ 
+ - [ ] Check
+ - [ ] Constraint / Pinning (Cant move into discovered check)
+ - [ ] Castling / En Passant
 
 ### Algorithm
  - [x] Minimax
